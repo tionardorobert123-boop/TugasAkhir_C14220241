@@ -1,0 +1,15 @@
+*.sqlite*
+# Laravel
+/vendor
+/node_modules
+.env
+/public/storage
+/storage/*.key
+
+# React / Vite
+node_modules
+dist
+
+# OS
+.DS_Store
+Thumbs.db
