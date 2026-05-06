@@ -13,18 +13,17 @@ return new class extends Migration
     {
         Schema::create('room_extend_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('transaction_id');
+
+            $table->foreignId('transaction_id')
+                ->constrained('transactions', 'transaction_id')
+                ->cascadeOnDelete();
+
             $table->integer('added_minutes');
 
             $table->dateTime('old_end_time');
             $table->dateTime('new_end_time');
 
             $table->timestamps();
-
-            $table->foreign('transaction_id')
-                ->references('transaction_id')
-                ->on('transactions')
-                ->onDelete('cascade');
         });
     }
 

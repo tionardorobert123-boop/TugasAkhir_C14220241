@@ -11,10 +11,8 @@ class Room extends Model
     protected $fillable = [
         'room_name',
         'room_type',
+        'price_per_hour',
         'status',
-        'customer_name',
-        'start_time',
-        'end_time',
         'iot_device_id'
     ];
 
@@ -31,5 +29,11 @@ class Room extends Model
     public function logs()
     {
         return $this->hasMany(AccessLog::class, 'room_id');
+    }
+
+     public function activeTransaction()
+    {
+        return $this->hasOne(Transaction::class, 'room_id')
+                    ->where('status', 'active');
     }
 }

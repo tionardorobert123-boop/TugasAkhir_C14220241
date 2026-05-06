@@ -44,7 +44,6 @@ class CheckDeviceStatus extends Command
                         $device->status_online = false;
                     }
 
-                    // 🔥 WAJIB SAVE (ini fix utama)
                     $device->save();
 
                 } else {

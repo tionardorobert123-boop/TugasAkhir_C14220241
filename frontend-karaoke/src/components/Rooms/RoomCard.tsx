@@ -1,4 +1,4 @@
-import { Lock, Unlock, DoorOpen, DoorClosed } from "lucide-react";
+import { Lock, Unlock, DoorOpen, DoorClosed, Settings } from "lucide-react";
 
 interface Props {
   room: any;
@@ -6,6 +6,7 @@ interface Props {
   warning: boolean;
   onClick: () => void;
   onExtend?: () => void;
+  isOwner?: boolean;
 }
 
 export default function RoomCard({
@@ -13,7 +14,8 @@ export default function RoomCard({
   onClick,
   onExtend,
   timer,
-  warning
+  warning,
+  isOwner
 }: Props) {
 
   const isActive = room.status === "occupied";
@@ -26,12 +28,20 @@ export default function RoomCard({
     backdrop-blur-md border
   `;
 
-  // 🔥 SATU LOGIC SAJA
+  // SATU LOGIC SAJA
   const handleCardClick = () => {
+
+    //OWNER
+    if (isOwner) {
+      onClick();
+      return;
+    }
+
+    //KASIR
     if (isDisabled || isOffline) return;
 
-    if (isActive || warning) {
-      onExtend?.();
+    if ((isActive || warning) && onExtend) {
+      onExtend();
       return;
     }
 
@@ -41,7 +51,10 @@ export default function RoomCard({
   // ❌ DISABLED
   if (isDisabled) {
     return (
-      <div className={`${base} bg-black/40 border-white/10 opacity-30 cursor-not-allowed`}>
+      
+      <div onClick={handleCardClick} 
+      className={`${base} bg-black/40 border-white/10 opacity-30 
+       ${isOwner ? "cursor-pointer" : "cursor-not-allowed"}`}>
         <div>
           <h2 className="font-semibold text-lg">
             Room {room.room_name}
@@ -50,6 +63,12 @@ export default function RoomCard({
             Tidak Tersedia
           </p>
         </div>
+        {isOwner && (
+          <div className="absolute top-3 right-3" style={{ opacity: 1 }}>
+            <Settings className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
+
       </div>
     );
   }
@@ -58,10 +77,11 @@ export default function RoomCard({
   if (isOffline) {
     return (
       <div
+      onClick={handleCardClick}
         className={`${base}
           bg-gradient-to-br from-white/10 to-black/50
           border-red-500/40
-          cursor-not-allowed
+          ${isOwner ? "cursor-pointer" : "cursor-not-allowed"}
           relative
         `}
       >
@@ -70,7 +90,13 @@ export default function RoomCard({
           timer={timer}
           status="Device Offline"
           offline
+          isOwner={isOwner}
         />
+        {isOwner && (
+          <div className="absolute top-3 right-3">
+            <Settings className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
       </div>
     );
   }
@@ -93,7 +119,13 @@ export default function RoomCard({
           timer={timer}
           status="Hampir Habis"
           warning
+          isOwner={isOwner}
         />
+        {isOwner && (
+          <div className="absolute top-3 right-3">
+            <Settings className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
       </div>
     );
   }
@@ -116,7 +148,13 @@ export default function RoomCard({
           timer={timer}
           status="Sedang Dipakai"
           active
+          isOwner={isOwner}
         />
+        {isOwner && (
+          <div className="absolute top-3 right-3">
+            <Settings className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
       </div>
     );
   }
@@ -136,14 +174,20 @@ export default function RoomCard({
         room={room}
         timer={timer}
         status="Standby"
+        isOwner={isOwner}
       />
+      {isOwner && (
+        <div className="absolute top-3 right-3">
+          <Settings className="w-4 h-4 text-gray-400" />
+        </div>
+      )}
     </div>
   );
 }
 
 
 // ================= CONTENT =================
-function Content({ room, timer, status, active, warning, offline }: any) {
+function Content({ room, timer, status, active, warning, offline, isOwner }: any) {
 
   const lock = room.lock_status ?? "unknown";
   const door = room.door_status ?? "unknown";
@@ -161,7 +205,7 @@ function Content({ room, timer, status, active, warning, offline }: any) {
           {offline ? (
             <>
               <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-              <p className="text-xl text-red-400 font-medium">
+              <p className="text-s text-red-400 font-medium">
                 Device Offline (Periksa Device)
               </p>
             </>

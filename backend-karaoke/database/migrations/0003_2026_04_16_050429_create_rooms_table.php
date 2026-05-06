@@ -10,17 +10,18 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id('room_id');
+
             $table->foreignId('iot_device_id')
-                  ->constrained('iot_devices', 'device_id')
-                  ->cascadeOnDelete();
+                ->constrained('iot_devices', 'device_id')
+                ->cascadeOnDelete();
 
             $table->string('room_name');
             $table->string('room_type');
-            $table->enum('status', ['available', 'occupied', 'disabled'])->default('available');
 
-            $table->string('customer_name')->nullable();
-            $table->timestamp('start_time')->nullable();
-            $table->timestamp('end_time')->nullable();
+            $table->integer('price_per_hour');
+
+            $table->enum('status', ['available', 'occupied', 'disabled'])
+                ->default('available');
 
             $table->timestamps();
         });

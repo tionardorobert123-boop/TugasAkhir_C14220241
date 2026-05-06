@@ -1,14 +1,21 @@
-import { useTransactions } from "../../hooks/useTransactions";
-
 interface Props {
   trx: any;
   type: "active" | "finished";
   onExtend?: (roomId: number) => void;
+
+  formatTimer: (end_time: string) => string;
+  isWarning: (end_time: string) => boolean;
+  formatDuration: (minutes: number) => string;
 }
 
-export default function TransactionCard({ trx, type, onExtend }: Props) {
-
-  const { formatTimer, isWarning, formatDuration } = useTransactions();
+export default function TransactionCard({
+  trx,
+  type,
+  onExtend,
+  formatTimer,
+  isWarning,
+  formatDuration
+}: Props) {
 
   const isActive = type === "active";
   const warning = isActive && isWarning(trx.end_time);

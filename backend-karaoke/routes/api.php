@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\AccessLog;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\AccessLogController;
 
 Route::get('/logs', function () {
     return AccessLog::latest()->take(20)->get();
@@ -31,7 +32,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
     // hanya owner (contoh future)
     Route::middleware('role:owner')->group(function () {
-        // settings, report, dll
+        Route::get('/access-logs', [AccessLogController::class, 'index']);
     });
 
 });

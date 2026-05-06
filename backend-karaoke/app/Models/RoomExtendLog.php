@@ -14,7 +14,7 @@ class RoomExtendLog extends Model
     ];
 
     public function transaction()
-    {
+    {   
         return $this->belongsTo(Transaction::class, 'transaction_id');
     }
 }

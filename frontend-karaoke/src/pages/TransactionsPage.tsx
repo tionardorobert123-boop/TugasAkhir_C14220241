@@ -3,7 +3,6 @@ import { useTransactions } from "../hooks/useTransactions";
 import { useRoomControl } from "../hooks/useRoomControl";
 import { useNavigate } from "react-router-dom";
 import TransactionCard from "../components/Transactions/TransactionCard";
-import ExtendRoomModal from "../components/Rooms/ExtendRoomModal";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -19,15 +18,13 @@ export default function TransactionsPage() {
     activeRooms,
     finishedTransactions,
     totalIncome,
-    today
+    formatTimer,
+    isWarning,
+    formatDuration
   } = useTransactions(selectedDate);
 
   const {
     openExtendModal,
-    showExtendModal,
-    extendRoomId,
-    submitExtend,
-    setShowExtendModal
   } = useRoomControl();
 
   const [page, setPage] = useState(1);
@@ -63,14 +60,21 @@ export default function TransactionsPage() {
 
         <div className="flex items-center gap-3">
 
-          {/* 🔥 OWNER DATE FILTER */}
           {isOwner && (
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
-            />
+            <>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
+              />
+              <button
+                onClick={() => navigate("/access-log")}
+                className="bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 rounded-lg hover:bg-yellow-500/30"
+              >
+                Log Akses
+              </button>
+            </>
           )}
 
           <button
@@ -92,10 +96,13 @@ export default function TransactionsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {activeRooms.map((room: any) => (
             <TransactionCard
-              key={room.room_id}
+              key={room.transaction_id}
               trx={room}
               type="active"
               onExtend={isOwner ? undefined : openExtendModal}
+              formatTimer={formatTimer}
+              isWarning={isWarning}
+              formatDuration={formatDuration}
             />
           ))}
         </div>
@@ -108,7 +115,6 @@ export default function TransactionsPage() {
           Transaksi Selesai
         </h2>
 
-        {/* TOTAL */}
         <div className="absolute top-4 right-6 bg-green-500/20 border border-green-500 px-4 py-2 rounded-xl">
           <p className="text-xs">Total</p>
           <p className="font-bold">
@@ -122,11 +128,13 @@ export default function TransactionsPage() {
               key={trx.transaction_id}
               trx={trx}
               type="finished"
+              formatTimer={formatTimer}
+              isWarning={isWarning}
+              formatDuration={formatDuration}
             />
           ))}
         </div>
 
-        {/* PAGINATION */}
         <div className="flex justify-between items-center mt-6">
           <button
             disabled={page === 1}
@@ -150,16 +158,6 @@ export default function TransactionsPage() {
         </div>
 
       </div>
-
-      {/* 🔥 EXTEND MODAL (HANYA KASIR) */}
-      {!isOwner && (
-        <ExtendRoomModal
-          show={showExtendModal}
-          roomId={extendRoomId}
-          onClose={() => setShowExtendModal(false)}
-          onSubmit={submitExtend}
-        />
-      )}
 
     </div>
   );

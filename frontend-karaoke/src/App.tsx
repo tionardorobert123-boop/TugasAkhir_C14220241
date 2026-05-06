@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import TransactionsPage from "./pages/TransactionsPage";
+import AccessLogPage from "./pages/AccessLogPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         />
 
         <Route path="/transactions" element={<TransactionsPage />} />
+        <Route path="/access-log" element={<AccessLogPage />} />
 
       </Routes>
     </BrowserRouter>

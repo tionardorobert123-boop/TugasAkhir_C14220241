@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamp('end_time')->nullable();
 
             $table->integer('duration')->nullable();
-            $table->integer('price_per_hour')->nullable();
+            $table->integer('price_per_hour');
             $table->integer('total_price')->nullable();
 
             $table->enum('status', ['active', 'finished'])->default('active');

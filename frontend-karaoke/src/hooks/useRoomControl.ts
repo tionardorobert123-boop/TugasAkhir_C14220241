@@ -6,6 +6,7 @@ export function useRoomControl() {
 
   const [showModal, setShowModal] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSetting, setShowSetting] = useState(false);
 
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [customerName, setCustomerName] = useState("");
@@ -76,7 +77,9 @@ export function useRoomControl() {
 
     fetchRooms();
 
-    const interval = setInterval(fetchRooms, 3000);
+    const interval = setInterval(() => {
+    fetchRooms();
+  }, 5000);   
 
     return () => clearInterval(interval);
   }, [token]);
@@ -216,6 +219,12 @@ export function useRoomControl() {
     resetForm();
     setSelectedRoom(room.room_id);
     setShowModal(true);
+    
+  };
+
+  const handleOwnerClick = (room: any) => {
+    setSelectedRoom(room.room_id);
+    setShowSetting(true);
   };
 
   // ================= LOGOUT =================
@@ -224,8 +233,11 @@ export function useRoomControl() {
     window.location.href = "/";
   };
 
-  const price = 100000;
-  const total = (duration / 60) * price;
+  //ambil data price dari database room
+  const selected = rooms.find(r => r.room_id === selectedRoom);
+  const price = selected?.price_per_hour ?? 0;
+  const hours = Math.ceil(duration / 60);
+  const total = hours * price;
 
   return {
     rooms,
@@ -242,6 +254,9 @@ export function useRoomControl() {
     showConfirm,
     setShowConfirm,
 
+    showSetting,
+    setShowSetting,
+
     selectedRoom,
     customerName,
     setCustomerName,
@@ -255,6 +270,7 @@ export function useRoomControl() {
     handleClick,
     startRoom,
     extendRoom,
+    handleOwnerClick,
 
     closeModal,
     logout,

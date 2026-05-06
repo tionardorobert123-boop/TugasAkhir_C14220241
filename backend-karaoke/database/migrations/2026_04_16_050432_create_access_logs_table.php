@@ -16,9 +16,9 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('customer_name')->nullable();
-
-            $table->enum('action', ['open', 'close', 'extend']);
-            $table->string('status');
+            
+            $table->enum('room_status', ['active', 'standby', 'disabled', 'extend']);
+            $table->integer('duration')->nullable();
 
             $table->timestamp('timestamp');
 

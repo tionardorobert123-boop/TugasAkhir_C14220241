@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.png";
 import { closeRoom } from "../services/roomService";
+import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 
 function Dashboard() {
   const {
@@ -22,6 +23,9 @@ function Dashboard() {
     showConfirm,
     setShowConfirm,
 
+    showSetting,
+    setShowSetting,
+
     selectedRoom,
     customerName,
     setCustomerName,
@@ -34,6 +38,7 @@ function Dashboard() {
 
     handleClick,
     startRoom,
+    handleOwnerClick,
 
     openExtendModal,
     showExtendModal,
@@ -49,6 +54,9 @@ function Dashboard() {
   const role = localStorage.getItem("role");
   const isOwner = role === "owner";
 
+  const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
+  const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
+
   const renderRoom = (id: number) => {
     const room = rooms.find((r) => r.room_id === id);
     if (!room) return null;
@@ -58,8 +66,9 @@ function Dashboard() {
         room={room}
         timer={room.end_time ? formatTimer(room.end_time) : "-"}
         warning={room.end_time ? isWarning(room.end_time) : false}
+        isOwner={isOwner}
 
-        onClick={isOwner ? () => {} : () => handleClick(room)}
+        onClick={isOwner ? () => handleOwnerClick(room) : () => handleClick(room)}
         onExtend={isOwner ? undefined : () => openExtendModal(room.room_id)}
       />
     );
@@ -136,7 +145,7 @@ function Dashboard() {
 
       {/* ================= FLOATING BUTTON ================= */}
 
-      {/* 🔥 MOBILE VERSION */}
+      {/*MOBILE VERSION*/}
       <div className="
         md:hidden
         fixed bottom-4 left-1/2 -translate-x-1/2 z-20
@@ -219,10 +228,18 @@ function Dashboard() {
       <ExtendRoomModal
         show={showExtendModal}
         roomId={extendRoomId}
+        price={extendPrice} 
+        total={total}
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
-        onCloseRoom={closeRoom} 
+        onCloseRoom={closeRoom}
       />
+
+      <RoomSettingModal
+      show={showSetting}
+      room={selectedRoom}
+      onClose={() => setShowSetting(false)}
+    />
 
     </div>
   );

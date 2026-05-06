@@ -15,6 +15,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 1,
                 'room_name' => '1',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -22,6 +23,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 2,
                 'room_name' => '2',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -29,6 +31,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 3,
                 'room_name' => '3',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -36,6 +39,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 4,
                 'room_name' => '4',
                 'room_type' => 'vip',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
             [
@@ -43,6 +47,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 5,
                 'room_name' => '5',
                 'room_type' => 'vip',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
             [
@@ -50,6 +55,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 6,
                 'room_name' => '6',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -57,6 +63,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 7,
                 'room_name' => '7',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -64,6 +71,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 8,
                 'room_name' => '8',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'available'
             ],
             [
@@ -71,6 +79,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 9,
                 'room_name' => '9',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
             [
@@ -78,6 +87,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 10,
                 'room_name' => '10',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
             [
@@ -85,6 +95,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 11,
                 'room_name' => '11',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
             [
@@ -92,6 +103,7 @@ class RoomSeeder extends Seeder
                 'iot_device_id' => 12,
                 'room_name' => '12',
                 'room_type' => 'regular',
+                'price_per_hour' => 100000,
                 'status' => 'disabled'
             ],
         ];

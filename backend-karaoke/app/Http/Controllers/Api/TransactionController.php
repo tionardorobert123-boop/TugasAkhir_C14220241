@@ -8,25 +8,31 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
-    // ================= GET ALL (KASIR: HARI INI) =================
+    // ================= TODAY (KASIR)
     public function index()
     {
-        $today = now()->toDateString(); // YYYY-MM-DD
+        $today = now()->toDateString();
 
         $transactions = Transaction::whereDate('created_at', $today)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
         return response()->json($transactions);
     }
 
-    // ================= OWNER (FILTER TANGGAL) =================
+    // ================= FILTER OWNER
     public function byDate(Request $request)
     {
-        $date = $request->query('date'); // ?date=2026-04-26
+        $date = $request->query('date');
+
+        if (!$date) {
+            return response()->json([
+                'message' => 'Tanggal wajib diisi'
+            ], 400);
+        }
 
         $transactions = Transaction::whereDate('created_at', $date)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
         return response()->json($transactions);

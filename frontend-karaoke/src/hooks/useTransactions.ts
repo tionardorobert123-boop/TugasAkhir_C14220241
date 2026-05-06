@@ -3,7 +3,6 @@ import axios from "axios";
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [rooms, setRooms] = useState<any[]>([]);
 
   const token = localStorage.getItem("token");
 
@@ -15,41 +14,30 @@ export function useTransactions(selectedDate?: string) {
   useEffect(() => {
     if (!token) return;
 
-    // ================= LOAD CACHE =================
     const cached = localStorage.getItem(cacheKey);
 
     if (cached) {
       const parsed = JSON.parse(cached);
-
       setTransactions(parsed.transactions || []);
-      setRooms(parsed.rooms || []);
     }
 
-    // ================= FETCH =================
     const fetchData = async () => {
       try {
-        const [trxRes, roomRes] = await Promise.all([
-          axios.get("http://localhost:8000/api/transactions", {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get("http://localhost:8000/api/rooms", {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
+        const res = await axios.get(`http://localhost:8000/api/transactions/by-date?date=${filterDate}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-        const filtered = trxRes.data.filter((trx: any) =>
-          trx.created_at.startsWith(filterDate)
-        );
+        const filtered = res.data.filter((trx: any) => {
+          const trxDate = trx.created_at?.slice(0, 10);
+          return trxDate === filterDate;
+        });
 
         setTransactions(filtered);
-        setRooms(roomRes.data);
 
-        // ================= SAVE CACHE =================
         localStorage.setItem(
           cacheKey,
           JSON.stringify({
-            transactions: filtered,
-            rooms: roomRes.data
+            transactions: filtered  
           })
         );
 
@@ -60,15 +48,10 @@ export function useTransactions(selectedDate?: string) {
 
     fetchData();
 
-    // ================= POLLING (LEBIH RINGAN) =================
-    const interval = setInterval(fetchData, 10000); // 🔥 dari 5s → 10s
-
-    return () => clearInterval(interval);
-
   }, [token, filterDate]);
 
   // ================= SPLIT =================
-  const activeRooms = rooms.filter(r => r.status === "occupied");
+  const activeRooms = transactions.filter(trx => trx.status === "active");
 
   const finishedTransactions = transactions.filter(
     trx => trx.status === "finished"
@@ -97,7 +80,6 @@ export function useTransactions(selectedDate?: string) {
       .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // ================= WARNING =================
   const isWarning = (end_time: string) => {
     if (!end_time) return false;
 
@@ -105,7 +87,6 @@ export function useTransactions(selectedDate?: string) {
     return diff > 0 && diff <= 5 * 60 * 1000;
   };
 
-  // ================= DURATION =================
   const formatDuration = (minutes: number) => {
     if (!minutes) return "0 jam";
 

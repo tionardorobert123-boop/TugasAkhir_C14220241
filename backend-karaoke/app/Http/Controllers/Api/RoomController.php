@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\MQTTService;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Services\MQTTService;
 use App\Models\Transaction;
 use App\Models\RoomExtendLog;
-use Carbon\Carbon;
+use App\Models\Room;
+use App\Models\AccessLog;
 
 class RoomController extends Controller
 {
@@ -16,105 +18,132 @@ class RoomController extends Controller
     // GET ROOMS + ACTIVE TRANSACTION
     // =============================
     public function index()
-{
-    $rooms = DB::table('rooms')
+    {
+        $rooms = DB::table('rooms')
 
-        // 🔥 JOIN TRANSACTION (TETAP)
-        ->leftJoinSub(
-            DB::table('transactions')
-                ->where('status', 'active')
-                ->orderByDesc('transaction_id')
-                ->select('*'),
-            't',
-            'rooms.room_id',
-            '=',
-            't.room_id'
-        )
+            ->leftJoinSub(
+                DB::table('transactions')
+                    ->where('status', 'active')
+                    ->orderByDesc('transaction_id')
+                    ->select('*'),
+                't',
+                'rooms.room_id',
+                '=',
+                't.room_id'
+            )
 
-        // 🔥 TAMBAHAN: JOIN IOT DEVICE
-        ->leftJoin('iot_devices', 'rooms.iot_device_id', '=', 'iot_devices.device_id')
+            ->leftJoin('iot_devices', 'rooms.iot_device_id', '=', 'iot_devices.device_id')
 
-        ->select(
-            'rooms.room_id',
-            'rooms.room_name',
-            'rooms.status',
+            ->select(
+                'rooms.room_id',
+                'rooms.room_name',
+                'rooms.status',
+                'rooms.price_per_hour',
 
-            't.end_time',
-            't.customer_name',
+                't.end_time',
+                't.customer_name',
+                't.duration',
+                't.total_price',
 
-            // 🔥 TAMBAHAN INI
-            'iot_devices.lock_status',
-            'iot_devices.door_status',
-            'iot_devices.status_online'
-        )
+                'iot_devices.lock_status',
+                'iot_devices.door_status',
+                'iot_devices.status_online'
+            )
 
-        ->get();
+            ->get();
 
-    return response()->json($rooms);
-}
+        return response()->json($rooms);
+    }
 
     // =============================
-    // OPEN ROOM
+    // OPEN ROOM (START)
     // =============================
     public function open(Request $request, $id)
     {
-        $duration = $request->duration;
+        $minutes = (int) $request->duration;
 
-        $start = now();
-        $end = now()->addMinutes($duration);
-
-        // cek jika masih ada transaksi aktif
-        $existing = DB::table('transactions')
-            ->where('room_id', $id)
-            ->where('status', 'active')
-            ->orderByDesc('transaction_id')
-            ->first();
-
-        if ($existing) {
+        if ($minutes <= 0) {
             return response()->json([
-                "message" => "Room masih aktif, tidak bisa buka lagi"
+                "message" => "Durasi tidak valid"
             ], 400);
         }
 
-        // insert transaksi baru
+        // 🔥 wajib kelipatan 60 menit
+        if ($minutes % 60 !== 0) {
+            return response()->json([
+                "message" => "Durasi harus kelipatan 60 menit"
+            ], 400);
+        }
+
+        $room = DB::table('rooms')->where('room_id', $id)->first();
+
+        if (!$room) {
+            return response()->json([
+                "message" => "Room tidak ditemukan"
+            ], 404);
+        }
+
+        // cek transaksi aktif
+        $existing = DB::table('transactions')
+            ->where('room_id', $id)
+            ->where('status', 'active')
+            ->exists();
+
+        if ($existing) {
+            return response()->json([
+                "message" => "Room masih aktif"
+            ], 400);
+        }
+
+        $start = now();
+        $hours = $minutes / 60;
+        $end = $start->copy()->addMinutes($minutes);
+
         DB::table('transactions')->insert([
             'room_id' => $id,
             'customer_name' => $request->customer_name ?? 'Guest',
             'start_time' => $start,
-            'end_time' => $end->format('Y-m-d H:i:s'),
-            'duration' => $duration,
-            'price_per_hour' => 100000,
-            'total_price' => ($duration / 60) * 100000,
+            'end_time' => $end,
+            'duration' => $hours, // 🔥 JAM
+            'price_per_hour' => $room->price_per_hour,
+            'total_price' => $hours * $room->price_per_hour,
             'status' => 'active',
             'created_at' => $start,
+            'updated_at' => $start
         ]);
 
-        // update room
         DB::table('rooms')
             ->where('room_id', $id)
             ->update(['status' => 'occupied']);
+
+        // LOG ACCESS
+        AccessLog::create([
+            'room_id' => $id,
+            'customer_name' => $request->customer_name ?? 'Guest',
+            'room_status' => 'active',
+            'duration' => (int) $hours,
+            'timestamp' => $start,
+        ]);
 
         // MQTT
         $mqtt = new MQTTService();
         $mqtt->publish("room/$id/control", json_encode([
             "room_id" => $id,
             "action" => "open",
-            "duration" => $duration
-            
+            "duration" => $minutes
         ]));
 
         return response()->json([
             "message" => "Room started",
-            "end_time" => $end->format('Y-m-d H:i:s')
+            "end_time" => $end
         ]);
     }
 
     // =============================
-    // CLOSE ROOM
+    // CLOSE ROOM (AUTO / FORCE)
     // =============================
     public function close($id)
     {
-        // ambil transaksi aktif terakhir
         $transaction = DB::table('transactions')
             ->where('room_id', $id)
             ->where('status', 'active')
@@ -123,21 +152,30 @@ class RoomController extends Controller
 
         if (!$transaction) {
             return response()->json([
-                "message" => "Already closed"
+                "message" => "Room already closed"
             ]);
         }
 
-        // update hanya 1 transaksi (tidak semua)
         DB::table('transactions')
             ->where('transaction_id', $transaction->transaction_id)
             ->update([
-                'status' => 'finished'
+                'status' => 'finished',
+                'updated_at' => now()
             ]);
 
-        // update room
         DB::table('rooms')
             ->where('room_id', $id)
             ->update(['status' => 'available']);
+
+        // LOG ACCESS
+        $totalDuration = Carbon::parse($transaction->start_time)->diffInMinutes(now());
+        AccessLog::create([
+            'room_id' => $id,
+            'customer_name' => $transaction->customer_name,
+            'room_status' => 'standby',
+            'duration' => $totalDuration,
+            'timestamp' => now(),
+        ]);
 
         // MQTT
         $mqtt = new MQTTService();
@@ -151,10 +189,25 @@ class RoomController extends Controller
         ]);
     }
 
-    //extend room function
+    // =============================
+    // EXTEND ROOM (TAMBAH JAM)
+    // =============================
     public function extend(Request $request, $id)
     {
-        $minutes = $request->minutes;
+        $minutes = (int) $request->minutes;
+
+        if ($minutes <= 0) {
+            return response()->json([
+                'message' => 'Durasi tidak valid'
+            ], 400);
+        }
+
+        // kelipatan 60 menit
+        if ($minutes % 60 !== 0) {
+            return response()->json([
+                'message' => 'Extend harus kelipatan 60 menit'
+            ], 400);
+        }
 
         $transaction = Transaction::where('room_id', $id)
             ->where('status', 'active')
@@ -162,20 +215,25 @@ class RoomController extends Controller
             ->first();
 
         if (!$transaction) {
-            return response()->json(['message' => 'No active transaction'], 404);
+            return response()->json([
+                'message' => 'No active transaction'
+            ], 404);
         }
 
         $oldEnd = $transaction->end_time;
 
-        $newEnd = Carbon::parse($transaction->end_time)->addMinutes($minutes);
+        $newEnd = Carbon::parse($transaction->end_time)
+            ->addMinutes($minutes);
 
-        // update transaksi
+        $hours = $minutes / 60;
+
+        // UPDATE TRANSACTION
         $transaction->end_time = $newEnd;
-        $transaction->duration += $minutes / 60;
+        $transaction->duration += $hours; // tambah jam
         $transaction->total_price = $transaction->duration * $transaction->price_per_hour;
         $transaction->save();
 
-        // log extend
+        //LOG
         RoomExtendLog::create([
             'transaction_id' => $transaction->transaction_id,
             'added_minutes' => $minutes,
@@ -183,6 +241,53 @@ class RoomController extends Controller
             'new_end_time' => $newEnd,
         ]);
 
-        return response()->json($transaction);
+        // LOG ACCESS
+        $extendHours = $minutes / 60;
+        AccessLog::create([
+            'room_id' => $id,
+            'customer_name' => $transaction->customer_name,
+            'room_status' => 'extend',
+            'duration' => (int) $extendHours,
+            'timestamp' => now(),
+        ]);
+
+        // MQTT
+        $mqtt = new MQTTService();
+        $mqtt->publish("room/$id/control", json_encode([
+            "room_id" => $id,
+            "action" => "extend",
+            "duration" => $minutes
+        ]));
+
+        return response()->json([
+            "message" => "Room extended",
+            "new_end_time" => $newEnd,
+            "total_price" => $transaction->total_price
+        ]);
+    }
+
+    public function updatePrice(Request $request, $id)
+    {
+        $request->validate([
+            'price' => 'required|numeric',
+            'mode' => 'required|in:single,type'
+        ]);
+
+        $room = Room::findOrFail($id);
+
+        if ($request->mode === 'single') {
+            //hanya room @terpilih
+            $room->update([
+                'price_per_hour' => $request->price
+            ]);
+        } else {
+            //semua room dengan type sama
+            Room::where('room_type', $room->room_type)
+                ->update([
+                    'price_per_hour' => $request->price
+                ]);
+        }
+
+        return response()->json(['message' => 'Harga berhasil diupdate']);
     }
 }

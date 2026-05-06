@@ -11,9 +11,13 @@ class AccessLog extends Model
     protected $fillable = [
         'room_id',
         'customer_name',
-        'action',
-        'status',
+        'room_status',
+        'duration',
         'timestamp'
+    ];
+
+    protected $casts = [
+        'timestamp' => 'datetime',
     ];
 
     public function room()
