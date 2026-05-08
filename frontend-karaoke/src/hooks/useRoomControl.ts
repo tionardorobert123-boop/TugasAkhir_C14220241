@@ -9,6 +9,7 @@ export function useRoomControl() {
   const [showSetting, setShowSetting] = useState(false);
 
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
+  const [selectedRoomData, setSelectedRoomData] = useState<any>(null);
   const [customerName, setCustomerName] = useState("");
   const [duration, setDuration] = useState(60);
 
@@ -224,7 +225,23 @@ export function useRoomControl() {
 
   const handleOwnerClick = (room: any) => {
     setSelectedRoom(room.room_id);
+    setSelectedRoomData(room);
     setShowSetting(true);
+  };
+
+  const handleSettingSuccess = () => {
+    // Refresh rooms data setelah update setting
+    const fetchRooms = () => {
+      axios
+        .get("http://localhost:8000/api/rooms", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => {
+          setRooms(res.data);
+          localStorage.setItem("rooms_cache", JSON.stringify(res.data));
+        });
+    };
+    fetchRooms();
   };
 
   // ================= LOGOUT =================
@@ -234,7 +251,9 @@ export function useRoomControl() {
   };
 
   //ambil data price dari database room
-  const selected = rooms.find(r => r.room_id === selectedRoom);
+  const selected = Array.isArray(rooms)
+  ? rooms.find(r => r.room_id === selectedRoom)
+  : null;
   const price = selected?.price_per_hour ?? 0;
   const hours = Math.ceil(duration / 60);
   const total = hours * price;
@@ -258,6 +277,7 @@ export function useRoomControl() {
     setShowSetting,
 
     selectedRoom,
+    selectedRoomData,
     customerName,
     setCustomerName,
 
@@ -271,6 +291,7 @@ export function useRoomControl() {
     startRoom,
     extendRoom,
     handleOwnerClick,
+    handleSettingSuccess,
 
     closeModal,
     logout,

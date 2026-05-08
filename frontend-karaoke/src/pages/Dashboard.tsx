@@ -27,6 +27,7 @@ function Dashboard() {
     setShowSetting,
 
     selectedRoom,
+    selectedRoomData,
     customerName,
     setCustomerName,
 
@@ -39,6 +40,7 @@ function Dashboard() {
     handleClick,
     startRoom,
     handleOwnerClick,
+    handleSettingSuccess,
 
     openExtendModal,
     showExtendModal,
@@ -236,10 +238,11 @@ function Dashboard() {
       />
 
       <RoomSettingModal
-      show={showSetting}
-      room={selectedRoom}
-      onClose={() => setShowSetting(false)}
-    />
+        show={showSetting}
+        room={selectedRoomData}
+        onClose={() => setShowSetting(false)}
+        onSuccess={handleSettingSuccess}
+      />
 
     </div>
   );

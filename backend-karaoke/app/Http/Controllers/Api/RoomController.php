@@ -38,6 +38,7 @@ class RoomController extends Controller
                 'rooms.room_id',
                 'rooms.room_name',
                 'rooms.status',
+                'rooms.room_type',
                 'rooms.price_per_hour',
 
                 't.end_time',
@@ -266,28 +267,35 @@ class RoomController extends Controller
         ]);
     }
 
-    public function updatePrice(Request $request, $id)
+    public function updateSetting(Request $request, $id)
     {
         $request->validate([
-            'price' => 'required|numeric',
-            'mode' => 'required|in:single,type'
+            'price' => 'nullable|numeric',
+            'mode' => 'nullable|in:single,all_type',
+            'room_type_filter' => 'nullable|string',
+            'room_type' => 'nullable|string',
+            'status' => 'nullable|in:available,disabled'
         ]);
 
         $room = Room::findOrFail($id);
 
-        if ($request->mode === 'single') {
-            //hanya room @terpilih
-            $room->update([
-                'price_per_hour' => $request->price
-            ]);
-        } else {
-            //semua room dengan type sama
-            Room::where('room_type', $room->room_type)
-                ->update([
-                    'price_per_hour' => $request->price
-                ]);
+        if ($request->filled('price')) {
+            if ($request->mode === 'all_type' && $request->room_type_filter) {
+                Room::where('room_type', $request->room_type_filter)
+                    ->update(['price_per_hour' => $request->price]);
+            } else {
+                $room->update(['price_per_hour' => $request->price]);
+            }
         }
 
-        return response()->json(['message' => 'Harga berhasil diupdate']);
+        if ($request->filled('room_type')) {
+            $room->update(['room_type' => $request->room_type]);
+        }
+
+        if ($request->filled('status')) {
+            $room->update(['status' => $request->status]);
+        }
+
+        return response()->json(['message' => 'Setting room berhasil diupdate']);
     }
 }

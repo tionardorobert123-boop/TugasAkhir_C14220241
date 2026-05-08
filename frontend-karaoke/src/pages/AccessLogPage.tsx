@@ -37,7 +37,7 @@ export default function AccessLogPage() {
           <div>
             <h1 className="text-2xl font-bold">Log Aktivitas Akses</h1>
             <p className="text-sm opacity-60 mt-2 max-w-xl">
-              Catatan seluruh akses pengguna.
+              Catatan seluruh akses pintu.
             </p>
           </div>
 

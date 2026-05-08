@@ -30,8 +30,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/rooms/{id}/close', [RoomController::class, 'close']);
         Route::post('/rooms/{id}/extend', [RoomController::class, 'extend']);
     });
-    // hanya owner (contoh future)
+    // hanya owner
     Route::middleware('role:owner')->group(function () {
+        Route::post('/rooms/{id}/update-setting', [RoomController::class, 'updateSetting']);
         Route::get('/access-logs', [AccessLogController::class, 'index']);
     });
 
