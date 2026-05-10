@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+
   plugins: [
     react(),
 
@@ -52,7 +53,8 @@ export default defineConfig({
 
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/domainkamu\.com\/api/,
+            urlPattern:
+            /^https:\/\/tugasakhirc14220241\.up\.railway\.app\/api/,
             handler: 'NetworkFirst',
 
             options: {
@@ -71,5 +73,14 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
+
+  server: {
+    host: '0.0.0.0'
+  },
+
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true
+  }
 })
