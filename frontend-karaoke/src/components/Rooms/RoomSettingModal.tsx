@@ -38,7 +38,7 @@ export default function RoomSettingModal({
     changes: {}
   });
 
-  const token = localStorage.getItem("token") || "";
+  // const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
     if (room && show) {
