@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\IotDevice;
+use App\Models\IoTDevice;
 
 class IotDeviceController extends Controller
 {
@@ -12,7 +12,7 @@ class IotDeviceController extends Controller
     {
         try {
 
-            $device = IotDevice::where(
+            $device = IoTDevice::where(
                 'device_id',
                 $request->room_id
             )->first();
