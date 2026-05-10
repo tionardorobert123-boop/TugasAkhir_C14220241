@@ -32,4 +32,5 @@ class AccessLogController extends Controller
 
         return response()->json($logs);
     }
+
 }

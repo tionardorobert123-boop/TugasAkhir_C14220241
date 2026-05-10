@@ -149,9 +149,31 @@ export default function AccessLogPage() {
                         <td className="px-4 py-4">{log.room_name ?? `Room ${log.room_id}`}</td>
                         <td className="px-4 py-4">{log.customer_name ?? "-"}</td>
                         <td className="px-4 py-4">{isActiveOrExtend ? `${log.duration}jam` : '-'}</td>
-                        <td className="px-4 py-4">{isStandby ? 'selesai' : (statusLabels[log.room_status] ?? log.room_status)}</td>
+                        <td className="px-4 py-4">
+                        {/* ACTIVE */}
+                        {log.room_status === "active" && (
+                          <span className="bg-red-500/20 border border-red-500/30 text-red-400 px-2 py-1 rounded-lg text-xs">
+                            aktif
+                          </span>
+                        )}
+
+                        {/* EXTEND */}
+                        {log.room_status === "extend" && (
+                          <span className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 px-2 py-1 rounded-lg text-xs">
+                            extend
+                          </span>
+                        )}
+
+                        {/* STANDBY / SELESAI */}
+                        {log.room_status === "standby" && (
+                          <span className="bg-green-500/20 border border-green-500/30 text-green-400 px-2 py-1 rounded-lg text-xs">
+                            selesai
+                          </span>
+                        )}
+
+                      </td>
                         <td className="px-4 py-4">{formatDate(log.timestamp)}</td>
-                        <td className="px-4 py-4">{isStandby ? formatDuration(log.duration) : '-'}</td>
+                        <td className="px-4 py-4 font-semibold text-green-400">{isStandby ? formatDuration(log.duration) : '-'}</td>
                       </tr>
                     );
                   })

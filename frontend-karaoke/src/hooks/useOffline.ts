@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
 
 export default function useOffline() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [hasInternet, setHasInternet] = useState(true);
 
   useEffect(() => {
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
+    const checkInternet = async () => {
+      try {
+        await fetch("https://clients3.google.com/generate_204", {
+          mode: "no-cors",
+        });
 
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-
-    return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
+        setHasInternet(true);
+      } catch {
+        setHasInternet(false);
+      }
     };
+
+    checkInternet();
+
+    const interval = setInterval(checkInternet, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  return isOnline;
+  return hasInternet;
 }

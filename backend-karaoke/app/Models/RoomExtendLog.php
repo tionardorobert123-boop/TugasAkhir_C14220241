@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class RoomExtendLog extends Model
 {
     protected $fillable = [
+        'temp_id',
         'transaction_id',
         'added_minutes',
         'old_end_time',
-        'new_end_time'
+        'new_end_time',
+    
     ];
 
     public function transaction()

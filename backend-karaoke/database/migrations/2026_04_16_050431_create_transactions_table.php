@@ -26,6 +26,8 @@ return new class extends Migration
 
             $table->enum('status', ['active', 'finished'])->default('active');
 
+            $table->string('temp_id')->nullable()->unique();
+
             $table->timestamps();
         });
     }

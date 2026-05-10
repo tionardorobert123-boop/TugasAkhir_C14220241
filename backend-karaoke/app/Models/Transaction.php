@@ -9,6 +9,7 @@ class Transaction extends Model
     protected $primaryKey = 'transaction_id';
 
     protected $fillable = [
+        'temp_id',
         'room_id',
         'customer_name',
         'start_time',
@@ -16,7 +17,8 @@ class Transaction extends Model
         'duration',
         'price_per_hour',
         'total_price',
-        'status'
+        'status',
+        
     ];
 
     public function room()

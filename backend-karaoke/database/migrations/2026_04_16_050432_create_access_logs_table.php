@@ -20,6 +20,8 @@ return new class extends Migration
             $table->enum('room_status', ['active', 'standby', 'disabled', 'extend']);
             $table->integer('duration')->nullable();
 
+            $table->string('temp_id')->nullable()->unique();
+
             $table->timestamp('timestamp');
 
             $table->timestamps();

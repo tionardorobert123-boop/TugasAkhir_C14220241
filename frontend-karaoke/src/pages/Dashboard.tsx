@@ -2,7 +2,7 @@ import RoomCard from "../components/Rooms/RoomCard";
 import OpenRoomModal from "../components/Rooms/OpenRoomModal";
 import ConfirmModal from "../components/Rooms/ConfirmModal";
 import ExtendRoomModal from "../components/Rooms/ExtendRoomModal";
-
+import useOffline from "../hooks/useOffline";
 import { useRoomControl } from "../hooks/useRoomControl";
 import { useNavigate } from "react-router-dom";
 
@@ -51,6 +51,8 @@ function Dashboard() {
     logout
   } = useRoomControl();
 
+  const hasInternet = useOffline();
+
   const navigate = useNavigate();
 
   const role = localStorage.getItem("role");
@@ -92,6 +94,46 @@ function Dashboard() {
         flex-col items-center justify-center
         opacity-80
       ">
+      {!hasInternet && (
+        <div
+          className="
+            mb-6
+
+            flex items-center justify-center gap-3
+
+            bg-red-600/85
+            border border-red-400
+
+            backdrop-blur-md
+
+            px-6 py-3
+
+            rounded-2xl
+
+            shadow-lg shadow-red-900/40
+
+            w-fit
+            mx-auto
+          "
+        >
+          {/* STATUS DOT */}
+          <div className="relative flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-white animate-ping absolute" />
+            <div className="w-3 h-3 rounded-full bg-white relative" />
+          </div>
+
+          {/* TEXT */}
+          <div className="text-center">
+            <p className="font-bold text-base tracking-wide">
+              MODE OFFLINE LOKAL
+            </p>
+
+            <p className="text-xs opacity-90">
+              Internet tidak tersedia • Sistem berjalan melalui jaringan lokal
+            </p>
+          </div>
+        </div>
+      )}
         <img src={logo} className="w-80 opacity-20 mb-4" />
 
         <h1 className="text-2xl font-bold tracking-wide">
@@ -99,7 +141,7 @@ function Dashboard() {
         </h1>
 
         <p className="text-sm opacity-70 mt-2">
-          {now.toLocaleDateString("id-ID", {
+          {now.toLocaleDateString("en-GB", {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -108,18 +150,43 @@ function Dashboard() {
         </p>
 
         <p className="text-xl font-mono">
-          {now.toLocaleTimeString("id-ID")}
+          {now.toLocaleTimeString("en-GB")}
         </p>
       </div>
 
       {/* ================= MOBILE HEADER ================= */}
       <div className="md:hidden text-center mb-4">
+        {/* OFFLINE MOBILE */}
+      {!hasInternet && (
+        <div
+          className="
+            mb-3
+
+            flex items-center justify-center gap-2
+
+            bg-red-600/90
+            border border-red-400
+
+            px-3 py-2
+
+            rounded-xl
+
+            shadow-lg shadow-red-900/40
+          "
+        >
+          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+
+          <p className="text-[11px] font-semibold">
+            MODE OFFLINE LOKAL
+          </p>
+        </div>
+      )}
         <h1 className="text-lg font-bold">
           FRIENDSHIP KARAOKE
         </h1>
 
         <p className="text-xs opacity-60">
-          {now.toLocaleTimeString("id-ID")}
+          {now.toLocaleTimeString("en-GB")}
         </p>
       </div>
 

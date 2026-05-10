@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\MQTTService;
-use App\Models\Transaction;
-use App\Models\RoomExtendLog;
 use App\Models\Room;
 use App\Models\AccessLog;
 
@@ -96,22 +94,42 @@ class RoomController extends Controller
             ], 400);
         }
 
+        if ($request->filled('temp_id')) {
+
+            $exists = DB::table('transactions')
+                ->where(
+                    'temp_id',
+                    $request->temp_id
+                )->exists();
+
+            if ($exists) {
+
+                return response()->json([
+                    'message' => 'Already synced'
+                ]);
+            }
+        }
+
         $start = now();
         $hours = $minutes / 60;
         $end = $start->copy()->addMinutes($minutes);
 
         DB::table('transactions')->insert([
-            'room_id' => $id,
-            'customer_name' => $request->customer_name ?? 'Guest',
-            'start_time' => $start,
-            'end_time' => $end,
-            'duration' => $hours, // 🔥 JAM
-            'price_per_hour' => $room->price_per_hour,
-            'total_price' => $hours * $room->price_per_hour,
-            'status' => 'active',
-            'created_at' => $start,
-            'updated_at' => $start
-        ]);
+        'temp_id' => $request->temp_id,
+        'room_id' => $id,
+        'customer_name' =>
+            $request->customer_name ?? 'Guest',
+        'start_time' => $start,
+        'end_time' => $end,
+        'duration' => $hours,
+        'price_per_hour' =>
+            $room->price_per_hour,
+        'total_price' =>
+            $hours * $room->price_per_hour,
+        'status' => 'active',
+        'created_at' => $start,
+        'updated_at' => $start
+    ]);
 
         DB::table('rooms')
             ->where('room_id', $id)
@@ -119,8 +137,10 @@ class RoomController extends Controller
 
         // LOG ACCESS
         AccessLog::create([
+            'temp_id' => $request->temp_id,
             'room_id' => $id,
-            'customer_name' => $request->customer_name ?? 'Guest',
+            'customer_name' =>
+                $request->customer_name ?? 'Guest',
             'room_status' => 'active',
             'duration' => (int) $hours,
             'timestamp' => $start,
@@ -143,7 +163,7 @@ class RoomController extends Controller
     // =============================
     // CLOSE ROOM (AUTO / FORCE)
     // =============================
-    public function close($id)
+    public function close(Request $request, $id)
     {
         $transaction = DB::table('transactions')
             ->where('room_id', $id)
@@ -155,6 +175,21 @@ class RoomController extends Controller
             return response()->json([
                 "message" => "Room already closed"
             ]);
+        }
+
+        if ($request->filled('temp_id')) {
+
+            $exists = AccessLog::where(
+                'temp_id',
+                $request->temp_id
+            )->exists();
+
+            if ($exists) {
+
+                return response()->json([
+                    'message' => 'Already synced'
+                ]);
+            }
         }
 
         DB::table('transactions')
@@ -171,8 +206,10 @@ class RoomController extends Controller
         // LOG ACCESS
         $totalDuration = Carbon::parse($transaction->start_time)->diffInMinutes(now());
         AccessLog::create([
+            'temp_id' => $request->temp_id,
             'room_id' => $id,
-            'customer_name' => $transaction->customer_name,
+            'customer_name' =>
+                $transaction->customer_name,
             'room_status' => 'standby',
             'duration' => $totalDuration,
             'timestamp' => now(),
@@ -187,83 +224,6 @@ class RoomController extends Controller
 
         return response()->json([
             "message" => "Room closed"
-        ]);
-    }
-
-    // =============================
-    // EXTEND ROOM (TAMBAH JAM)
-    // =============================
-    public function extend(Request $request, $id)
-    {
-        $minutes = (int) $request->minutes;
-
-        if ($minutes <= 0) {
-            return response()->json([
-                'message' => 'Durasi tidak valid'
-            ], 400);
-        }
-
-        // kelipatan 60 menit
-        if ($minutes % 60 !== 0) {
-            return response()->json([
-                'message' => 'Extend harus kelipatan 60 menit'
-            ], 400);
-        }
-
-        $transaction = Transaction::where('room_id', $id)
-            ->where('status', 'active')
-            ->latest()
-            ->first();
-
-        if (!$transaction) {
-            return response()->json([
-                'message' => 'No active transaction'
-            ], 404);
-        }
-
-        $oldEnd = $transaction->end_time;
-
-        $newEnd = Carbon::parse($transaction->end_time)
-            ->addMinutes($minutes);
-
-        $hours = $minutes / 60;
-
-        // UPDATE TRANSACTION
-        $transaction->end_time = $newEnd;
-        $transaction->duration += $hours; // tambah jam
-        $transaction->total_price = $transaction->duration * $transaction->price_per_hour;
-        $transaction->save();
-
-        //LOG
-        RoomExtendLog::create([
-            'transaction_id' => $transaction->transaction_id,
-            'added_minutes' => $minutes,
-            'old_end_time' => $oldEnd,
-            'new_end_time' => $newEnd,
-        ]);
-
-        // LOG ACCESS
-        $extendHours = $minutes / 60;
-        AccessLog::create([
-            'room_id' => $id,
-            'customer_name' => $transaction->customer_name,
-            'room_status' => 'extend',
-            'duration' => (int) $extendHours,
-            'timestamp' => now(),
-        ]);
-
-        // MQTT
-        $mqtt = new MQTTService();
-        $mqtt->publish("room/$id/control", json_encode([
-            "room_id" => $id,
-            "action" => "extend",
-            "duration" => $minutes
-        ]));
-
-        return response()->json([
-            "message" => "Room extended",
-            "new_end_time" => $newEnd,
-            "total_price" => $transaction->total_price
         ]);
     }
 

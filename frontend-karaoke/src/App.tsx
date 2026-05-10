@@ -5,8 +5,20 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import TransactionsPage from "./pages/TransactionsPage";
 import AccessLogPage from "./pages/AccessLogPage";
+import { useEffect } from 'react'
+import { syncAll } from './lib/sync/'
 
 function App() {
+  useEffect(() => {
+    syncAll()
+
+    window.addEventListener('online', syncAll)
+
+    return () => {
+      window.removeEventListener('online', syncAll)
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>

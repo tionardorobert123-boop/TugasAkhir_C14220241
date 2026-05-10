@@ -9,11 +9,13 @@ class AccessLog extends Model
     protected $primaryKey = 'log_id';
 
     protected $fillable = [
+        'temp_id',
         'room_id',
         'customer_name',
         'room_status',
         'duration',
-        'timestamp'
+        'timestamp',
+
     ];
 
     protected $casts = [

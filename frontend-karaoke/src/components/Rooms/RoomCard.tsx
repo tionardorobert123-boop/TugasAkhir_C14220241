@@ -187,7 +187,7 @@ export default function RoomCard({
 
 
 // ================= CONTENT =================
-function Content({ room, timer, status, active, warning, offline, isOwner }: any) {
+function Content({ room, timer, status, active, warning, offline }: any) {
 
   const lock = room.lock_status ?? "unknown";
   const door = room.door_status ?? "unknown";

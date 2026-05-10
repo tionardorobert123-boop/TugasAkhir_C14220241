@@ -12,7 +12,7 @@ export const connectMQTT = (onMessage: (data: any) => void) => {
     client.subscribe("room/+/status");
   });
 
-  client.on("message", (topic: string, message: any) => {
+  client.on("message", (_topic: string, message: any) => {
     try {
       const data = JSON.parse(message.toString());
       console.log("MQTT RECEIVED:", data);

@@ -23,6 +23,8 @@ return new class extends Migration
             $table->dateTime('old_end_time');
             $table->dateTime('new_end_time');
 
+            $table->string('temp_id')->nullable()->unique();
+
             $table->timestamps();
         });
     }
