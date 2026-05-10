@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -54,12 +54,12 @@ export default function useAccessLog(initialDate?: string) {
       setLoading(true);
     }
     try {
-      const res = await axios.get(
-        `http://localhost:8000/api/access-logs?date=${selectedDate}`,
+      const res = await API.get(
+        `/access-logs?date=${selectedDate}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
         }
       );
       const data = res.data || [];

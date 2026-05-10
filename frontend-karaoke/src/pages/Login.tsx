@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 import logo from "../assets/logo.png";
 
 function Login() {
@@ -10,7 +10,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:8000/api/login", {
+      const res = await API.post("/login", {
         email,
         password,
       });

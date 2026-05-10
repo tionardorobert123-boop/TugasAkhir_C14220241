@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -23,8 +23,8 @@ export function useTransactions(selectedDate?: string) {
 
     const fetchData = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/transactions/by-date?date=${filterDate}`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const res = await API.get(`/transactions/by-date?date=${filterDate}`, {
+          // headers: { Authorization: `Bearer ${token}` }
         });
 
         const filtered = res.data.filter((trx: any) => {

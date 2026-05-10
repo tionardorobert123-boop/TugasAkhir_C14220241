@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../services/api";
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -65,10 +65,9 @@ export function useRoomControl() {
     }
 
     const fetchRooms = () => {
-      axios
-        .get("http://localhost:8000/api/rooms", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+      API.get("/rooms", {
+        // headers: { Authorization: `Bearer ${token}` },
+      })
         .then((res) => {
           setRooms(res.data);
 
@@ -98,11 +97,11 @@ export function useRoomControl() {
           const nowTime = new Date().getTime();
 
           if (nowTime >= end && !room._closing) {
-            axios.post(
-              `http://localhost:8000/api/rooms/${room.room_id}/close`,
+            API.post(
+              `/rooms/${room.room_id}/close`,
               {},
               {
-                headers: { Authorization: `Bearer ${token}` },
+                // headers: { Authorization: `Bearer ${token}` },
               }
             );
 
@@ -154,14 +153,14 @@ export function useRoomControl() {
     if (!selectedRoom) return;
 
     try {
-      const res = await axios.post(
-        `http://localhost:8000/api/rooms/${selectedRoom}/open`,
+      const res = await API.post(
+        `/rooms/${selectedRoom}/open`,
         {
           duration,
           customer_name: customerName,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          // headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -190,11 +189,11 @@ export function useRoomControl() {
   // ================= EXTEND =================
   const extendRoom = async (roomId: number, minutes: number) => {
     try {
-      const res = await axios.post(
-        `http://localhost:8000/api/rooms/${roomId}/extend`,
+      const res = await API.post(
+        `/rooms/${roomId}/extend`,
         { minutes },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          // headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -232,10 +231,9 @@ export function useRoomControl() {
   const handleSettingSuccess = () => {
     // Refresh rooms data setelah update setting
     const fetchRooms = () => {
-      axios
-        .get("http://localhost:8000/api/rooms", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+      API.get("/rooms", {
+        // headers: { Authorization: `Bearer ${token}` },
+      })
         .then((res) => {
           setRooms(res.data);
           localStorage.setItem("rooms_cache", JSON.stringify(res.data));

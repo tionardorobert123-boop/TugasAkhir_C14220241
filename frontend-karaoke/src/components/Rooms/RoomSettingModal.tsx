@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../../services/api";
 
 interface Props {
   show: boolean;
@@ -203,11 +203,11 @@ export default function RoomSettingModal({
         }
       }
 
-      await axios.post(
-        `http://localhost:8000/api/rooms/${room.room_id}/update-setting`,
+      await API.post(
+        `/rooms/${room.room_id}/update-setting`,
         payload,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          // headers: { Authorization: `Bearer ${token}` }
         }
       );
 

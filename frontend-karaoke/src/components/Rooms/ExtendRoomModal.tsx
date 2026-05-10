@@ -4,8 +4,8 @@ type Props = {
   show: boolean;
   roomId: number | null;
 
-  price: number;   // 🔥 dari database (rooms.price_per_hour)
-  total: number;   // 🔥 total lama (optional display)
+  price: number; 
+  total: number; 
 
   onClose: () => void;
   onSubmit: (minutes: number) => void;
