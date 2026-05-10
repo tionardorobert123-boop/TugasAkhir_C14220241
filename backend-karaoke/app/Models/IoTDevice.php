@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class IoTDevice extends Model
 {
+
+    protected $table = 'iot_devices';
     protected $primaryKey = 'device_id';
 
     protected $fillable = [
