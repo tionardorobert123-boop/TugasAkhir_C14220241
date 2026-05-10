@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class IotDevice extends Model
+class IoTDevice extends Model
 {
     protected $primaryKey = 'device_id';
 
