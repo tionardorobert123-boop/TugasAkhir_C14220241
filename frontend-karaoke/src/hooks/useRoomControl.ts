@@ -80,7 +80,7 @@ export function useRoomControl() {
 
     const interval = setInterval(() => {
     fetchRooms();
-  }, 5000);   
+  }, 7000);   
 
     return () => clearInterval(interval);
   }, [token]);

@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import useAccessLog from "../hooks/useAccessLog";
 
 export default function AccessLogPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedDate = location.state?.selectedDate;
 
   const {
     selectedDate,
@@ -27,8 +29,7 @@ export default function AccessLogPage() {
     handleFilterChange,
     formatDate,
     formatDuration,
-    statusLabels,
-  } = useAccessLog();
+  } = useAccessLog(passedDate);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-900 to-black text-white p-6">
@@ -46,10 +47,11 @@ export default function AccessLogPage() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
+              max={new Date().toISOString().split("T")[0]}
               className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
             />
             <button
-              onClick={() => navigate("/transactions")}
+              onClick={() => navigate("/transactions", { state: { selectedDate } })}
               className="bg-white/10 backdrop-blur px-4 py-2 rounded-lg hover:bg-white/20"
             >
               ← Kembali ke Transaksi
@@ -119,7 +121,7 @@ export default function AccessLogPage() {
             <table className="min-w-full divide-y divide-white/10 text-left text-sm">
               <thead className="bg-white/5">
                 <tr>
-                  <th className="px-4 py-3 font-semibold opacity-80">Room</th>
+                  <th className="sticky left-0 z-20 bg-[#2b1608] px-4 py-3 font-semibold opacity-80">Room</th>
                   <th className="px-4 py-3 font-semibold opacity-80">Nama Customer</th>
                   <th className="px-4 py-3 font-semibold opacity-80">Durasi</th>
                   <th className="px-4 py-3 font-semibold opacity-80">Status</th>
@@ -146,7 +148,7 @@ export default function AccessLogPage() {
                     const isActiveOrExtend = ['active', 'extend'].includes(log.room_status);
                     return (
                       <tr key={index} className="border-t border-white/10 hover:bg-white/5">
-                        <td className="px-4 py-4">{log.room_name ?? `Room ${log.room_id}`}</td>
+                        <td className="sticky left-0 z-10 bg-[#1a0d05] px-4 py-4 whitespace-nowrap">Room {log.room_name ?? `Room ${log.room_id}`}</td>
                         <td className="px-4 py-4">{log.customer_name ?? "-"}</td>
                         <td className="px-4 py-4">{isActiveOrExtend ? `${log.duration}jam` : '-'}</td>
                         <td className="px-4 py-4">

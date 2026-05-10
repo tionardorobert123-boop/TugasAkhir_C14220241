@@ -18,8 +18,10 @@ export interface AccessLog {
   timestamp: string;
 }
 
-export default function useAccessLog() {
-  const [selectedDate, setSelectedDate] = useState(
+export default function useAccessLog(initialDate?: string) {
+  const [selectedDate, setSelectedDate] =
+  useState(
+    initialDate ??
     new Date().toISOString().split("T")[0]
   );
   const [logs, setLogs] = useState<AccessLog[]>([]);
@@ -34,22 +36,47 @@ export default function useAccessLog() {
 
   const itemsPerPage = 9;
 
-  const fetchLogs = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+  const cacheKey =
+  `access_logs_cache_${selectedDate}`;
 
-    setLoading(true);
+ const fetchLogs = async () => {
+
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  // ================= CACHE
+  const cached = localStorage.getItem(cacheKey);
+  // kalau ada cache -> tampilkan dulu
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setLogs(parsed.logs || []);
+    } else {
+      // loading hanya jika belum ada cache
+      setLoading(true);
+    }
     try {
       const res = await axios.get(
         `http://localhost:8000/api/access-logs?date=${selectedDate}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      setLogs(res.data || []);
+      const data = res.data || [];
+      setLogs(data);
+      // update cache
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          logs: data
+        })
+      );
     } catch (err) {
       console.log(err);
-      setLogs([]);
+      // hanya kosongkan jika memang tidak ada cache
+      if (!cached) {
+        setLogs([]);
+      }
     } finally {
       setLoading(false);
     }

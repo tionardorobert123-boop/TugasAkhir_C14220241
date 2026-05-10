@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { useTransactions } from "../hooks/useTransactions";
 import { useRoomControl } from "../hooks/useRoomControl";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import TransactionCard from "../components/Transactions/TransactionCard";
 import { RefreshCw } from "lucide-react";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedDate = location.state?.selectedDate;
 
   const role = localStorage.getItem("role");
   const isOwner = role === "owner";
 
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate] =
+    useState(
+      passedDate ??
+      new Date().toISOString().split("T")[0]
+    );
 
   const {
     activeRooms,
@@ -79,10 +83,18 @@ const handleRefresh = async () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full md:w-auto bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
+                max={new Date().toISOString().split("T")[0]}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
               />
               <button
-                onClick={() => navigate("/access-log")}
+              //passing parameter tanggal
+                onClick={() =>
+                  navigate("/access-log", {
+                    state: {
+                      selectedDate
+                    }
+                  })
+                }
                 className="flex-1 md:flex-none bg-yellow-500/20 border border-yellow-500/30 px-4 py-2 rounded-lg hover:bg-yellow-500/30"
               >
                 Log Akses
@@ -172,7 +184,7 @@ const handleRefresh = async () => {
 
         <tr>
 
-          <th className="px-4 py-3 font-semibold opacity-80">
+          <th className="sticky left-0 z-20 bg-[#2b1608] px-4 py-3 font-semibold opacity-80">
             Room
           </th>
 
@@ -226,7 +238,7 @@ const handleRefresh = async () => {
               className="border-t border-white/10 hover:bg-white/5"
             >
 
-              <td className="px-4 py-4">
+              <td className="sticky left-0 z-10 bg-[#1a0d05] px-4 py-4 whitespace-nowrap">
                 {trx.room_name ?? `Room ${trx.room_id}`}
               </td>
 
