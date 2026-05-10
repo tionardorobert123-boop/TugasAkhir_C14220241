@@ -86,6 +86,9 @@ class CheckDeviceStatus extends Command
                                     $device->status_online =
                                         false;
 
+                                        // SIMPAN DULU
+                                    $device->save();
+
                                     echo "DEVICE OFFLINE "
                                         . $device->device_id
                                         . PHP_EOL;

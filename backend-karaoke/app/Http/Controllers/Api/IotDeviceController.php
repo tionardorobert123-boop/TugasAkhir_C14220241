@@ -34,7 +34,7 @@ class IotDeviceController extends Controller
                 $request->status_online;
 
             $device->last_seen =
-                now();
+                $request->last_seen;
 
             $device->miss_count = 0;
 
