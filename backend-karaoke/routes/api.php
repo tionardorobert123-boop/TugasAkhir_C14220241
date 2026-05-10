@@ -7,10 +7,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccessLogController;
 use App\Http\Controllers\Api\RoomExtendController;
+use App\Http\Controllers\Api\IotDeviceController;
 
 Route::get('/logs', function () {
     return AccessLog::latest()->take(20)->get();
 });
+
+Route::post(
+    '/iot-sync',
+    [IotDeviceController::class, 'sync']
+);
 
 // ================= AUTH =================
 Route::post('/login', [AuthController::class, 'login']);

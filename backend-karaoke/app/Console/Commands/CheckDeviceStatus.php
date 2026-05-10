@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\IotDevice;
+use Illuminate\Support\Facades\Http;
 
 class CheckDeviceStatus extends Command
 {
@@ -41,7 +42,32 @@ class CheckDeviceStatus extends Command
                     $device->miss_count++;
 
                     if ($device->miss_count >= $maxMiss) {
-                        $device->status_online = false;
+
+                        if ($device->status_online !== false) {
+
+                            $device->status_online = false;
+
+                            Http::withHeaders([
+                                'X-GATEWAY-KEY' => 'karaoke-secret'
+                            ])->post(
+                                'https://tugasakhirc14220241.up.railway.app/api/iot-sync',
+                                [
+                                    'room_id' =>
+                                        $device->room_id,
+
+                                    'door_status' =>
+                                        $device->door_status,
+
+                                    'lock_status' =>
+                                        $device->lock_status,
+
+                                    'status_online' => false,
+
+                                    'last_seen' =>
+                                        $device->last_seen,
+                                ]
+                            );
+                        }
                     }
 
                     $device->save();

@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
 use App\Models\Room;
+use Illuminate\Support\Facades\Http;
 
 class MQTTListen extends Command
 {
@@ -51,6 +52,26 @@ class MQTTListen extends Command
                 $device->miss_count    = 0;
 
                 $device->save();
+
+               Http::withHeaders([
+                    'X-GATEWAY-KEY' => 'karaoke-secret'
+                ])->post(
+                    'https://tugasakhirc14220241.up.railway.app/api/iot-sync',
+                    [
+                        'room_id' =>
+                            $data['room_id'],
+
+                        'door_status' =>
+                            $data['door'] ?? 'unknown',
+
+                        'lock_status' =>
+                            $data['lock'] ?? 'unknown',
+
+                        'status_online' => true,
+
+                        'last_seen' => now(),
+                    ]
+                );
 
                 echo "MQTT UPDATE DEVICE {$data['room_id']}" . PHP_EOL;
 
