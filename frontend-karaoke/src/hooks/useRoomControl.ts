@@ -26,7 +26,7 @@ export function useRoomControl() {
   };
 
   const submitExtend = async (minutes: number) => {
-    if (!extendRoomId) return;
+    if (extendRoomId === null) return;
 
     await extendRoom(extendRoomId, minutes);
 
@@ -187,30 +187,34 @@ export function useRoomControl() {
   };
 
   // ================= EXTEND =================
-  const extendRoom = async (roomId: number, minutes: number) => {
-    try {
-      const res = await API.post(
-        `/rooms/${roomId}/extend`,
-        { minutes },
-        {
-          // headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const extendRoom = async (
+      roomId: number,
+      minutes: number
+    ) => {
 
-      setRooms((prev) =>
-        prev.map((room) =>
-          room.room_id === roomId
-            ? {
-                ...room,
-                end_time: res.data.new_end_time,
-              }
-            : room
-        )
-      );
-    } catch (err) {
-      console.log("extend error", err);
-    }
-  };
+      try {
+
+        const res = await API.post(
+          `/rooms/${roomId}/extend`,
+          {
+            minutes,
+            temp_id: crypto.randomUUID(),
+          }
+        );
+
+        console.log(res.data);
+
+            // refresh data
+         window.location.reload();
+
+      } catch (err) {
+
+        console.log(
+          "extend error",
+          err
+        );
+      }
+    };
 
   // ================= CLICK =================
   const handleClick = (room: any) => {

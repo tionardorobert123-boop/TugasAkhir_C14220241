@@ -143,7 +143,7 @@ export default function ExtendRoomModal({
 
               <button
                 onClick={() => {
-                  onSubmit(selectedMinutes); // 🔥 kirim ke backend
+                  onSubmit(selectedMinutes);
                   setShowConfirmExtend(false);
                   onClose();
                 }}
