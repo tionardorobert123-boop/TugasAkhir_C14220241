@@ -33,7 +33,7 @@ export default function TransactionsPage() {
   } = useRoomControl();
 
   const [page, setPage] = useState(1);
-  const perPage = 8;
+  const perPage = 4;
 const [refreshing, setRefreshing] = useState(false);
 
 const handleRefresh = async () => {

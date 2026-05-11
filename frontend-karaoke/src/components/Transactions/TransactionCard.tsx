@@ -90,11 +90,9 @@ function Content({
           </p>
 
           <p className="font-bold text-lg">
-            {trx.customer_name || "-"}
+            👤 {trx.customer_name || "-"}
           </p>
         </div>
-
-        <span className="opacity-40">🎵</span>
       </div>
 
       {/* INFO */}
@@ -102,12 +100,6 @@ function Content({
         {warning && (
           <p className="text-xs text-yellow-300">
             ⚠ Hampir habis (klik untuk tambah)
-          </p>
-        )}
-
-        {active && !warning && (
-          <p className="text-xs text-yellow-300">
-            klik untuk tambah durasi
           </p>
         )}
 

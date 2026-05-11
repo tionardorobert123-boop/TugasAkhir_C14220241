@@ -68,6 +68,7 @@ export default function RoomCard({
             <Settings className="w-4 h-4 text-gray-400" />
           </div>
         )}
+        
 
       </div>
     );
@@ -181,6 +182,13 @@ export default function RoomCard({
           <Settings className="w-4 h-4 text-gray-400" />
         </div>
       )}
+      {!isOwner && isActive && !warning && (
+        <div className="absolute top-3 right-3">
+          <p className="text-xs text-white">
+            ➕ Durasi
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -244,11 +252,6 @@ function Content({ room, timer, status, active, warning, offline }: any) {
             </p>
           )}
 
-          {active && !warning && (
-            <p className="text-xs text-white">
-              ➕ Durasi
-            </p>
-          )}
         </div>
       )}
 

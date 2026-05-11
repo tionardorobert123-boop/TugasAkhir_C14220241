@@ -80,8 +80,8 @@ function Dashboard() {
 
   return (
     <div className="
-      min-h-screen md:h-screen
-      overflow-auto md:overflow-hidden
+      min-h-screen
+      overflow-auto
       bg-gradient-to-b from-yellow-900 to-black text-white
       px-4 md:px-6 py-3
       relative
@@ -97,25 +97,8 @@ function Dashboard() {
       {!hasInternet && (
         <div
           className="
-            mb-6
-
-            flex items-center justify-center gap-3
-
-            bg-red-600/85
-            border border-red-400
-
-            backdrop-blur-md
-
-            px-6 py-3
-
-            rounded-2xl
-
-            shadow-lg shadow-red-900/40
-
-            w-fit
-            mx-auto
-          "
-        >
+            mb-6 flex items-center justify-center gap-3 bg-red-600/85 border border-red-400 backdrop-blur-md px-6 py-3
+            rounded-2xl shadow-lg shadow-red-900/40  w-fit  mx-auto">
           {/* STATUS DOT */}
           <div className="relative flex items-center justify-center">
             <div className="w-3 h-3 rounded-full bg-white animate-ping absolute" />
@@ -155,27 +138,11 @@ function Dashboard() {
       </div>
 
       {/* ================= MOBILE HEADER ================= */}
-      <div className="md:hidden text-center mb-4">
+      <div className="md:hidden sticky top-0 z-40 text-center pt-2 pb-3 backdrop-blur-md">
         {/* OFFLINE MOBILE */}
       {!hasInternet && (
-        <div
-          className="
-            mb-3
-
-            flex items-center justify-center gap-2
-
-            bg-red-600/90
-            border border-red-400
-
-            px-3 py-2
-
-            rounded-xl
-
-            shadow-lg shadow-red-900/40
-          "
-        >
+        <div className=" mb-3 flex items-center justify-center gap-2 bg-red-600/90 border border-red-400 px-3 py-2 rounded-xl shadow-lg shadow-red-900/40 " >
           <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-
           <p className="text-[11px] font-semibold">
             MODE OFFLINE LOKAL
           </p>
@@ -192,12 +159,10 @@ function Dashboard() {
 
       {/* ================= ROOM GRID ================= */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-6 relative z-10">
-
         {/* LEFT */}
         <div className="flex flex-col gap-3 md:gap-4">
           {[5,4,3,2,1].map(renderRoom)}
         </div>
-
         {/* CENTER (DESKTOP ONLY) */}
         <div className="hidden md:flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-4">
@@ -217,9 +182,8 @@ function Dashboard() {
       {/*MOBILE VERSION*/}
       <div className="
         md:hidden
-        fixed bottom-4 left-1/2 -translate-x-1/2 z-20
         flex flex-col gap-3 items-center
-      ">
+        mt-8 mb-6">
         <button
           onClick={logout}
           className="bg-gray-800/80 px-5 py-2 rounded-xl text-sm"
