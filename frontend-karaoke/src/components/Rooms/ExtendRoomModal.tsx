@@ -36,10 +36,9 @@ export default function ExtendRoomModal({
     { label: "+4 Jam", value: 240 },
   ];
 
-  // 🔥 FIX UTAMA (ANTI NaN)
   const safePrice = price ?? 0;
 
-  // 🔥 HITUNG TAMBAHAN SAJA
+  // HITUNG TAMBAHAN
   const hours = selectedMinutes / 60;
   const additionalTotal = hours * safePrice;
 
