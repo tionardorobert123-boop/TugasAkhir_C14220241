@@ -138,7 +138,7 @@ function Dashboard() {
       </div>
 
       {/* ================= MOBILE HEADER ================= */}
-      <div className="md:hidden sticky top-0 z-40 text-center pt-2 pb-3 backdrop-blur-md">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 text-center pt-2 pb-3 backdrop-blur-md">
         {/* OFFLINE MOBILE */}
       {!hasInternet && (
         <div className=" mb-3 flex items-center justify-center gap-2 bg-red-600/90 border border-red-400 px-3 py-2 rounded-xl shadow-lg shadow-red-900/40 " >
@@ -176,8 +176,6 @@ function Dashboard() {
         </div>
 
       </div>
-
-      {/* ================= FLOATING BUTTON ================= */}
 
       {/*MOBILE VERSION*/}
       <div className="

@@ -127,6 +127,13 @@ export default function RoomCard({
             <Settings className="w-4 h-4 text-gray-400" />
           </div>
         )}
+        {!isOwner && (
+          <div className="absolute top-3 right-3">
+            <p className="text-xs font-bold text-white">
+              ➕ Durasi
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -156,6 +163,13 @@ export default function RoomCard({
             <Settings className="w-4 h-4 text-gray-400" />
           </div>
         )}
+        {!isOwner && (
+          <div className="absolute top-3 right-3">
+            <p className="text-xs font-bold text-white">
+              ➕ Durasi
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -180,13 +194,6 @@ export default function RoomCard({
       {isOwner && (
         <div className="absolute top-3 right-3">
           <Settings className="w-4 h-4 text-gray-400" />
-        </div>
-      )}
-      {!isOwner && isActive && !warning && (
-        <div className="absolute top-3 right-3">
-          <p className="text-xs text-white">
-            ➕ Durasi
-          </p>
         </div>
       )}
     </div>
