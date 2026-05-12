@@ -7,7 +7,7 @@ import { useRoomControl } from "../hooks/useRoomControl";
 import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.png";
-import { closeRoom } from "../services/roomService";
+import { saveRoomClose } from "../lib/offline/saveRoomClose";
 import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 
 function Dashboard() {
@@ -289,7 +289,11 @@ function Dashboard() {
         total={total}
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
-        onCloseRoom={closeRoom}
+        onCloseRoom={(roomId) =>
+          saveRoomClose({
+            room_id: roomId
+          })
+        }
       />
 
       <RoomSettingModal
