@@ -6,6 +6,7 @@ type Props = {
   total: number;
   onClose: () => void;
   onConfirm: () => void;
+  room: any;
 };
 
 export default function ConfirmModal({
@@ -16,7 +17,11 @@ export default function ConfirmModal({
   total,
   onClose,
   onConfirm,
+  room
 }: Props) {
+
+  const isOffline = !room.status_online;
+
   if (!show) return null;
 
   const rupiah = (n: number) => n.toLocaleString("id-ID");
@@ -42,6 +47,23 @@ export default function ConfirmModal({
           <p><span className="text-white/60">Room:</span> <b>{selectedRoom}</b></p>
           <p><span className="text-white/60">Customer:</span> <b>{customerName || "-"}</b></p>
           <p><span className="text-white/60">Durasi:</span> <b>{formatDurasi(duration)}</b></p>
+          {isOffline && (
+            <div className="mt-3 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3">
+              
+              <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse mt-1" />
+
+              <div>
+                <p className="text-sm font-semibold text-red-400">
+                  Device Offline
+                </p>
+
+                <p className="text-xs text-white/70 mt-1">
+                  Apakah tetap ingin membuka Room {selectedRoom}?
+                </p>
+              </div>
+
+            </div>
+          )}
         </div>
 
         <div className="bg-black/30 rounded-xl p-3 mb-5 text-center">

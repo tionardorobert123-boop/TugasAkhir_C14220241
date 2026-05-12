@@ -158,24 +158,50 @@ function Dashboard() {
       </div>
 
       {/* ================= ROOM GRID ================= */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-6 relative z-10">
+
+    <>
+      {/* MOBILE */}
+      <div className="grid grid-cols-2 gap-3 md:hidden relative z-10">
+
+        {/* TOP */}
+        {renderRoom(11)}
+        {renderRoom(12)}
+        {/* LEFT - RIGHT */}
+        {renderRoom(5)}
+        {renderRoom(10)}
+        {renderRoom(4)}
+        {renderRoom(9)}
+        {renderRoom(3)}
+        {renderRoom(8)}
+        {renderRoom(2)}
+        {renderRoom(7)}
+        {renderRoom(1)}
+        {renderRoom(6)}
+
+      </div>
+
+      {/* DESKTOP */}
+      <div className="hidden md:grid md:grid-cols-3 gap-6 relative z-10">
+
         {/* LEFT */}
-        <div className="flex flex-col gap-3 md:gap-4">
+        <div className="flex flex-col gap-4">
           {[5,4,3,2,1].map(renderRoom)}
         </div>
-        {/* CENTER (DESKTOP ONLY) */}
-        <div className="hidden md:flex flex-col justify-between">
+
+        {/* CENTER */}
+        <div className="flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-4">
             {[11,12].map(renderRoom)}
           </div>
         </div>
 
         {/* RIGHT */}
-        <div className="flex flex-col gap-3 md:gap-4">
+        <div className="flex flex-col gap-4">
           {[10,9,8,7,6].map(renderRoom)}
         </div>
 
       </div>
+    </>
 
       {/*MOBILE VERSION*/}
       <div className="
@@ -203,7 +229,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 🔥 DESKTOP VERSION */}
+      {/* DESKTOP VERSION */}
       <div className="
         hidden md:flex
         absolute bottom-8 left-1/2 -translate-x-1/2 z-20

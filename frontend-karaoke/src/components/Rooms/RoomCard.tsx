@@ -223,7 +223,7 @@ function Content({ room, timer, status, active, warning, offline }: any) {
               <p className="text-xs text-red-400 font-medium">
                 Device Offline (Periksa Device)
               </p>
-            </>
+            </> 
           ) : (
             <>
               <div
@@ -240,7 +240,6 @@ function Content({ room, timer, status, active, warning, offline }: any) {
               </p>
             </>
           )}
-
         </div>
       </div>
         <div className="min-h-[40px]">
