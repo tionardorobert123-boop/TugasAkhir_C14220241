@@ -12,10 +12,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    // 🔥 custom primary key
+    //custom primary key
     protected $primaryKey = 'user_id';
 
-    // 🔥 kolom yang boleh diisi
+    //kolom yang boleh diisi
     protected $fillable = [
         'user_name',
         'user_email',
@@ -23,7 +23,7 @@ class User extends Authenticatable
         'user_role'
     ];
 
-    // 🔒 hidden field
+    //hidden field
     protected $hidden = [
         'user_password',
         'remember_token',

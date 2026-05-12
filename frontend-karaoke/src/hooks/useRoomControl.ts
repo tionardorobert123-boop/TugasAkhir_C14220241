@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import { saveRoomOpen } from "../lib/offline/saveRoomOpen";
+import { saveRoomExtend } from "../lib/offline/saveRoomExtend";
+import { saveRoomClose } from "../lib/offline/saveRoomClose";
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -97,13 +100,10 @@ export function useRoomControl() {
           const nowTime = new Date().getTime();
 
           if (nowTime >= end && !room._closing) {
-            API.post(
-              `/rooms/${room.room_id}/close`,
-              {},
-              {
-                // headers: { Authorization: `Bearer ${token}` },
-              }
-            );
+
+            saveRoomClose({
+              room_id: room.room_id
+            });
 
             return {
               ...room,
@@ -149,72 +149,54 @@ export function useRoomControl() {
   };
 
   // ================= OPEN ROOM =================
-  const startRoom = async () => {
-    if (!selectedRoom) return;
+      const startRoom = async () => {
 
-    try {
-      const res = await API.post(
-        `/rooms/${selectedRoom}/open`,
-        {
-          duration,
-          customer_name: customerName,
-        },
-        {
-          // headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setRooms((prev) =>
-        prev.map((room) =>
-          room.room_id === selectedRoom
-            ? {
-                ...room,
-                status: "occupied",
-                end_time: res.data.end_time,
-                customer_name: customerName,
-                _closing: false,
-              }
-            : room
-        )
-      );
-
-      setShowConfirm(false);
-      setShowModal(false);
-      resetForm();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // ================= EXTEND =================
-      const extendRoom = async (
-      roomId: number,
-      minutes: number
-    ) => {
+      if (!selectedRoom) return;
 
       try {
 
-        const res = await API.post(
-          `/rooms/${roomId}/extend`,
-          {
-            minutes,
-            temp_id: crypto.randomUUID(),
-          }
-        );
+        await saveRoomOpen({
+          room_id: selectedRoom,
+          customer_name: customerName,
+          duration,
+        });
 
-        console.log(res.data);
+        window.location.reload();
 
-            // refresh data
-         window.location.reload();
+        setShowConfirm(false);
+        setShowModal(false);
+
+        resetForm();
 
       } catch (err) {
 
-        console.log(
-          "extend error",
-          err
-        );
+        console.log(err);
       }
     };
+
+  // ================= EXTEND =================
+        const extendRoom = async (
+        roomId: number,
+        minutes: number
+      ) => {
+
+        try {
+
+          await saveRoomExtend({
+            room_id: roomId,
+            minutes,
+          });
+
+          window.location.reload();
+
+        } catch (err) {
+
+          console.log(
+            "extend error",
+            err
+          );
+        }
+      };
 
   // ================= CLICK =================
   const handleClick = (room: any) => {

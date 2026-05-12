@@ -1,14 +1,27 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "https://tugasakhirc14220241.up.railway.app/api",
-  // baseURL: "http://localhost:8000/api"
-});
+const LOCAL_API =
+  "http://localhost:8000/api";
+
+const CLOUD_API =
+  "https://tugasakhirc14220241.up.railway.app/api";
+
+const API = axios.create();
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+
+  // SWITCH API
+  config.baseURL =
+    navigator.onLine
+      ? CLOUD_API
+      : LOCAL_API;
+
+  // TOKEN
+  const token =
+    localStorage.getItem("token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization =
+      `Bearer ${token}`;
   }
   return config;
 });

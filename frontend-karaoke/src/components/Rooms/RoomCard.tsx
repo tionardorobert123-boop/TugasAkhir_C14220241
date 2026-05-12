@@ -82,7 +82,7 @@ export default function RoomCard({
         className={`${base}
           bg-gradient-to-br from-white/10 to-black/50
           border-red-500/40
-          ${isOwner ? "cursor-pointer" : "cursor-not-allowed"}
+            cursor-pointer
           relative
         `}
       >
@@ -219,8 +219,8 @@ function Content({ room, timer, status, active, warning, offline }: any) {
 
           {offline ? (
             <>
-              <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-              <p className="text-s text-red-400 font-medium">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <p className="text-xs text-red-400 font-medium">
                 Device Offline (Periksa Device)
               </p>
             </>
@@ -243,36 +243,26 @@ function Content({ room, timer, status, active, warning, offline }: any) {
 
         </div>
       </div>
-
-      {/* CUSTOMER */}
-      {!offline && (
         <div className="min-h-[40px]">
           {room.customer_name && (
             <p className="text-sm truncate">
               👤 {room.customer_name}
             </p>
           )}
-
           {warning && (
             <p className="text-xs text-yellow-300">
               ⚠ Hampir habis
             </p>
           )}
-
         </div>
-      )}
-
       {/* FOOTER */}
-      {!offline && (
         <div className="flex justify-between items-center">
           <p className="text-sm font-mono opacity-80">
             ⏱ {timer ?? "-"}
           </p>
         </div>
-      )}
 
       {/* ICON */}
-      {!offline && (
         <div className="absolute bottom-3 right-3 flex gap-2 opacity-80">
 
           {lock === "locked" ? (
@@ -288,7 +278,6 @@ function Content({ room, timer, status, active, warning, offline }: any) {
           )}
 
         </div>
-      )}
     </>
   );
 }
