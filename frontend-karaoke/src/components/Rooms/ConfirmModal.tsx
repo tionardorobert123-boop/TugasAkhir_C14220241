@@ -6,7 +6,7 @@ type Props = {
   total: number;
   onClose: () => void;
   onConfirm: () => void;
-  room: any;
+  isOffline?: boolean;
 };
 
 export default function ConfirmModal({
@@ -17,10 +17,9 @@ export default function ConfirmModal({
   total,
   onClose,
   onConfirm,
-  room
+  isOffline,
 }: Props) {
 
-  const isOffline = !room.status_online;
 
   if (!show) return null;
 
