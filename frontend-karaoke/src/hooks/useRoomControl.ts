@@ -63,87 +63,44 @@ export function useRoomControl() {
 
       if (!token) return;
 
-      let isFetching = false;
-
       const fetchRooms = async () => {
 
-        // ================= PREVENT OVERLAP
-        if (isFetching) return;
+        // ONLINE
+        if (navigator.onLine) {
+          try {
 
-        isFetching = true;
+            const res = await API.get('/rooms')
 
-        try {
+            setRooms(res.data)
 
-          // ================= ONLINE
-          if (navigator.onLine) {
+            await db.rooms.clear()
 
-            try {
+            await db.rooms.bulkPut(res.data)
 
-              const res =
-                await API.get('/rooms');
+            return
 
-              const roomsData =
-                res.data || [];
+          } catch (err) {
 
-              // UPDATE UI
-              setRooms(roomsData);
-
-              // SAVE CACHE DEXIE
-              await db.rooms.clear();
-
-              await db.rooms.bulkPut(
-                roomsData
-              );
-
-              console.log(
-                '☁️ ROOMS FROM CLOUD'
-              );
-
-              return;
-
-            } catch (err) {
-
-              console.log(
-                'CLOUD FETCH FAILED',
-                err
-              );
-            }
+            console.log(err)
           }
-
-          // ================= OFFLINE
-          const offlineRooms =
-            await db.rooms.toArray();
-
-          console.log(
-            '💻 ROOMS FROM DEXIE'
-          );
-
-          setRooms(offlineRooms);
-
-        } catch (err) {
-
-          console.log(
-            'FETCH ROOMS ERROR',
-            err
-          );
-
-        } finally {
-
-          isFetching = false;
         }
-      };
 
-      // INITIAL LOAD
-      fetchRooms();
+        // OFFLINE
+        const offlineRooms =
+          await db.rooms.toArray()
 
-      // AUTO REFRESH
+        setRooms(offlineRooms)
+      }
+
+      fetchRooms()
+
       const interval = setInterval(() => {
-        fetchRooms();
-      }, 7000);
+        fetchRooms()
+      }, 7000)
 
-      return () => clearInterval(interval);
+      return () => clearInterval(interval)
 
-    }, [token]);
+    }, [token])
 // ================= AUTO CLOSE =================
     useEffect(() => {
 

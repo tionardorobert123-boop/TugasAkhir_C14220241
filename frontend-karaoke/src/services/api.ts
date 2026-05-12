@@ -12,78 +12,76 @@ const API = axios.create({
 
 let currentMode = "";
 
-// ================= CHECK CLOUD
-async function getAvailableAPI() {
+// ================= REAL INTERNET CHECK
+export async function hasInternet() {
 
   try {
 
-    await axios.get(
-      `${CLOUD_API}/ping`,
+    await fetch(
+      "https://clients3.google.com/generate_204",
       {
-        timeout: 2000
+        mode: "no-cors",
       }
     );
 
-    if (currentMode !== "cloud") {
-
-      console.log(
-        "☁️ Switch to CLOUD API"
-      );
-
-      currentMode = "cloud";
-    }
-
-    return CLOUD_API;
+    return true;
 
   } catch {
 
-    if (currentMode !== "local") {
+    return false;
+  }
+}
 
-      console.log(
-        "💻 Switch to LOCAL API"
+// ================= API SWITCH
+async function getAvailableAPI() {
+
+  const internet =
+    await hasInternet();
+
+  // ================= CLOUD
+  if (internet) {
+
+    try {
+
+      await axios.get(
+        `${CLOUD_API}/ping`,
+        { timeout: 2000 }
       );
 
-      currentMode = "local";
-    }
+      if (currentMode !== "cloud") {
 
-    return LOCAL_API;
+        console.log(
+          "☁️ CLOUD API"
+        );
+
+        currentMode = "cloud";
+      }
+
+      return CLOUD_API;
+
+    } catch {}
   }
+
+  // ================= LOCAL
+  if (currentMode !== "local") {
+
+    console.log(
+      "📡 LOCAL MQTT API"
+    );
+
+    currentMode = "local";
+  }
+
+  return LOCAL_API;
 }
 
 // ================= INTERCEPTOR
 API.interceptors.request.use(
   async (config) => {
 
-    const url =
-      config.url || "";
+    config.baseURL =
+      await getAvailableAPI();
 
-    // =================
-    // IOT LOCAL ONLY
-    // =================
-
-    const isLocalIOT =
-      url.includes("/local/rooms");
-
-    if (isLocalIOT) {
-
-      config.baseURL =
-        LOCAL_API;
-
-      console.log(
-        "📡 LOCAL MQTT API"
-      );
-
-    } else {
-
-      // =================
-      // AUTO SWITCH
-      // =================
-
-      config.baseURL =
-        await getAvailableAPI();
-    }
-
-    // ================= TOKEN
     const token =
       localStorage.getItem("token");
 

@@ -1,13 +1,16 @@
 import axios from 'axios'
 
 import { db } from '../db'
+import { hasInternet } from '../../services/api'
 
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
 export async function syncRoomActions() {
 
-  if (!navigator.onLine) return
+  const internet = await hasInternet()
+
+  if (!internet) return
 
   const unsynced =
     await db.room_actions
