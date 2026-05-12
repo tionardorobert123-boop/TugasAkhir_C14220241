@@ -38,7 +38,7 @@ export default function RoomCard({
     }
 
     //KASIR
-    if (isDisabled || isOffline) return;
+    if (isDisabled) return;
 
     if ((isActive || warning) && onExtend) {
       onExtend();
