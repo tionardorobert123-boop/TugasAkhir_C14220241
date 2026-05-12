@@ -18,6 +18,12 @@ Route::post(
     [IotDeviceController::class, 'sync']
 );
 
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'ok'
+    ]);
+});
+
 // ================= AUTH =================
 Route::post('/login', [AuthController::class, 'login']);
 
