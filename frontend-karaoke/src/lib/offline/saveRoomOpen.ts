@@ -11,7 +11,9 @@ interface Payload {
 export async function saveRoomOpen(
   data: Payload
 ) {
+
   const payload = {
+
     temp_id: uuidv4(),
 
     room_id: data.room_id,
@@ -27,40 +29,39 @@ export async function saveRoomOpen(
     sync_status: 0
   }
 
-  // ================= ONLINE
-  
-  if (navigator.onLine) {
+  try {
 
-    try {
+    // API otomatis:
+    // cloud atau local
+    await API.post(
+      `/rooms/${data.room_id}/open`,
+      {
+        customer_name: data.customer_name,
+        duration: data.duration,
+        temp_id: payload.temp_id
+      }
+    )
 
-      await API.post(
-        `/rooms/${data.room_id}/open`,
-        {
-          customer_name: data.customer_name,
-          duration: data.duration,
-          temp_id: payload.temp_id
-        }
-      )
+    await db.room_actions.add({
+      ...payload,
+      sync_status: navigator.onLine ? 1 : 0
+    })
 
-      await db.room_actions.add({
-        ...payload,
-        sync_status: 1
-      })
+    console.log(
+      navigator.onLine
+        ? 'ROOM OPEN CLOUD'
+        : 'ROOM OPEN LOCAL'
+    )
 
-      console.log('ROOM OPEN ONLINE')
+  } catch (err) {
 
-      return
+    console.log(err)
 
-    } catch (err) {
+    // fallback save queue
+    await db.room_actions.add(payload)
 
-      console.log(err)
-
-      console.log('ROOM OPEN OFFLINE')
-    }
+    console.log(
+      'ROOM OPEN SAVED OFFLINE'
+    )
   }
-
-  // ================= OFFLINE
-  await db.room_actions.add(payload)
-
-  console.log('ROOM OPEN SAVED OFFLINE')
 }

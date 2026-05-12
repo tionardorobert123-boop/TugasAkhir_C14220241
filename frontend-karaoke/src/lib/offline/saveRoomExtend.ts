@@ -10,7 +10,9 @@ interface Payload {
 export async function saveRoomExtend(
   data: Payload
 ) {
+
   const payload = {
+
     temp_id: uuidv4(),
 
     room_id: data.room_id,
@@ -24,26 +26,42 @@ export async function saveRoomExtend(
     sync_status: 0
   }
 
-  // ONLINE
-  if (navigator.onLine) {
-    try {
-      await API.post(
-        `/rooms/${data.room_id}/extend`,
-        {
-          minutes: data.minutes,
-          temp_id: payload.temp_id
-        }
-      )
+  try {
 
-      await db.room_actions.add({
-        ...payload,
-        sync_status: 1
-      })
+    // AUTO:
+    // cloud atau local
+    await API.post(
+      `/rooms/${data.room_id}/extend`,
+      {
+        minutes: data.minutes,
+        temp_id: payload.temp_id
+      }
+    )
 
-      return
-    } catch (err) {}
+    await db.room_actions.add({
+      ...payload,
+
+      sync_status:
+        navigator.onLine ? 1 : 0
+    })
+
+    console.log(
+      navigator.onLine
+        ? 'ROOM EXTEND CLOUD'
+        : 'ROOM EXTEND LOCAL'
+    )
+
+  } catch (err) {
+
+    console.log(err)
+
+    // fallback queue
+    await db.room_actions.add(
+      payload
+    )
+
+    console.log(
+      'ROOM EXTEND SAVED OFFLINE'
+    )
   }
-
-  // OFFLINE
-  await db.room_actions.add(payload)
 }
