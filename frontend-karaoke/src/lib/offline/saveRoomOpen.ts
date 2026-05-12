@@ -28,18 +28,15 @@ export async function saveRoomOpen(
 
     created_at: new Date().toISOString(),
 
+    // ALWAYS UNSYNC
     sync_status: 0
   }
 
   try {
 
-    // ================= ENDPOINT
-    const endpoint =
-  `/local/rooms/${data.room_id}/open`
-
-    // ================= API
+    // ================= LOCAL MQTT
     await API.post(
-      endpoint,
+      `/local/rooms/${data.room_id}/open`,
       {
         customer_name:
           data.customer_name,
@@ -52,14 +49,13 @@ export async function saveRoomOpen(
       }
     )
 
-    // ================= END TIME
+    // ================= LOCAL UI UPDATE
     const endTime =
       new Date(
         Date.now() +
         data.duration * 60000
       ).toISOString()
 
-    // ================= UPDATE DEXIE ROOM
     await db.rooms.update(
       data.room_id,
       {
@@ -72,19 +68,13 @@ export async function saveRoomOpen(
       }
     )
 
-    // ================= SAVE ACTION
-    await db.room_actions.add({
-
-      ...payload,
-
-      sync_status:
-        navigator.onLine ? 1 : 0
-    })
+    // ================= SAVE QUEUE
+    await db.room_actions.add(
+      payload
+    )
 
     console.log(
-      navigator.onLine
-        ? '☁️ ROOM OPEN CLOUD'
-        : '💻 ROOM OPEN LOCAL'
+      '📡 ROOM OPEN LOCAL MQTT'
     )
 
   } catch (err) {
@@ -94,12 +84,12 @@ export async function saveRoomOpen(
       err
     )
 
-    // ================= SAVE OFFLINE QUEUE
+    // ================= SAVE OFFLINE
     await db.room_actions.add(
       payload
     )
 
-    // ================= UPDATE ROOM LOCAL
+    // ================= UPDATE ROOM
     const endTime =
       new Date(
         Date.now() +

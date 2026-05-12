@@ -7,10 +7,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\RoomExtendLog;
 use Carbon\Carbon;
-use App\Services\MQTTService;
 use App\Models\AccessLog;
-use Illuminate\Support\Facades\Log;
-
 class RoomExtendController extends Controller
 {
 

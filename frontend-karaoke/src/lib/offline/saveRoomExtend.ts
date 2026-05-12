@@ -25,18 +25,15 @@ export async function saveRoomExtend(
 
     created_at: new Date().toISOString(),
 
+    // ALWAYS UNSYNC
     sync_status: 0
   }
 
   try {
 
-    // ================= ENDPOINT
-    const endpoint =
-  `/local/rooms/${data.room_id}/extend`
-
-    // ================= API
+    // ================= LOCAL MQTT
     await API.post(
-      endpoint,
+      `/local/rooms/${data.room_id}/extend`,
       {
         minutes: data.minutes,
 
@@ -69,19 +66,13 @@ export async function saveRoomExtend(
       )
     }
 
-    // ================= SAVE ACTION
-    await db.room_actions.add({
-
-      ...payload,
-
-      sync_status:
-        navigator.onLine ? 1 : 0
-    })
+    // ================= SAVE QUEUE
+    await db.room_actions.add(
+      payload
+    )
 
     console.log(
-      navigator.onLine
-        ? '☁️ ROOM EXTEND CLOUD'
-        : '💻 ROOM EXTEND LOCAL'
+      '📡 ROOM EXTEND LOCAL MQTT'
     )
 
   } catch (err) {
@@ -91,12 +82,12 @@ export async function saveRoomExtend(
       err
     )
 
-    // ================= SAVE OFFLINE QUEUE
+    // ================= SAVE OFFLINE
     await db.room_actions.add(
       payload
     )
 
-    // ================= UPDATE LOCAL ROOM
+    // ================= UPDATE ROOM LOCAL
     const room =
       await db.rooms.get(
         data.room_id

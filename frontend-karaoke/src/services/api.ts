@@ -12,13 +12,16 @@ const API = axios.create({
 
 let currentMode = "";
 
+// ================= CHECK CLOUD
 async function getAvailableAPI() {
 
   try {
 
     await axios.get(
       `${CLOUD_API}/ping`,
-      { timeout: 2000 }
+      {
+        timeout: 2000
+      }
     );
 
     if (currentMode !== "cloud") {
@@ -47,16 +50,45 @@ async function getAvailableAPI() {
   }
 }
 
+// ================= INTERCEPTOR
 API.interceptors.request.use(
   async (config) => {
 
-    config.baseURL =
-      await getAvailableAPI();
+    const url =
+      config.url || "";
 
+    // =================
+    // IOT LOCAL ONLY
+    // =================
+
+    const isLocalIOT =
+      url.includes("/local/rooms");
+
+    if (isLocalIOT) {
+
+      config.baseURL =
+        LOCAL_API;
+
+      console.log(
+        "📡 LOCAL MQTT API"
+      );
+
+    } else {
+
+      // =================
+      // AUTO SWITCH
+      // =================
+
+      config.baseURL =
+        await getAvailableAPI();
+    }
+
+    // ================= TOKEN
     const token =
       localStorage.getItem("token");
 
     if (token) {
+
       config.headers.Authorization =
         `Bearer ${token}`;
     }

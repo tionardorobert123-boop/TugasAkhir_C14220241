@@ -22,24 +22,21 @@ export async function saveRoomClose(
 
     created_at: new Date().toISOString(),
 
+    // ALWAYS UNSYNC
     sync_status: 0
   }
 
   try {
 
-    // ================= ENDPOINT
-   const endpoint =
-  `/local/rooms/${data.room_id}/close`
-
-    // ================= API
+    // ================= LOCAL MQTT
     await API.post(
-      endpoint,
+      `/local/rooms/${data.room_id}/close`,
       {
         temp_id: payload.temp_id
       }
     )
 
-    // ================= UPDATE DEXIE ROOM
+    // ================= UPDATE ROOM
     await db.rooms.update(
       data.room_id,
       {
@@ -51,19 +48,13 @@ export async function saveRoomClose(
       }
     )
 
-    // ================= SAVE ACTION
-    await db.room_actions.add({
-
-      ...payload,
-
-      sync_status:
-        navigator.onLine ? 1 : 0
-    })
+    // ================= SAVE QUEUE
+    await db.room_actions.add(
+      payload
+    )
 
     console.log(
-      navigator.onLine
-        ? '☁️ ROOM CLOSE CLOUD'
-        : '💻 ROOM CLOSE LOCAL'
+      '📡 ROOM CLOSE LOCAL MQTT'
     )
 
   } catch (err) {
@@ -73,7 +64,7 @@ export async function saveRoomClose(
       err
     )
 
-    // ================= SAVE OFFLINE QUEUE
+    // ================= SAVE OFFLINE
     await db.room_actions.add(
       payload
     )
