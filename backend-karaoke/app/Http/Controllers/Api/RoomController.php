@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Services\MQTTService;
 use App\Models\Room;
 use App\Models\AccessLog;
-use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
@@ -147,28 +145,6 @@ class RoomController extends Controller
             'timestamp' => $start,
         ]);
 
-        // MQTT
-        try {
-
-            $mqtt = new MQTTService();
-
-            $mqtt->publish(
-                "room/$id/control",
-                json_encode([
-                    "room_id" => $id,
-                    "action" => "open",
-                    "duration" => $minutes
-                ])
-            );
-
-        } catch (\Throwable $e) {
-
-            Log::error(
-                'MQTT ERROR: ' .
-                $e->getMessage()
-            );
-        }
-
         return response()->json([
             "message" => "Room started",
             "end_time" => $end
@@ -230,26 +206,6 @@ class RoomController extends Controller
             'timestamp' => now(),
         ]);
 
-        // MQTT
-        try {
-
-            $mqtt = new MQTTService();
-
-            $mqtt->publish(
-                "room/$id/control",
-                json_encode([
-                    "room_id" => $id,
-                    "action" => "close"
-                ])
-            );
-
-        } catch (\Throwable $e) {
-
-            Log::error(
-                'MQTT ERROR: ' .
-                $e->getMessage()
-            );
-        }
 
         return response()->json([
             "message" => "Room closed"

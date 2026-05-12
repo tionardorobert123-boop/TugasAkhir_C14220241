@@ -162,53 +162,6 @@ class MQTTListen extends Command
                                 echo "CLOUD ERROR: "
                                     . $e->getMessage()
                                     . PHP_EOL;
-
-                                // =================
-                                // SAVE LOCAL QUEUE
-                                // =================
-
-                                $queuePath = storage_path(
-                                    'app/iot_queue.json'
-                                );
-
-                                $queue = [];
-
-                                if (file_exists($queuePath)) {
-
-                                    $queue = json_decode(
-                                        file_get_contents($queuePath),
-                                        true
-                                    ) ?? [];
-                                }
-
-                                $queue[] = [
-
-                                    'room_id' =>
-                                        $data['room_id'],
-
-                                    'door_status' =>
-                                        $data['door']
-                                        ?? 'unknown',
-
-                                    'lock_status' =>
-                                        $data['lock']
-                                        ?? 'unknown',
-
-                                    'status_online' => true,
-
-                                    'last_seen' => now(),
-                                ];
-
-                                file_put_contents(
-                                    $queuePath,
-                                    json_encode(
-                                        $queue,
-                                        JSON_PRETTY_PRINT
-                                    )
-                                );
-
-                                echo "QUEUE SAVED"
-                                    . PHP_EOL;
                             }
                         } catch (\Throwable $e) {
 

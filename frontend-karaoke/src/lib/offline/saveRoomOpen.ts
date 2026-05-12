@@ -35,9 +35,7 @@ export async function saveRoomOpen(
 
     // ================= ENDPOINT
     const endpoint =
-      navigator.onLine
-        ? `/rooms/${data.room_id}/open`
-        : `/local/rooms/${data.room_id}/open`
+  `/local/rooms/${data.room_id}/open`
 
     // ================= API
     await API.post(

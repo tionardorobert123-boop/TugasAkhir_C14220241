@@ -93,28 +93,6 @@ class RoomExtendController extends Controller
             'timestamp' => now(),
         ]);
 
-        // MQTT
-        try {
-
-            $mqtt = new MQTTService();
-
-            $mqtt->publish(
-                "room/$id/control",
-                json_encode([
-                    "room_id" => $id,
-                    "action" => "extend",
-                    "duration" => $minutes
-                ])
-            );
-
-        } catch (\Throwable $e) {
-
-            Log::error(
-                'MQTT ERROR: ' .
-                $e->getMessage()
-            );
-        }
-
         return response()->json([
             "message" => "Room extended",
             "new_end_time" => $newEnd,

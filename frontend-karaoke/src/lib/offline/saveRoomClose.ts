@@ -28,10 +28,8 @@ export async function saveRoomClose(
   try {
 
     // ================= ENDPOINT
-    const endpoint =
-      navigator.onLine
-        ? `/rooms/${data.room_id}/close`
-        : `/local/rooms/${data.room_id}/close`
+   const endpoint =
+  `/local/rooms/${data.room_id}/close`
 
     // ================= API
     await API.post(

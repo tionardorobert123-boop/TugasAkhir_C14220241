@@ -32,9 +32,7 @@ export async function saveRoomExtend(
 
     // ================= ENDPOINT
     const endpoint =
-      navigator.onLine
-        ? `/rooms/${data.room_id}/extend`
-        : `/local/rooms/${data.room_id}/extend`
+  `/local/rooms/${data.room_id}/extend`
 
     // ================= API
     await API.post(
