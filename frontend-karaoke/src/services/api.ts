@@ -10,39 +10,49 @@ const API = axios.create({
   timeout: 5000,
 });
 
-// DETECT API
+let currentMode = "";
+
 async function getAvailableAPI() {
 
   try {
 
     await axios.get(
       `${CLOUD_API}/ping`,
-      {
-        timeout: 2000,
-      }
+      { timeout: 2000 }
     );
+
+    if (currentMode !== "cloud") {
+
+      console.log(
+        "☁️ Switch to CLOUD API"
+      );
+
+      currentMode = "cloud";
+    }
 
     return CLOUD_API;
 
-  } catch (error) {
+  } catch {
 
-    console.log(
-      "Cloud unavailable, switch local API"
-    );
+    if (currentMode !== "local") {
+
+      console.log(
+        "💻 Switch to LOCAL API"
+      );
+
+      currentMode = "local";
+    }
 
     return LOCAL_API;
   }
 }
 
-// INTERCEPTOR
 API.interceptors.request.use(
   async (config) => {
 
-    // AUTO SWITCH
     config.baseURL =
       await getAvailableAPI();
 
-    // TOKEN
     const token =
       localStorage.getItem("token");
 
@@ -52,8 +62,7 @@ API.interceptors.request.use(
     }
 
     return config;
-  },
-  (error) => Promise.reject(error)
+  }
 );
 
 export default API;
