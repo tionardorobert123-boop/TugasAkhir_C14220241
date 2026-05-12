@@ -58,49 +58,73 @@ export function useRoomControl() {
     return () => clearInterval(interval);
   }, []);
 
-  // ================= LOAD + FETCH ROOMS =================
+  // ================= LOAD + FETCH ROOMS
     useEffect(() => {
 
       if (!token) return;
 
+      let isFetching = false;
+
       const fetchRooms = async () => {
 
-        // ONLINE
-        if (navigator.onLine) {
-          try {
+        // PREVENT OVERLAP
+        if (isFetching) return;
 
-            const res = await API.get('/rooms')
+        isFetching = true;
 
-            setRooms(res.data)
+        try {
 
-            await db.rooms.clear()
+          // ================= CLOUD
+          const res =
+            await API.get('/rooms');
 
-            await db.rooms.bulkPut(res.data)
+          setRooms(res.data);
 
-            return
+          // SAVE CACHE
+          await db.rooms.clear();
 
-          } catch (err) {
+          await db.rooms.bulkPut(
+            res.data
+          );
 
-            console.log(err)
-          }
+          console.log(
+            '☁️ ROOMS FROM CLOUD'
+          );
+
+        } catch (err) {
+
+          console.log(
+            'CLOUD FETCH FAILED',
+            err
+          );
+
+          // ================= DEXIE
+          const offlineRooms =
+            await db.rooms.toArray();
+
+          setRooms(offlineRooms);
+
+          console.log(
+            '💻 ROOMS FROM DEXIE'
+          );
+
+        } finally {
+
+          isFetching = false;
         }
+      };
 
-        // OFFLINE
-        const offlineRooms =
-          await db.rooms.toArray()
+      // FIRST LOAD
+      fetchRooms();
 
-        setRooms(offlineRooms)
-      }
-
-      fetchRooms()
-
+      // AUTO REFRESH
       const interval = setInterval(() => {
-        fetchRooms()
-      }, 7000)
+        fetchRooms();
+      }, 7000);
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
 
-    }, [token])
+    }, [token]);
 // ================= AUTO CLOSE =================
     useEffect(() => {
 

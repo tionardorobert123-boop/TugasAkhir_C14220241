@@ -1,16 +1,11 @@
 import axios from 'axios'
 
 import { db } from '../db'
-import { hasInternet } from '../../services/api'
 
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
 export async function syncRoomActions() {
-
-  const internet = await hasInternet()
-
-  if (!internet) return
 
   const unsynced =
     await db.room_actions
@@ -66,7 +61,10 @@ export async function syncRoomActions() {
               item.temp_id
           },
 
-          { headers }
+          {
+            headers,
+            timeout: 5000
+          }
         )
       }
 
@@ -85,7 +83,10 @@ export async function syncRoomActions() {
               item.temp_id
           },
 
-          { headers }
+          {
+            headers,
+            timeout: 5000
+          }
         )
       }
 
@@ -101,7 +102,10 @@ export async function syncRoomActions() {
               item.temp_id
           },
 
-          { headers }
+          {
+            headers,
+            timeout: 5000
+          }
         )
       }
 
@@ -123,6 +127,10 @@ export async function syncRoomActions() {
         '❌ SYNC GAGAL',
         err
       )
+
+      // STOP LOOP
+      // supaya tidak spam request
+      break
     }
   }
 }
