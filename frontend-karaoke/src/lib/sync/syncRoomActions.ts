@@ -7,12 +7,24 @@ const CLOUD_API =
 
 export async function syncRoomActions() {
 
+  // ================= OFFLINE
+  if (!navigator.onLine) {
+
+    console.log(
+      '📴 OFFLINE - SYNC SKIPPED'
+    )
+
+    return
+  }
+
+  // ================= GET QUEUE
   const unsynced =
     await db.room_actions
       .where('sync_status')
       .equals(0)
       .toArray()
 
+  // ================= EMPTY
   if (!unsynced.length) {
 
     console.log(

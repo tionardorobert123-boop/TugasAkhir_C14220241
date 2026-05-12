@@ -59,72 +59,87 @@ export function useRoomControl() {
   }, []);
 
   // ================= LOAD + FETCH ROOMS
-    useEffect(() => {
+useEffect(() => {
 
-      if (!token) return;
+  if (!token) return;
 
-      let isFetching = false;
+  let isFetching = false;
 
-      const fetchRooms = async () => {
+  const fetchRooms = async () => {
 
-        // PREVENT OVERLAP
-        if (isFetching) return;
+    // ================= PREVENT OVERLAP
+    if (isFetching) return;
 
-        isFetching = true;
+    isFetching = true;
 
-        try {
+    try {
 
-          // ================= CLOUD
-          const res =
-            await API.get('/rooms');
+      // ================= OFFLINE
+      if (!navigator.onLine) {
 
-          setRooms(res.data);
+        const offlineRooms =
+          await db.rooms.toArray();
 
-          // SAVE CACHE
-          await db.rooms.clear();
+        setRooms(offlineRooms);
 
-          await db.rooms.bulkPut(
-            res.data
-          );
+        console.log(
+          '💻 ROOMS FROM DEXIE'
+        );
 
-          console.log(
-            '☁️ ROOMS FROM CLOUD'
-          );
+        return;
+      }
 
-        } catch (err) {
+      // ================= CLOUD
+      const res =
+        await API.get('/rooms');
 
-          console.log(
-            'CLOUD FETCH FAILED',
-            err
-          );
+      setRooms(res.data);
 
-          // ================= DEXIE
-          const offlineRooms =
-            await db.rooms.toArray();
+      // SAVE CACHE
+      await db.rooms.clear();
 
-          setRooms(offlineRooms);
+      await db.rooms.bulkPut(
+        res.data
+      );
 
-          console.log(
-            '💻 ROOMS FROM DEXIE'
-          );
+      console.log(
+        '☁️ ROOMS FROM CLOUD'
+      );
 
-        } finally {
+    } catch (err) {
 
-          isFetching = false;
-        }
-      };
+      console.log(
+        'CLOUD FETCH FAILED',
+        err
+      );
 
-      // FIRST LOAD
+      // ================= FALLBACK DEXIE
+      const offlineRooms =
+        await db.rooms.toArray();
+
+      setRooms(offlineRooms);
+
+      console.log(
+        '💻 ROOMS FROM DEXIE'
+      );
+
+    } finally {
+
+      isFetching = false;
+    }
+  };
+
+  // ================= FIRST LOAD
+    fetchRooms();
+
+    // ================= AUTO REFRESH
+    const interval = setInterval(() => {
       fetchRooms();
+    }, 7000);
 
-      // AUTO REFRESH
-      const interval = setInterval(() => {
-        fetchRooms();
-      }, 7000);
+    return () => clearInterval(interval);
 
-      return () => clearInterval(interval);
-
-    }, [token]);
+  }, [token]);
 // ================= AUTO CLOSE =================
     useEffect(() => {
 
