@@ -3,209 +3,134 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
-use App\Models\Room;
+
 use Illuminate\Support\Facades\Http;
 
 class MQTTListen extends Command
 {
-    protected $signature = 'mqtt:listen';
+    protected $signature =
+        'mqtt:listen';
 
     protected $description =
         'Listen MQTT from ESP';
 
-    public function handle()
+    public function handle(): void
     {
-        $server   = '127.0.0.1';
-        $port     = 1883;
-        $clientId = 'laravel-listener';
-
+        $server = '127.0.0.1';
+        $port = 1883;
+        $clientId =
+            'laravel-listener';
         $connectionSettings =
             (new ConnectionSettings)
                 ->setKeepAliveInterval(60);
-
         while (true) {
-
             try {
-
-                $mqtt = new MqttClient(
-                    $server,
-                    $port,
-                    $clientId
-                );
-
-                $mqtt->connect(
-                    $connectionSettings,
-                    false
-                );
-
+                $mqtt =
+                    new MqttClient(
+                        $server,
+                        $port,
+                        $clientId
+                    );
+                $mqtt->connect($connectionSettings,false);
                 $this->info(
-                    "MQTT Listener connected..."
+                    'MQTT Listener connected...'
                 );
-
+                // ================= SUBSCRIBE
                 $mqtt->subscribe(
                     'room/+/status',
-
                     function (
                         string $topic,
                         string $message
                     ) {
-
                         try {
-
+                            // ================= JSON
                             $data = json_decode(
                                 $message,
                                 true
                             );
-
                             if (
                                 !is_array($data) ||
-                                !isset($data['room_id'])
+
+                                !isset(
+                                    $data['room_id']
+                                )
                             ) {
                                 return;
                             }
-
-                            $room = Room::with(
-                                'iotDevice'
-                            )
-                            ->where(
-                                'room_id',
-                                $data['room_id']
-                            )
-                            ->first();
-
-                            if (
-                                !$room ||
-                                !$room->iotDevice
-                            ) {
-                                return;
-                            }
-
-                            $device =
-                                $room->iotDevice;
-
-                            // =================
-                            // UPDATE LOCAL DB
-                            // =================
-
-                            $device->lock_status =
+                            // ================= DATA
+                            $roomId =
+                                $data['room_id'];
+                            $lock =
                                 $data['lock']
                                 ?? 'unknown';
-
-                            $device->door_status =
+                            $door =
                                 $data['door']
                                 ?? 'unknown';
-
-                            $device->status_online =
-                                true;
-
-                            $device->last_seen =
-                                now();
-
-                            $device->miss_count =
-                                0;
-
-                            $device->save();
-
-                            echo "LOCAL UPDATE ROOM {$data['room_id']}"
+                            // ================= LOG
+                            echo
+                                "ROOM {$roomId}"
+                                . " | LOCK: {$lock}"
+                                . " | DOOR: {$door}"
                                 . PHP_EOL;
-
-                            // =================
-                            // SYNC CLOUD
-                            // =================
-
+                            // ================= SYNC CLOUD
                             try {
-
                                 $response =
                                     Http::withOptions([
                                         'verify' => false,
                                         'timeout' => 3,
                                     ])
                                     ->withHeaders([
-                                        'X-GATEWAY-KEY' =>
-                                            'karaoke-secret'
+                                    'X-GATEWAY-KEY' => 'karaoke-secret'
                                     ])
                                     ->post(
                                         'https://tugasakhirc14220241.up.railway.app/api/iot-sync',
                                         [
-                                            'room_id' =>
-                                                $data['room_id'],
-
-                                            'door_status' =>
-                                                $data['door']
-                                                ?? 'unknown',
-
-                                            'lock_status' =>
-                                                $data['lock']
-                                                ?? 'unknown',
-
-                                            'status_online' =>
-                                                true,
-
-                                            'last_seen' =>
-                                                now(),
+                                            'room_id'=> $roomId,
+                                            'door_status'=> $door,
+                                            'lock_status'=> $lock,
+                                            'status_online'=> true,
+                                            'last_seen'=> now(),
                                         ]
                                     );
-
-                                echo "CLOUD STATUS: "
+                                echo
+                                    "CLOUD STATUS: "
                                     . $response->status()
                                     . PHP_EOL;
-
-                                echo $response->body()
-                                    . PHP_EOL;
-
-                                    
-
                             } catch (\Throwable $e) {
-
-                                echo "CLOUD ERROR: "
-                                    . $e->getMessage()
+                                echo
+                                    "CLOUD OFFLINE"
                                     . PHP_EOL;
                             }
                         } catch (\Throwable $e) {
-
-                            echo "CALLBACK ERROR: "
-                                . $e->getMessage()
-                                . PHP_EOL;
+                            echo
+                                "CALLBACK ERROR: ". $e->getMessage(). PHP_EOL;
                         }
                     },
-
                     0
                 );
-
-                // =================
-                // LOOP MQTT
-                // =================
-
+                // ================= MQTT LOOP
                 while (true) {
-
                     try {
-
                         $mqtt->loop(
                             true
                         );
-
                     } catch (\Throwable $e) {
 
-                        echo "MQTT LOOP ERROR: "
-                            . $e->getMessage()
-                            . PHP_EOL;
-
+                        echo
+                            "MQTT LOOP ERROR: ". $e->getMessage(). PHP_EOL;
                         break;
                     }
                 }
-
             } catch (\Throwable $e) {
-
-                echo "MQTT CONNECT ERROR: "
-                    . $e->getMessage()
-                    . PHP_EOL;
+                echo
+                    "MQTT CONNECT ERROR: ". $e->getMessage(). PHP_EOL;
             }
-
-            echo "RECONNECTING MQTT..."
+            echo
+                "RECONNECTING MQTT..."
                 . PHP_EOL;
-
             sleep(2);
         }
     }
