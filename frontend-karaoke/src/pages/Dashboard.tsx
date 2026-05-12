@@ -280,6 +280,7 @@ function Dashboard() {
         total={total}
         onClose={() => setShowConfirm(false)}
         onConfirm={startRoom}
+        room={selectedRoomData}
       />
 
       <ExtendRoomModal
