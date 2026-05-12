@@ -1,7 +1,72 @@
 import Dexie from 'dexie'
+
 import type { Table } from 'dexie'
 
+// ================= ROOMS
+export interface OfflineRoom {
+
+  room_id: number
+
+  room_name: string
+
+  status: string
+
+  customer_name?: string | null
+
+  end_time?: string | null
+
+  price_per_hour?: number
+
+  lock_status?: string
+
+  door_status?: string
+
+  status_online?: boolean
+
+  updated_at?: string
+
+  _closing?: boolean
+}
+
+// ================= TRANSACTIONS
+export interface OfflineTransaction {
+
+  id?: number
+
+  temp_id?: string
+
+  room_id: number
+
+  customer_name?: string
+
+  total_price?: number
+
+  duration?: number
+
+  created_at: string
+
+  status?: string
+}
+
+// ================= LOGS
+export interface OfflineLog {
+
+  id?: number
+
+  room_id: number
+
+  customer_name: string
+
+  room_status: string
+
+  duration: number
+
+  timestamp: string
+}
+
+// ================= ACTION QUEUE
 export interface OfflineRoomAction {
+
   id?: number
 
   temp_id: string
@@ -21,17 +86,42 @@ export interface OfflineRoomAction {
   sync_status: number
 }
 
+// ================= DATABASE
 class AppDB extends Dexie {
+
+  // TABLES
+  rooms!: Table<OfflineRoom>
+
+  transactions!: Table<OfflineTransaction>
+
+  logs!: Table<OfflineLog>
+
   room_actions!: Table<OfflineRoomAction>
 
   constructor() {
+
     super('karaokeDB')
 
     this.version(1).stores({
+
+      // ================= ROOMS
+      rooms:
+        'room_id,status,status_online',
+
+      // ================= TRANSACTIONS
+      transactions:
+        '++id,room_id,created_at',
+
+      // ================= LOGS
+      logs:
+        '++id,room_id,timestamp',
+
+      // ================= ACTIONS
       room_actions:
         '++id,temp_id,action,sync_status,created_at'
     })
   }
 }
 
+// ================= EXPORT DB
 export const db = new AppDB()

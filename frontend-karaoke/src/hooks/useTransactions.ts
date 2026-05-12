@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import { db } from '../lib/db'
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -9,46 +10,113 @@ export function useTransactions(selectedDate?: string) {
   const today = new Date().toISOString().split("T")[0];
   const filterDate = selectedDate || today;
 
-  const cacheKey = `transactions_cache_${filterDate}`;
+ // ================= LOAD TRANSACTIONS =================
+    useEffect(() => {
 
-  useEffect(() => {
-    if (!token) return;
+      if (!token) return;
 
-    const cached = localStorage.getItem(cacheKey);
+      let isFetching = false;
 
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      setTransactions(parsed.transactions || []);
-    }
+      const fetchTransactions = async () => {
 
-    const fetchData = async () => {
-      try {
-        const res = await API.get(`/transactions/by-date?date=${filterDate}`, {
-          // headers: { Authorization: `Bearer ${token}` }
-        });
+        // ================= PREVENT OVERLAP
+        if (isFetching) return;
 
-        const filtered = res.data.filter((trx: any) => {
-          const trxDate = trx.created_at?.slice(0, 10);
-          return trxDate === filterDate;
-        });
+        isFetching = true;
 
-        setTransactions(filtered);
+        try {
 
-        localStorage.setItem(
-          cacheKey,
-          JSON.stringify({
-            transactions: filtered  
-          })
-        );
+          // ================= ONLINE
+          if (navigator.onLine) {
 
-      } catch (err) {
-        console.log(err);
-      }
-    };
+            try {
 
-    fetchData();
+              const res = await API.get(
+                `/transactions/by-date?date=${filterDate}`
+              );
 
-  }, [token, filterDate]);
+              const filtered =
+                (res.data || []).filter(
+                  (trx: any) => {
+
+                  const trxDate =
+                    trx.created_at?.slice(0, 10);
+
+                  return trxDate === filterDate;
+                });
+
+              // UPDATE UI
+              setTransactions(filtered);
+
+              // SAVE DEXIE
+              await db.transactions.clear();
+
+              await db.transactions.bulkPut(
+                filtered
+              );
+
+              console.log(
+                '☁️ TRANSACTIONS FROM CLOUD'
+              );
+
+              return;
+
+            } catch (err) {
+
+              console.log(
+                'TRANSACTION CLOUD FAILED',
+                err
+              );
+            }
+          }
+
+          // ================= OFFLINE
+          const offlineTransactions =
+            await db.transactions.toArray();
+
+          // FILTER LOCAL DATE
+          const filteredOffline =
+            offlineTransactions.filter(
+              (trx: any) => {
+
+              const trxDate =
+                trx.created_at?.slice(0, 10);
+
+              return trxDate === filterDate;
+            });
+
+          console.log(
+            '💻 TRANSACTIONS FROM DEXIE'
+          );
+
+          setTransactions(
+            filteredOffline
+          );
+
+        } catch (err) {
+
+          console.log(
+            'FETCH TRANSACTION ERROR',
+            err
+          );
+
+        } finally {
+
+          isFetching = false;
+        }
+      };
+
+      // INITIAL LOAD
+      fetchTransactions();
+
+      // AUTO REFRESH
+      const interval = setInterval(() => {
+        fetchTransactions();
+      }, 7000);
+
+      return () => clearInterval(interval);
+
+    }, [token, filterDate]);
 
   // ================= SPLIT =================
   const activeRooms = transactions.filter(trx => trx.status === "active");

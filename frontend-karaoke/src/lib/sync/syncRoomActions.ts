@@ -1,70 +1,125 @@
-import API from '../../services/api'
+import axios from 'axios'
+
 import { db } from '../db'
+
+const CLOUD_API =
+  'https://tugasakhirc14220241.up.railway.app/api'
 
 export async function syncRoomActions() {
 
   if (!navigator.onLine) return
 
-  const unsynced = await db.room_actions
-    .where('sync_status')
-    .equals(0)
-    .toArray()
+  const unsynced =
+    await db.room_actions
+      .where('sync_status')
+      .equals(0)
+      .toArray()
+
+  if (!unsynced.length) {
+
+    console.log(
+      '✅ NO PENDING SYNC'
+    )
+
+    return
+  }
+
+  console.log(
+    `🔄 SYNC ${unsynced.length} ACTION`
+  )
 
   for (const item of unsynced) {
 
     try {
 
+      // ================= TOKEN
+      const token =
+        localStorage.getItem(
+          'token'
+        )
+
+      const headers = token
+        ? {
+            Authorization:
+              `Bearer ${token}`
+          }
+        : {}
+
       // ================= OPEN
       if (item.action === 'open') {
 
-        await API.post(
-          `/rooms/${item.room_id}/open`,
+        await axios.post(
+
+          `${CLOUD_API}/rooms/${item.room_id}/open`,
+
           {
-            customer_name: item.customer_name,
+            customer_name:
+              item.customer_name,
 
-            duration: item.duration,
+            duration:
+              item.duration,
 
-            temp_id: item.temp_id
-          }
+            temp_id:
+              item.temp_id
+          },
+
+          { headers }
         )
       }
 
       // ================= EXTEND
       if (item.action === 'extend') {
 
-        await API.post(
-          `/rooms/${item.room_id}/extend`,
-          {
-            minutes: item.minutes,
+        await axios.post(
 
-            temp_id: item.temp_id
-          }
+          `${CLOUD_API}/rooms/${item.room_id}/extend`,
+
+          {
+            minutes:
+              item.minutes,
+
+            temp_id:
+              item.temp_id
+          },
+
+          { headers }
         )
       }
 
       // ================= CLOSE
       if (item.action === 'close') {
 
-        await API.post(
-          `/rooms/${item.room_id}/close`,
+        await axios.post(
+
+          `${CLOUD_API}/rooms/${item.room_id}/close`,
+
           {
-            temp_id: item.temp_id
-          }
+            temp_id:
+              item.temp_id
+          },
+
+          { headers }
         )
       }
 
       // ================= SUCCESS
-      await db.room_actions.update(item.id!, {
-        sync_status: 1
-      })
+      await db.room_actions.update(
+        item.id!,
+        {
+          sync_status: 1
+        }
+      )
 
-      console.log('SYNC BERHASIL')
+      console.log(
+        '☁️ SYNC BERHASIL'
+      )
 
     } catch (err) {
 
-      console.log(err)
-
-      console.log('SYNC GAGAL')
+      console.log(
+        '❌ SYNC GAGAL',
+        err
+      )
     }
   }
 }

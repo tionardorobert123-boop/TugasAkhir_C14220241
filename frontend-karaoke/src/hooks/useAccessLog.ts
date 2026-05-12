@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
+import { db } from '../lib/db'
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -36,51 +37,88 @@ export default function useAccessLog(initialDate?: string) {
 
   const itemsPerPage = 9;
 
-  const cacheKey =
-  `access_logs_cache_${selectedDate}`;
+  // ================= FETCH ACCESS LOGS =================
+    const fetchLogs = async () => {
 
- const fetchLogs = async () => {
+      if (loading) return;
 
-  const token = localStorage.getItem("token");
-  if (!token) return;
-  // ================= CACHE
-  const cached = localStorage.getItem(cacheKey);
-  // kalau ada cache -> tampilkan dulu
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      setLogs(parsed.logs || []);
-    } else {
-      // loading hanya jika belum ada cache
       setLoading(true);
-    }
-    try {
-      const res = await API.get(
-        `/access-logs?date=${selectedDate}`,
-        {
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
+
+      try {
+
+        // ================= ONLINE
+        if (navigator.onLine) {
+
+          try {
+
+            const res = await API.get(
+              `/access-logs?date=${selectedDate}`
+            );
+
+            const data = res.data || [];
+
+            const filtered =
+              data.filter((log: any) => {
+
+              const logDate =
+                log.timestamp?.slice(0, 10);
+
+              return logDate === selectedDate;
+            });
+
+            setLogs(filtered);
+
+            await db.logs.clear();
+
+            await db.logs.bulkPut(filtered);
+
+            console.log(
+              '☁️ LOGS FROM CLOUD'
+            );
+
+            return;
+
+          } catch (err) {
+
+            console.log(
+              'LOG CLOUD FAILED',
+              err
+            );
+          }
         }
-      );
-      const data = res.data || [];
-      setLogs(data);
-      // update cache
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({
-          logs: data
-        })
-      );
-    } catch (err) {
-      console.log(err);
-      // hanya kosongkan jika memang tidak ada cache
-      if (!cached) {
-        setLogs([]);
+
+        // ================= OFFLINE
+        const offlineLogs =
+          await db.logs.toArray();
+
+        const filteredOffline =
+          offlineLogs.filter(
+            (log: any) => {
+
+            const logDate =
+              log.timestamp?.slice(0, 10);
+
+            return logDate === selectedDate;
+          });
+
+        console.log(
+          '💻 LOGS FROM DEXIE'
+        );
+
+        setLogs(filteredOffline);
+
+      } catch (err) {
+
+        console.log(
+          'FETCH LOG ERROR',
+          err
+        );
+
+      } finally {
+
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const handleRefresh = async () => {
     setRefreshing(true);

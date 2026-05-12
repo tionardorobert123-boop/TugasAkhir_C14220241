@@ -3,6 +3,7 @@ import API from "../services/api";
 import { saveRoomOpen } from "../lib/offline/saveRoomOpen";
 import { saveRoomExtend } from "../lib/offline/saveRoomExtend";
 import { saveRoomClose } from "../lib/offline/saveRoomClose";
+import { db } from "../lib/db";
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -58,69 +59,168 @@ export function useRoomControl() {
   }, []);
 
   // ================= LOAD + FETCH ROOMS =================
-  useEffect(() => {
-    if (!token) return;
+    useEffect(() => {
 
-    // LOAD CACHE
-    const cached = localStorage.getItem("rooms_cache");
-    if (cached) {
-      setRooms(JSON.parse(cached));
-    }
+      if (!token) return;
 
-    const fetchRooms = () => {
-      API.get("/rooms", {
-        // headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          setRooms(res.data);
+      let isFetching = false;
 
-          localStorage.setItem("rooms_cache", JSON.stringify(res.data));
-        });
-    };
+      const fetchRooms = async () => {
 
-    fetchRooms();
+        // ================= PREVENT OVERLAP
+        if (isFetching) return;
 
-    const interval = setInterval(() => {
-    fetchRooms();
-  }, 7000);   
+        isFetching = true;
 
-    return () => clearInterval(interval);
-  }, [token]);
+        try {
 
-  // ================= AUTO CLOSE =================
-  useEffect(() => {
-    if (!token) return;
+          // ================= ONLINE
+          if (navigator.onLine) {
 
-    const interval = setInterval(() => {
-      setRooms((prev) =>
-        prev.map((room) => {
-          if (room.status !== "occupied" || !room.end_time) return room;
+            try {
 
-          const end = new Date(room.end_time).getTime();
-          const nowTime = new Date().getTime();
+              const res =
+                await API.get('/rooms');
 
-          if (nowTime >= end && !room._closing) {
+              const roomsData =
+                res.data || [];
 
-            saveRoomClose({
-              room_id: room.room_id
-            });
+              // UPDATE UI
+              setRooms(roomsData);
 
-            return {
-              ...room,
-              status: "available",
-              end_time: null,
-              customer_name: null,
-              _closing: true,
-            };
+              // SAVE CACHE DEXIE
+              await db.rooms.clear();
+
+              await db.rooms.bulkPut(
+                roomsData
+              );
+
+              console.log(
+                '☁️ ROOMS FROM CLOUD'
+              );
+
+              return;
+
+            } catch (err) {
+
+              console.log(
+                'CLOUD FETCH FAILED',
+                err
+              );
+            }
           }
 
-          return room;
-        })
-      );
-    }, 1000);
+          // ================= OFFLINE
+          const offlineRooms =
+            await db.rooms.toArray();
 
-    return () => clearInterval(interval);
-  }, [token]);
+          console.log(
+            '💻 ROOMS FROM DEXIE'
+          );
+
+          setRooms(offlineRooms);
+
+        } catch (err) {
+
+          console.log(
+            'FETCH ROOMS ERROR',
+            err
+          );
+
+        } finally {
+
+          isFetching = false;
+        }
+      };
+
+      // INITIAL LOAD
+      fetchRooms();
+
+      // AUTO REFRESH
+      const interval = setInterval(() => {
+        fetchRooms();
+      }, 7000);
+
+      return () => clearInterval(interval);
+
+    }, [token]);
+// ================= AUTO CLOSE =================
+    useEffect(() => {
+
+      if (!token) return;
+
+      const interval = setInterval(async () => {
+
+        const nowTime = Date.now();
+
+        setRooms(prev =>
+          prev.map(room => {
+
+            // ================= SKIP
+            if (
+              room.status !== 'occupied' ||
+              !room.end_time
+            ) {
+              return room;
+            }
+
+            const end =
+              new Date(
+                room.end_time
+              ).getTime();
+
+            // ================= AUTO CLOSE
+            if (
+              nowTime >= end &&
+              !room._closing
+            ) {
+
+              // CLOSE ROOM
+              saveRoomClose({
+                room_id: room.room_id
+              });
+
+              // UPDATE DEXIE
+              db.rooms.update(
+                room.room_id,
+                {
+                  status: 'available',
+
+                  customer_name: null,
+
+                  end_time: null
+                }
+              );
+
+              console.log(
+                navigator.onLine
+                  ? 'AUTO CLOSE CLOUD'
+                  : 'AUTO CLOSE LOCAL'
+              );
+
+              return {
+
+                ...room,
+
+                status: 'available',
+
+                end_time: null,
+
+                customer_name: null,
+
+                _closing: true
+              };
+            }
+
+            return room;
+          })
+        );
+
+      }, 1000);
+
+      return () => clearInterval(interval);
+
+    }, [token]);
 
   // ================= WARNING =================
   const isWarning = (endTime: string) => {
@@ -149,54 +249,154 @@ export function useRoomControl() {
   };
 
   // ================= OPEN ROOM =================
-      const startRoom = async () => {
+    const startRoom = async () => {
 
       if (!selectedRoom) return;
 
       try {
 
+        // ================= SAVE ACTION
         await saveRoomOpen({
           room_id: selectedRoom,
           customer_name: customerName,
           duration,
         });
 
-        window.location.reload();
+        // ================= HITUNG END TIME
+        const endTime = new Date(
+          Date.now() + duration * 60000
+        ).toISOString();
 
+        // ================= UPDATE UI LANGSUNG
+        setRooms(prev =>
+          prev.map(room =>
+            room.room_id === selectedRoom
+              ? {
+                  ...room,
+
+                  status: 'occupied',
+
+                  customer_name: customerName,
+
+                  end_time: endTime,
+
+                  status_online: room.status_online
+                }
+              : room
+          )
+        );
+
+        // ================= UPDATE DEXIE CACHE
+        await db.rooms.update(
+          selectedRoom,
+          {
+            status: 'occupied',
+
+            customer_name: customerName,
+
+            end_time: endTime
+          }
+        );
+
+        console.log(
+          navigator.onLine
+            ? 'ROOM OPEN CLOUD'
+            : 'ROOM OPEN LOCAL'
+        );
+
+        // ================= CLOSE MODAL
         setShowConfirm(false);
+
         setShowModal(false);
 
+        // ================= RESET FORM
         resetForm();
 
       } catch (err) {
 
-        console.log(err);
+        console.log(
+          'OPEN ROOM ERROR',
+          err
+        );
       }
     };
-
   // ================= EXTEND =================
-        const extendRoom = async (
-        roomId: number,
-        minutes: number
-      ) => {
+    const extendRoom = async (
+      roomId: number,
+      minutes: number
+    ) => {
 
-        try {
+      try {
 
-          await saveRoomExtend({
-            room_id: roomId,
-            minutes,
-          });
+        // ================= SAVE ACTION
+        await saveRoomExtend({
+          room_id: roomId,
+          minutes,
+        });
 
-          window.location.reload();
+        // ================= UPDATE ROOM STATE
+        setRooms(prev =>
+          prev.map(room => {
 
-        } catch (err) {
+            if (
+              room.room_id !== roomId ||
+              !room.end_time
+            ) {
+              return room;
+            }
 
-          console.log(
-            "extend error",
-            err
+            // TAMBAH WAKTU
+            const currentEnd =
+              new Date(room.end_time);
+
+            currentEnd.setMinutes(
+              currentEnd.getMinutes() + minutes
+            );
+
+            return {
+              ...room,
+              end_time:
+                currentEnd.toISOString()
+            };
+          })
+        );
+
+        // ================= UPDATE DEXIE
+        const room =
+          await db.rooms.get(roomId);
+
+        if (room?.end_time) {
+
+          const end =
+            new Date(room.end_time);
+
+          end.setMinutes(
+            end.getMinutes() + minutes
+          );
+
+          await db.rooms.update(
+            roomId,
+            {
+              end_time:
+                end.toISOString()
+            }
           );
         }
-      };
+
+        console.log(
+          navigator.onLine
+            ? 'ROOM EXTEND CLOUD'
+            : 'ROOM EXTEND LOCAL'
+        );
+
+      } catch (err) {
+
+        console.log(
+          'EXTEND ERROR',
+          err
+        );
+      }
+    };
 
   // ================= CLICK =================
   const handleClick = (room: any) => {

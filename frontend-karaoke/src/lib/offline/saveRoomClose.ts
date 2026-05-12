@@ -1,5 +1,7 @@
 import API from '../../services/api'
+
 import { db } from '../db'
+
 import { v4 as uuidv4 } from 'uuid'
 
 interface Payload {
@@ -25,16 +27,35 @@ export async function saveRoomClose(
 
   try {
 
-    // AUTO:
-    // cloud atau local
+    // ================= ENDPOINT
+    const endpoint =
+      navigator.onLine
+        ? `/rooms/${data.room_id}/close`
+        : `/local/rooms/${data.room_id}/close`
+
+    // ================= API
     await API.post(
-      `/rooms/${data.room_id}/close`,
+      endpoint,
       {
         temp_id: payload.temp_id
       }
     )
 
+    // ================= UPDATE DEXIE ROOM
+    await db.rooms.update(
+      data.room_id,
+      {
+        status: 'available',
+
+        customer_name: null,
+
+        end_time: null
+      }
+    )
+
+    // ================= SAVE ACTION
     await db.room_actions.add({
+
       ...payload,
 
       sync_status:
@@ -43,21 +64,36 @@ export async function saveRoomClose(
 
     console.log(
       navigator.onLine
-        ? 'ROOM CLOSE CLOUD'
-        : 'ROOM CLOSE LOCAL'
+        ? '☁️ ROOM CLOSE CLOUD'
+        : '💻 ROOM CLOSE LOCAL'
     )
 
   } catch (err) {
 
-    console.log(err)
+    console.log(
+      'ROOM CLOSE ERROR',
+      err
+    )
 
-    // fallback queue
+    // ================= SAVE OFFLINE QUEUE
     await db.room_actions.add(
       payload
     )
 
+    // ================= UPDATE ROOM LOCAL
+    await db.rooms.update(
+      data.room_id,
+      {
+        status: 'available',
+
+        customer_name: null,
+
+        end_time: null
+      }
+    )
+
     console.log(
-      'ROOM CLOSE SAVED OFFLINE'
+      '💾 ROOM CLOSE SAVED OFFLINE'
     )
   }
 }

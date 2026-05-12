@@ -1,27 +1,74 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
+
+import { syncRoomActions }
+  from '../lib/sync/syncRoomActions'
 
 export default function useOffline() {
-  const [hasInternet, setHasInternet] = useState(true);
+
+  const [hasInternet,
+    setHasInternet] =
+      useState(navigator.onLine)
 
   useEffect(() => {
-    const checkInternet = async () => {
-      try {
-        await fetch("https://clients3.google.com/generate_204", {
-          mode: "no-cors",
-        });
 
-        setHasInternet(true);
-      } catch {
-        setHasInternet(false);
+    const checkInternet =
+      async () => {
+
+      // ================= OFFLINE
+      if (!navigator.onLine) {
+
+        setHasInternet(false)
+
+        return
       }
-    };
 
-    checkInternet();
+      try {
 
-    const interval = setInterval(checkInternet, 5000);
+        // PING CLOUD API
+        const res = await fetch(
+          'https://tugasakhirc14220241.up.railway.app/api/ping'
+        )
 
-    return () => clearInterval(interval);
-  }, []);
+        if (res.ok) {
 
-  return hasInternet;
+          setHasInternet(true)
+
+          console.log(
+            '☁️ INTERNET ONLINE'
+          )
+
+          // AUTO SYNC
+          syncRoomActions()
+
+        } else {
+
+          setHasInternet(false)
+        }
+
+      } catch {
+
+        setHasInternet(false)
+
+        console.log(
+          '💻 OFFLINE MODE'
+        )
+      }
+    }
+
+    // FIRST CHECK
+    checkInternet()
+
+    // INTERVAL CHECK
+    const interval =
+      setInterval(
+        checkInternet,
+        5000
+      )
+
+    return () =>
+      clearInterval(interval)
+
+  }, [])
+
+  return hasInternet
 }

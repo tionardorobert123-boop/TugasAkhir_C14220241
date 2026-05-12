@@ -1,5 +1,7 @@
 import API from '../../services/api'
+
 import { db } from '../db'
+
 import { v4 as uuidv4 } from 'uuid'
 
 interface Payload {
@@ -31,37 +33,95 @@ export async function saveRoomOpen(
 
   try {
 
-    // API otomatis:
-    // cloud atau local
+    // ================= ENDPOINT
+    const endpoint =
+      navigator.onLine
+        ? `/rooms/${data.room_id}/open`
+        : `/local/rooms/${data.room_id}/open`
+
+    // ================= API
     await API.post(
-      `/rooms/${data.room_id}/open`,
+      endpoint,
       {
-        customer_name: data.customer_name,
-        duration: data.duration,
-        temp_id: payload.temp_id
+        customer_name:
+          data.customer_name,
+
+        duration:
+          data.duration,
+
+        temp_id:
+          payload.temp_id
       }
     )
 
+    // ================= END TIME
+    const endTime =
+      new Date(
+        Date.now() +
+        data.duration * 60000
+      ).toISOString()
+
+    // ================= UPDATE DEXIE ROOM
+    await db.rooms.update(
+      data.room_id,
+      {
+        status: 'occupied',
+
+        customer_name:
+          data.customer_name,
+
+        end_time: endTime
+      }
+    )
+
+    // ================= SAVE ACTION
     await db.room_actions.add({
+
       ...payload,
-      sync_status: navigator.onLine ? 1 : 0
+
+      sync_status:
+        navigator.onLine ? 1 : 0
     })
 
     console.log(
       navigator.onLine
-        ? 'ROOM OPEN CLOUD'
-        : 'ROOM OPEN LOCAL'
+        ? '☁️ ROOM OPEN CLOUD'
+        : '💻 ROOM OPEN LOCAL'
     )
 
   } catch (err) {
 
-    console.log(err)
+    console.log(
+      'ROOM OPEN ERROR',
+      err
+    )
 
-    // fallback save queue
-    await db.room_actions.add(payload)
+    // ================= SAVE OFFLINE QUEUE
+    await db.room_actions.add(
+      payload
+    )
+
+    // ================= UPDATE ROOM LOCAL
+    const endTime =
+      new Date(
+        Date.now() +
+        data.duration * 60000
+      ).toISOString()
+
+    await db.rooms.update(
+      data.room_id,
+      {
+        status: 'occupied',
+
+        customer_name:
+          data.customer_name,
+
+        end_time: endTime
+      }
+    )
 
     console.log(
-      'ROOM OPEN SAVED OFFLINE'
+      '💾 ROOM OPEN SAVED OFFLINE'
     )
   }
 }

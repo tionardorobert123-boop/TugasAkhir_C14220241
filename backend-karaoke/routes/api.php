@@ -1,76 +1,112 @@
 <?php
 
-use App\Http\Controllers\Api\RoomController;
 use Illuminate\Support\Facades\Route;
+
 use App\Models\AccessLog;
+
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccessLogController;
 use App\Http\Controllers\Api\RoomExtendController;
 use App\Http\Controllers\Api\IotDeviceController;
+use App\Http\Controllers\Api\LocalRoomController;
 
-Route::get('/logs', function () {
-    return AccessLog::latest()->take(20)->get();
-});
+// ================= PUBLIC =================
 
-Route::post(
-    '/iot-sync',
-    [IotDeviceController::class, 'sync']
-);
-
+// HEALTH CHECK
 Route::get('/ping', function () {
     return response()->json([
         'status' => 'ok'
     ]);
 });
 
-// ================= AUTH =================
-Route::post('/login', [AuthController::class, 'login']);
+// LOGIN
+Route::post(
+    '/login',
+    [AuthController::class, 'login']
+);
 
-// ================= PROTECTED =================
-Route::middleware(['auth:sanctum'])->group(function () {
+// IOT SYNC
+Route::post(
+    '/iot-sync',
+    [IotDeviceController::class, 'sync']
+);
 
-    // ================= ROOMS =================
-    Route::get('/rooms', [RoomController::class, 'index']);
+// QUICK LOGS
+Route::get('/logs', function () {
+    return AccessLog::latest()
+        ->take(20)
+        ->get();
+});
 
-    // ================= TRANSACTIONS =================
+// PROTECTED API
+Route::middleware(['auth:sanctum'])
+    ->group(function () {
 
-    // kasir → transaksi hari ini
+    // ROOMS
+    Route::get(
+        '/rooms',
+        [RoomController::class, 'index']
+    );
+
+    // TRANSACTIONS
+    // kasir
     Route::get(
         '/transactions',
         [TransactionController::class, 'index']
     );
 
-    // owner → filter tanggal
+    // owner
     Route::get(
         '/transactions/by-date',
         [TransactionController::class, 'byDate']
     );
 
-    // ================= KASIR =================
-    Route::middleware('role:kasir')->group(function () {
+    // KASIR (ONLINE / CLOUD)
+    Route::middleware('role:kasir')
+        ->group(function () {
 
-        // OPEN ROOM
+        // CLOUD BUSINESS LOGIC
         Route::post(
             '/rooms/{id}/open',
             [RoomController::class, 'open']
         );
 
-        // CLOSE ROOM
         Route::post(
             '/rooms/{id}/close',
             [RoomController::class, 'close']
         );
 
-        // EXTEND ROOM
         Route::post(
             '/rooms/{id}/extend',
             [RoomExtendController::class, 'extend']
         );
+
+        // LOCAL OFFLINE MQTT ONLY
+        Route::prefix('local')
+            ->group(function () {
+
+            Route::post(
+                '/rooms/{id}/open',
+                [LocalRoomController::class, 'open']
+            );
+
+            Route::post(
+                '/rooms/{id}/close',
+                [LocalRoomController::class, 'close']
+            );
+
+            Route::post(
+                '/rooms/{id}/extend',
+                [LocalRoomController::class, 'extend']
+            );
+        });
     });
 
-    // ================= OWNER =================
-    Route::middleware('role:owner')->group(function () {
+    // OWNER
+    Route::middleware('role:owner')
+        ->group(function () {
 
         Route::post(
             '/rooms/{id}/update-setting',
