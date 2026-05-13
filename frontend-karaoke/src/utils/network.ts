@@ -1,13 +1,23 @@
 const CLOUD_API =
-  "https://tugasakhirc14220241.up.railway.app/api";
+  'https://tugasakhirc14220241.up.railway.app/api'
 
 export async function isCloudOnline() {
 
   // ================= NO NETWORK
   if (!navigator.onLine) {
 
-    return false;
+    return false
   }
+
+  const controller =
+    new AbortController()
+
+  const timeout =
+    setTimeout(() => {
+
+      controller.abort()
+
+    }, 3000)
 
   try {
 
@@ -19,13 +29,20 @@ export async function isCloudOnline() {
         method: 'GET',
 
         cache: 'no-store',
-      }
-    );
 
-    return response.ok;
+        signal:
+          controller.signal
+      }
+    )
+
+    clearTimeout(timeout)
+
+    return response.ok
 
   } catch {
 
-    return false;
+    clearTimeout(timeout)
+
+    return false
   }
 }
