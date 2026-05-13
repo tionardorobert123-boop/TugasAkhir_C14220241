@@ -15,19 +15,51 @@ class MQTTService
 
         $port = 1883;
 
-        // UNIQUE CLIENT ID
         $clientId =
             'laravel-client-'
             . uniqid();
 
-        $this->mqtt =
-            new MqttClient(
-                $server,
-                $port,
-                $clientId
+        Log::info('MQTT CONNECT START', [
+            'server' => $server,
+            'port' => $port,
+            'client_id' => $clientId
+        ]);
+
+        try {
+
+            $this->mqtt =
+                new MqttClient(
+                    $server,
+                    $port,
+                    $clientId
+                );
+
+            $connectStart =
+                microtime(true);
+
+            $this->mqtt->connect();
+
+            $connectTime =
+                (microtime(true) - $connectStart) * 1000;
+
+            Log::info(
+                'MQTT CONNECT SUCCESS',
+                [
+                    'time_ms' =>
+                        round($connectTime, 2)
+                ]
             );
 
-        $this->mqtt->connect();
+        } catch (\Exception $e) {
+
+            Log::error(
+                'MQTT CONNECT FAILED',
+                [
+                    'error' =>
+                        $e->getMessage()
+                ]
+            );
+        }
     }
 
     public function publish(
@@ -35,12 +67,18 @@ class MQTTService
         string $message
     ): void {
 
-        Log::info('MQTT PUBLISH CALLED', [
-            'topic' => $topic,
-            'message' => $message
-        ]);
+        Log::info(
+            'MQTT PUBLISH CALLED',
+            [
+                'topic' => $topic,
+                'message' => $message
+            ]
+        );
 
         try {
+
+            $publishStart =
+                microtime(true);
 
             $this->mqtt->publish(
                 $topic,
@@ -49,20 +87,39 @@ class MQTTService
                 false
             );
 
-            Log::info('MQTT PUBLISH SUCCESS', [
-                'topic' => $topic
-            ]);
+            $publishTime =
+                (microtime(true) - $publishStart) * 1000;
 
-            $this->mqtt->disconnect();
+            Log::info(
+                'MQTT PUBLISH SUCCESS',
+                [
+                    'topic' => $topic,
+                    'time_ms' =>
+                        round($publishTime, 2)
+                ]
+            );
 
-            Log::info('MQTT DISCONNECT SUCCESS');
+            // ================= IMPORTANT
+            // JANGAN DISCONNECT DULU
+            // =================
+
+            // $this->mqtt->disconnect();
+
+            // Log::info(
+            //     'MQTT DISCONNECT SUCCESS'
+            // );
 
         } catch (\Exception $e) {
 
-            Log::error('MQTT PUBLISH FAILED', [
-                'error' => $e->getMessage(),
-                'topic' => $topic
-            ]);
+            Log::error(
+                'MQTT PUBLISH FAILED',
+                [
+                    'error' =>
+                        $e->getMessage(),
+
+                    'topic' => $topic
+                ]
+            );
         }
     }
 }

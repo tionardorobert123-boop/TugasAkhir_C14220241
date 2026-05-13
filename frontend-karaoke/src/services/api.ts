@@ -7,7 +7,7 @@ const LOCAL_API =
   "http://localhost:8000/api";
 
 const API = axios.create({
-  timeout: 5000,
+  timeout: 10000,
 });
 
 // ================= TOKEN
