@@ -24,7 +24,7 @@ export function useRoomControl() {
 
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [extendRoomId, setExtendRoomId] = useState<number | null>(null);
-  const location = useLocation()
+  
 
   const openExtendModal = (roomId: number) => {
     setExtendRoomId(roomId);
@@ -63,11 +63,13 @@ export function useRoomControl() {
   // ================= LOAD + FETCH ROOMS
     useEffect(() => {
 
+      const location = useLocation()
+
       if (!token) return;
 
       // ================= ONLY ROOM PAGE
       if (
-        location.pathname !== '/Dashboard'
+        location.pathname !== '/dashboard'
       ) {
         return;
       }
