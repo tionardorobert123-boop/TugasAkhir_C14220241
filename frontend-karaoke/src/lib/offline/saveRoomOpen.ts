@@ -10,120 +10,96 @@ interface Payload {
   duration: number
 }
 
-export async function saveRoomOpen(
-  data: Payload
-) {
+    export async function saveRoomOpen(
+      data: Payload
+    ) {
 
-  const payload = {
+      const payload = {
+        temp_id: uuidv4(),
+        room_id: data.room_id,
+        action: 'open' as const,
+        customer_name: data.customer_name,
+        duration: data.duration,
+        created_at: new Date().toISOString(),
+        sync_status: 0
+      }
 
-    temp_id: uuidv4(),
+      // ================= ALWAYS LOCAL MQTT
+      try {
 
-    room_id: data.room_id,
+        await API.post(
 
-    action: 'open' as const,
+          `/local/rooms/${data.room_id}/open`,
 
-    customer_name: data.customer_name,
+          {
+            customer_name: data.customer_name,
+            duration: data.duration,
+            temp_id: payload.temp_id
+          }
+        )
 
-    duration: data.duration,
+        console.log('📡 LOCAL MQTT OPEN')
 
-    created_at: new Date().toISOString(),
+      } catch (err) {
 
-    sync_status: 0
-  }
+        console.log(
+          'LOCAL MQTT FAILED',
+          err
+        )
+      }
 
-  // ================= ONLINE
-  if (navigator.onLine) {
+      // ================= ONLINE CLOUD SYNC
+      if (navigator.onLine) {
 
-    try {
+        try {
 
-      // CLOUD API
-      await API.post(
+          await API.post(
 
-        `/rooms/${data.room_id}/open`,
+            `/rooms/${data.room_id}/open`,
 
+            {
+              customer_name: data.customer_name,
+              duration: data.duration,
+              temp_id: payload.temp_id
+            }
+          )
+
+          console.log(
+            '☁️ ROOM OPEN CLOUD'
+          )
+
+          return
+
+        } catch (err) {
+
+          console.log(
+            'CLOUD OPEN FAILED',
+            err
+          )
+        }
+      }
+
+      // ================= SAVE OFFLINE QUEUE
+      const endTime =
+        new Date(
+          Date.now() +
+          data.duration * 60000
+        ).toISOString()
+
+      await db.rooms.update(
+        data.room_id,
         {
-          customer_name:
-            data.customer_name,
-
-          duration:
-            data.duration,
-
-          temp_id:
-            payload.temp_id
+          status: 'occupied',
+          customer_name: data.customer_name,
+          end_time: endTime
         }
       )
 
-      console.log(
-        '☁️ ROOM OPEN CLOUD'
+      await db.room_actions.add(
+        payload
       )
 
-      return
-
-    } catch (err) {
-
       console.log(
-        'CLOUD OPEN FAILED',
-        err
+        '💾 ROOM OPEN SAVED OFFLINE'
       )
     }
-  }
-
-  // ================= OFFLINE MQTT
-  try {
-
-    await API.post(
-
-      `/local/rooms/${data.room_id}/open`,
-
-      {
-        customer_name:
-          data.customer_name,
-
-        duration:
-          data.duration,
-
-        temp_id:
-          payload.temp_id
-      }
-    )
-
-    console.log(
-      '📡 LOCAL MQTT OPEN'
-    )
-
-  } catch (err) {
-
-    console.log(
-      'LOCAL MQTT FAILED',
-      err
-    )
-  }
-
-  // ================= UPDATE LOCAL ROOM
-  const endTime =
-    new Date(
-      Date.now() +
-      data.duration * 60000
-    ).toISOString()
-
-  await db.rooms.update(
-    data.room_id,
-    {
-      status: 'occupied',
-
-      customer_name:
-        data.customer_name,
-
-      end_time: endTime
-    }
-  )
-
-  // ================= SAVE QUEUE
-  await db.room_actions.add(
-    payload
-  )
-
-  console.log(
-    '💾 ROOM OPEN SAVED OFFLINE'
-  )
-}
