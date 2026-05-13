@@ -25,50 +25,52 @@ export async function saveRoomExtend(
 
     created_at: new Date().toISOString(),
 
-    // ALWAYS UNSYNC
     sync_status: 0
   }
 
+  // ================= ONLINE
+  if (navigator.onLine) {
+
+    try {
+
+      await API.post(
+
+        `/rooms/${data.room_id}/extend`,
+
+        {
+          minutes: data.minutes,
+
+          temp_id: payload.temp_id
+        }
+      )
+
+      console.log(
+        '☁️ ROOM EXTEND CLOUD'
+      )
+
+      return
+
+    } catch (err) {
+
+      console.log(
+        'CLOUD EXTEND FAILED',
+        err
+      )
+    }
+  }
+
+  // ================= OFFLINE MQTT
   try {
 
-    // ================= LOCAL MQTT
     await API.post(
+
       `/local/rooms/${data.room_id}/extend`,
+
       {
         minutes: data.minutes,
 
         temp_id: payload.temp_id
       }
-    )
-
-    // ================= UPDATE ROOM DEXIE
-    const room =
-      await db.rooms.get(
-        data.room_id
-      )
-
-    if (room?.end_time) {
-
-      const end =
-        new Date(room.end_time)
-
-      end.setMinutes(
-        end.getMinutes() +
-        data.minutes
-      )
-
-      await db.rooms.update(
-        data.room_id,
-        {
-          end_time:
-            end.toISOString()
-        }
-      )
-    }
-
-    // ================= SAVE QUEUE
-    await db.room_actions.add(
-      payload
     )
 
     console.log(
@@ -78,42 +80,42 @@ export async function saveRoomExtend(
   } catch (err) {
 
     console.log(
-      'ROOM EXTEND ERROR',
+      'LOCAL MQTT EXTEND FAILED',
       err
     )
+  }
 
-    // ================= SAVE OFFLINE
-    await db.room_actions.add(
-      payload
+  // ================= UPDATE ROOM LOCAL
+  const room =
+    await db.rooms.get(
+      data.room_id
     )
 
-    // ================= UPDATE ROOM LOCAL
-    const room =
-      await db.rooms.get(
-        data.room_id
-      )
+  if (room?.end_time) {
 
-    if (room?.end_time) {
+    const currentEnd =
+      new Date(room.end_time).getTime()
 
-      const end =
-        new Date(room.end_time)
+    const newEnd =
+      currentEnd +
+      (data.minutes * 60000)
 
-      end.setMinutes(
-        end.getMinutes() +
-        data.minutes
-      )
-
-      await db.rooms.update(
-        data.room_id,
-        {
-          end_time:
-            end.toISOString()
-        }
-      )
-    }
-
-    console.log(
-      '💾 ROOM EXTEND SAVED OFFLINE'
+    await db.rooms.update(
+      data.room_id,
+      {
+        end_time:
+          new Date(newEnd)
+            .toISOString()
+      }
     )
   }
+
+  // ================= SAVE QUEUE
+  await db.room_actions.add(
+    payload
+  )
+
+  console.log(
+    '💾 ROOM EXTEND SAVED OFFLINE'
+  )
 }

@@ -22,35 +22,50 @@ export async function saveRoomClose(
 
     created_at: new Date().toISOString(),
 
-    // ALWAYS UNSYNC
     sync_status: 0
   }
 
+  // ================= ONLINE
+  if (navigator.onLine) {
+
+    try {
+
+      await API.post(
+
+        `/rooms/${data.room_id}/close`,
+
+        {
+          temp_id:
+            payload.temp_id
+        }
+      )
+
+      console.log(
+        '☁️ ROOM CLOSE CLOUD'
+      )
+
+      return
+
+    } catch (err) {
+
+      console.log(
+        'CLOUD CLOSE FAILED',
+        err
+      )
+    }
+  }
+
+  // ================= OFFLINE MQTT
   try {
 
-    // ================= LOCAL MQTT
     await API.post(
+
       `/local/rooms/${data.room_id}/close`,
+
       {
-        temp_id: payload.temp_id
+        temp_id:
+          payload.temp_id
       }
-    )
-
-    // ================= UPDATE ROOM
-    await db.rooms.update(
-      data.room_id,
-      {
-        status: 'available',
-
-        customer_name: null,
-
-        end_time: null
-      }
-    )
-
-    // ================= SAVE QUEUE
-    await db.room_actions.add(
-      payload
     )
 
     console.log(
@@ -60,29 +75,29 @@ export async function saveRoomClose(
   } catch (err) {
 
     console.log(
-      'ROOM CLOSE ERROR',
+      'LOCAL MQTT CLOSE FAILED',
       err
     )
-
-    // ================= SAVE OFFLINE
-    await db.room_actions.add(
-      payload
-    )
-
-    // ================= UPDATE ROOM LOCAL
-    await db.rooms.update(
-      data.room_id,
-      {
-        status: 'available',
-
-        customer_name: null,
-
-        end_time: null
-      }
-    )
-
-    console.log(
-      '💾 ROOM CLOSE SAVED OFFLINE'
-    )
   }
+
+  // ================= UPDATE LOCAL ROOM
+  await db.rooms.update(
+    data.room_id,
+    {
+      status: 'available',
+
+      customer_name: null,
+
+      end_time: null
+    }
+  )
+
+  // ================= SAVE QUEUE
+  await db.room_actions.add(
+    payload
+  )
+
+  console.log(
+    '💾 ROOM CLOSE SAVED OFFLINE'
+  )
 }

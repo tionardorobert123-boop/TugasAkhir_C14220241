@@ -28,15 +28,53 @@ export async function saveRoomOpen(
 
     created_at: new Date().toISOString(),
 
-    // ALWAYS UNSYNC
     sync_status: 0
   }
 
+  // ================= ONLINE
+  if (navigator.onLine) {
+
+    try {
+
+      // CLOUD API
+      await API.post(
+
+        `/rooms/${data.room_id}/open`,
+
+        {
+          customer_name:
+            data.customer_name,
+
+          duration:
+            data.duration,
+
+          temp_id:
+            payload.temp_id
+        }
+      )
+
+      console.log(
+        '☁️ ROOM OPEN CLOUD'
+      )
+
+      return
+
+    } catch (err) {
+
+      console.log(
+        'CLOUD OPEN FAILED',
+        err
+      )
+    }
+  }
+
+  // ================= OFFLINE MQTT
   try {
 
-    // ================= LOCAL MQTT
     await API.post(
+
       `/local/rooms/${data.room_id}/open`,
+
       {
         customer_name:
           data.customer_name,
@@ -49,67 +87,43 @@ export async function saveRoomOpen(
       }
     )
 
-    // ================= LOCAL UI UPDATE
-    const endTime =
-      new Date(
-        Date.now() +
-        data.duration * 60000
-      ).toISOString()
-
-    await db.rooms.update(
-      data.room_id,
-      {
-        status: 'occupied',
-
-        customer_name:
-          data.customer_name,
-
-        end_time: endTime
-      }
-    )
-
-    // ================= SAVE QUEUE
-    await db.room_actions.add(
-      payload
-    )
-
     console.log(
-      '📡 ROOM OPEN LOCAL MQTT'
+      '📡 LOCAL MQTT OPEN'
     )
 
   } catch (err) {
 
     console.log(
-      'ROOM OPEN ERROR',
+      'LOCAL MQTT FAILED',
       err
     )
-
-    // ================= SAVE OFFLINE
-    await db.room_actions.add(
-      payload
-    )
-
-    // ================= UPDATE ROOM
-    const endTime =
-      new Date(
-        Date.now() +
-        data.duration * 60000
-      ).toISOString()
-
-    await db.rooms.update(
-      data.room_id,
-      {
-        status: 'occupied',
-
-        customer_name:
-          data.customer_name,
-
-        end_time: endTime
-      }
-    )
-
-    console.log(
-      '💾 ROOM OPEN SAVED OFFLINE'
-    )
   }
+
+  // ================= UPDATE LOCAL ROOM
+  const endTime =
+    new Date(
+      Date.now() +
+      data.duration * 60000
+    ).toISOString()
+
+  await db.rooms.update(
+    data.room_id,
+    {
+      status: 'occupied',
+
+      customer_name:
+        data.customer_name,
+
+      end_time: endTime
+    }
+  )
+
+  // ================= SAVE QUEUE
+  await db.room_actions.add(
+    payload
+  )
+
+  console.log(
+    '💾 ROOM OPEN SAVED OFFLINE'
+  )
 }
