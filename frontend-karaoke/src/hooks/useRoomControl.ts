@@ -4,6 +4,7 @@ import { saveRoomOpen } from "../lib/offline/saveRoomOpen";
 import { saveRoomExtend } from "../lib/offline/saveRoomExtend";
 import { saveRoomClose } from "../lib/offline/saveRoomClose";
 import { db } from "../lib/db";
+import { useLocation } from 'react-router-dom'
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -59,87 +60,97 @@ export function useRoomControl() {
   }, []);
 
   // ================= LOAD + FETCH ROOMS
-useEffect(() => {
+    useEffect(() => {
 
-  if (!token) return;
+      if (!token) return;
 
-  let isFetching = false;
-
-  const fetchRooms = async () => {
-
-    // ================= PREVENT OVERLAP
-    if (isFetching) return;
-
-    isFetching = true;
-
-    try {
-
-      // ================= OFFLINE
-      if (!navigator.onLine) {
-
-        const offlineRooms =
-          await db.rooms.toArray();
-
-        setRooms(offlineRooms);
-
-        console.log(
-          '💻 ROOMS FROM DEXIE'
-        );
-
+      // ================= ONLY ROOM PAGE
+      if (
+        location.pathname !== '/Dashboard'
+      ) {
         return;
       }
 
-      // ================= CLOUD
-      const res =
-        await API.get('/rooms');
+      let isFetching = false;
 
-      setRooms(res.data);
+      const fetchRooms = async () => {
 
-      // SAVE CACHE
-      await db.rooms.clear();
+        // ================= PREVENT OVERLAP
+        if (isFetching) return;
 
-      await db.rooms.bulkPut(
-        res.data
-      );
+        isFetching = true;
 
-      console.log(
-        '☁️ ROOMS FROM CLOUD'
-      );
+        try {
 
-    } catch (err) {
+          // ================= OFFLINE
+          if (!navigator.onLine) {
 
-      console.log(
-        'CLOUD FETCH FAILED',
-        err
-      );
+            const offlineRooms =
+              await db.rooms.toArray();
 
-      // ================= FALLBACK DEXIE
-      const offlineRooms =
-        await db.rooms.toArray();
+            setRooms(offlineRooms);
 
-      setRooms(offlineRooms);
+            console.log(
+              '💻 ROOMS FROM DEXIE'
+            );
 
-      console.log(
-        '💻 ROOMS FROM DEXIE'
-      );
+            return;
+          }
 
-    } finally {
+          // ================= CLOUD
+          const res =
+            await API.get('/rooms');
 
-      isFetching = false;
-    }
-  };
+          setRooms(res.data);
 
-  // ================= FIRST LOAD
-    fetchRooms();
+          // SAVE CACHE
+          await db.rooms.clear();
 
-    // ================= AUTO REFRESH
-    const interval = setInterval(() => {
+          await db.rooms.bulkPut(
+            res.data
+          );
+
+          console.log(
+            '☁️ ROOMS FROM CLOUD'
+          );
+
+        } catch (err) {
+
+          console.log(
+            'CLOUD FETCH FAILED',
+            err
+          );
+
+          // ================= FALLBACK DEXIE
+          const offlineRooms =
+            await db.rooms.toArray();
+
+          setRooms(offlineRooms);
+
+          console.log(
+            '💻 ROOMS FROM DEXIE'
+          );
+
+        } finally {
+
+          isFetching = false;
+        }
+      };
+
+      // ================= FIRST LOAD
       fetchRooms();
-    }, 10000);
 
-    return () => clearInterval(interval);
+      // ================= AUTO REFRESH
+      const interval = setInterval(() => {
+        fetchRooms();
+      }, 10000);
 
-  }, [token]);
+      return () => clearInterval(interval);
+
+    }, [
+      token,
+      location.pathname
+    ]);
 // ================= AUTO CLOSE =================
     useEffect(() => {
 
