@@ -11,54 +11,37 @@ class MQTTService
 
     public function __construct()
     {
-        $server = '127.0.0.1';
-
-        $port = 1883;
-
-        $clientId =
-            'laravel-client-'
-            . uniqid();
-
-        Log::info('MQTT CONNECT START', [
-            'server' => $server,
-            'port' => $port,
-            'client_id' => $clientId
-        ]);
-
         try {
 
-            $this->mqtt =
-                new MqttClient(
-                    $server,
-                    $port,
-                    $clientId
-                );
+            Log::info('MQTT CONNECT START');
 
-            $connectStart =
-                microtime(true);
+            $server = '127.0.0.1';
+
+            $port = 1883;
+
+            $clientId =
+                'laravel-client-' . uniqid();
+
+            $this->mqtt = new MqttClient(
+                $server,
+                $port,
+                $clientId
+            );
 
             $this->mqtt->connect();
 
-            $connectTime =
-                (microtime(true) - $connectStart) * 1000;
+            Log::info('MQTT CONNECT SUCCESS');
 
-            Log::info(
-                'MQTT CONNECT SUCCESS',
-                [
-                    'time_ms' =>
-                        round($connectTime, 2)
-                ]
-            );
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             Log::error(
                 'MQTT CONNECT FAILED',
                 [
-                    'error' =>
-                        $e->getMessage()
+                    'error' => $e->getMessage()
                 ]
             );
+
+            throw $e;
         }
     }
 
@@ -67,18 +50,15 @@ class MQTTService
         string $message
     ): void {
 
-        Log::info(
-            'MQTT PUBLISH CALLED',
-            [
-                'topic' => $topic,
-                'message' => $message
-            ]
-        );
-
         try {
 
-            $publishStart =
-                microtime(true);
+            Log::info(
+                'MQTT PUBLISH START',
+                [
+                    'topic' => $topic,
+                    'message' => $message
+                ]
+            );
 
             $this->mqtt->publish(
                 $topic,
@@ -87,39 +67,22 @@ class MQTTService
                 false
             );
 
-            $publishTime =
-                (microtime(true) - $publishStart) * 1000;
+            Log::info('MQTT PUBLISH SUCCESS');
 
-            Log::info(
-                'MQTT PUBLISH SUCCESS',
-                [
-                    'topic' => $topic,
-                    'time_ms' =>
-                        round($publishTime, 2)
-                ]
-            );
+            $this->mqtt->disconnect();
 
-            // ================= IMPORTANT
-            // JANGAN DISCONNECT DULU
-            // =================
+            Log::info('MQTT DISCONNECT SUCCESS');
 
-            // $this->mqtt->disconnect();
-
-            // Log::info(
-            //     'MQTT DISCONNECT SUCCESS'
-            // );
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
 
             Log::error(
                 'MQTT PUBLISH FAILED',
                 [
-                    'error' =>
-                        $e->getMessage(),
-
-                    'topic' => $topic
+                    'error' => $e->getMessage()
                 ]
             );
+
+            throw $e;
         }
     }
 }
