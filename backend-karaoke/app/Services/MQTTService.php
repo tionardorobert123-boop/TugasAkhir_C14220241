@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use PhpMqtt\Client\MqttClient;
+use Illuminate\Support\Facades\Log;
 
 class MQTTService
 {
@@ -34,13 +35,34 @@ class MQTTService
         string $message
     ): void {
 
-        $this->mqtt->publish(
-            $topic,
-            $message,
-            0,
-            false
-        );
+        Log::info('MQTT PUBLISH CALLED', [
+            'topic' => $topic,
+            'message' => $message
+        ]);
 
-        $this->mqtt->disconnect();
+        try {
+
+            $this->mqtt->publish(
+                $topic,
+                $message,
+                0,
+                false
+            );
+
+            Log::info('MQTT PUBLISH SUCCESS', [
+                'topic' => $topic
+            ]);
+
+            $this->mqtt->disconnect();
+
+            Log::info('MQTT DISCONNECT SUCCESS');
+
+        } catch (\Exception $e) {
+
+            Log::error('MQTT PUBLISH FAILED', [
+                'error' => $e->getMessage(),
+                'topic' => $topic
+            ]);
+        }
     }
 }
