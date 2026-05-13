@@ -9,74 +9,30 @@ export function useTransactions(selectedDate?: string) {
 
   const today = new Date().toISOString().split("T")[0];
   const filterDate = selectedDate || today;
+// ================= LOAD TRANSACTIONS
+useEffect(() => {
 
- // ================= LOAD TRANSACTIONS =================
-    useEffect(() => {
+  if (!token) return;
 
-      if (!token) return;
+  let isFetching = false;
 
-      let isFetching = false;
+  const fetchTransactions = async () => {
 
-      const fetchTransactions = async () => {
+    // ================= PREVENT OVERLAP
+    if (isFetching) return;
 
-        // ================= PREVENT OVERLAP
-        if (isFetching) return;
+    isFetching = true;
 
-        isFetching = true;
-
+    try {
+      // ================= ONLINE
+      if (navigator.onLine) {
         try {
+          const res = await API.get(
+            `/transactions/by-date?date=${filterDate}`
+          );
 
-          // ================= ONLINE
-          if (navigator.onLine) {
-
-            try {
-
-              const res = await API.get(
-                `/transactions/by-date?date=${filterDate}`
-              );
-
-              const filtered =
-                (res.data || []).filter(
-                  (trx: any) => {
-
-                  const trxDate =
-                    trx.created_at?.slice(0, 10);
-
-                  return trxDate === filterDate;
-                });
-
-              // UPDATE UI
-              setTransactions(filtered);
-
-              // SAVE DEXIE
-              await db.transactions.clear();
-
-              await db.transactions.bulkPut(
-                filtered
-              );
-
-              console.log(
-                '☁️ TRANSACTIONS FROM CLOUD'
-              );
-
-              return;
-
-            } catch (err) {
-
-              console.log(
-                'TRANSACTION CLOUD FAILED',
-                err
-              );
-            }
-          }
-
-          // ================= OFFLINE
-          const offlineTransactions =
-            await db.transactions.toArray();
-
-          // FILTER LOCAL DATE
-          const filteredOffline =
-            offlineTransactions.filter(
+          const filtered =
+            (res.data || []).filter(
               (trx: any) => {
 
               const trxDate =
@@ -85,39 +41,71 @@ export function useTransactions(selectedDate?: string) {
               return trxDate === filterDate;
             });
 
-          console.log(
-            '💻 TRANSACTIONS FROM DEXIE'
+          // UPDATE UI
+          setTransactions(filtered);
+
+          // SAVE DEXIE
+          await db.transactions.clear();
+
+          await db.transactions.bulkPut(
+            filtered
           );
 
-          setTransactions(
-            filteredOffline
+          console.log(
+            '☁️ TRANSACTIONS FROM CLOUD'
           );
+
+          return;
 
         } catch (err) {
 
           console.log(
-            'FETCH TRANSACTION ERROR',
+            'TRANSACTION CLOUD FAILED',
             err
           );
-
-        } finally {
-
-          isFetching = false;
         }
-      };
+      }
 
-      // INITIAL LOAD
-      fetchTransactions();
+      // ================= OFFLINE
+      const offlineTransactions =
+        await db.transactions.toArray();
 
-      // AUTO REFRESH
-      const interval = setInterval(() => {
-        fetchTransactions();
-      }, 7000);
+      // FILTER LOCAL DATE
+      const filteredOffline =
+        offlineTransactions.filter(
+          (trx: any) => {
 
-      return () => clearInterval(interval);
+          const trxDate =
+            trx.created_at?.slice(0, 10);
 
-    }, [token, filterDate]);
+          return trxDate === filterDate;
+        });
 
+      console.log(
+        '💻 TRANSACTIONS FROM DEXIE'
+      );
+
+      setTransactions(
+        filteredOffline
+      );
+
+    } catch (err) {
+
+      console.log(
+        'FETCH TRANSACTION ERROR',
+        err
+      );
+
+    } finally {
+
+      isFetching = false;
+    }
+  };
+
+  // INITIAL LOAD ONLY
+  fetchTransactions();
+
+}, [token, filterDate]);
   // ================= SPLIT =================
   const activeRooms = transactions.filter(trx => trx.status === "active");
 
