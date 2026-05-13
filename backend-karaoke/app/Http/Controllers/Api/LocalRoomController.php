@@ -9,6 +9,14 @@ use App\Services\MQTTService;
 
 class LocalRoomController extends Controller
 {
+    protected MQTTService $mqtt;
+
+    public function __construct(
+        MQTTService $mqtt
+    ) {
+        $this->mqtt = $mqtt;
+    }
+
     // =============================
     // OPEN ROOM (LOCAL MQTT ONLY)
     // =============================
@@ -22,10 +30,18 @@ class LocalRoomController extends Controller
             $minutes =
                 (int) $request->duration;
 
-            $mqtt = new MQTTService();
+            Log::info(
+                'LOCAL MQTT OPEN HIT',
+                [
+                    'room_id' => $id,
+                    'duration' => $minutes
+                ]
+            );
 
-            $mqtt->publish(
+            $this->mqtt->publish(
+
                 "room/$id/control",
+
                 json_encode([
                     "room_id" => (int) $id,
                     "action" => "open",
@@ -43,8 +59,11 @@ class LocalRoomController extends Controller
         } catch (\Throwable $e) {
 
             Log::error(
-                'LOCAL OPEN MQTT ERROR: '
-                . $e->getMessage()
+                'LOCAL OPEN MQTT ERROR',
+                [
+                    'room_id' => $id,
+                    'error' => $e->getMessage()
+                ]
             );
 
             return response()->json([
@@ -63,10 +82,17 @@ class LocalRoomController extends Controller
 
         try {
 
-            $mqtt = new MQTTService();
+            Log::info(
+                'LOCAL MQTT CLOSE HIT',
+                [
+                    'room_id' => $id
+                ]
+            );
 
-            $mqtt->publish(
+            $this->mqtt->publish(
+
                 "room/$id/control",
+
                 json_encode([
                     "room_id" => (int) $id,
                     "action" => "close"
@@ -83,8 +109,11 @@ class LocalRoomController extends Controller
         } catch (\Throwable $e) {
 
             Log::error(
-                'LOCAL CLOSE MQTT ERROR: '
-                . $e->getMessage()
+                'LOCAL CLOSE MQTT ERROR',
+                [
+                    'room_id' => $id,
+                    'error' => $e->getMessage()
+                ]
             );
 
             return response()->json([
@@ -108,10 +137,18 @@ class LocalRoomController extends Controller
             $minutes =
                 (int) $request->minutes;
 
-            $mqtt = new MQTTService();
+            Log::info(
+                'LOCAL MQTT EXTEND HIT',
+                [
+                    'room_id' => $id,
+                    'minutes' => $minutes
+                ]
+            );
 
-            $mqtt->publish(
+            $this->mqtt->publish(
+
                 "room/$id/control",
+
                 json_encode([
                     "room_id" => (int) $id,
                     "action" => "extend",
@@ -129,8 +166,11 @@ class LocalRoomController extends Controller
         } catch (\Throwable $e) {
 
             Log::error(
-                'LOCAL EXTEND MQTT ERROR: '
-                . $e->getMessage()
+                'LOCAL EXTEND MQTT ERROR',
+                [
+                    'room_id' => $id,
+                    'error' => $e->getMessage()
+                ]
             );
 
             return response()->json([
