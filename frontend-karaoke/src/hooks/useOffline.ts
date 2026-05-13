@@ -1,75 +1,68 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState }
+from 'react'
 
-import { syncRoomActions }
-  from '../lib/sync/syncRoomActions'
+import {
+  syncRoomActions
+}
+from '../lib/sync/syncRoomActions'
+
+import {
+  isCloudOnline
+}
+from '../utils/network'
 
 export default function useOffline() {
 
   const [hasInternet,
     setHasInternet] =
-      useState(navigator.onLine)
+      useState(false)
 
   useEffect(() => {
 
-    // ================= ONLINE
-    const goOnline =
+    let interval: any;
+
+    // ================= CHECK CLOUD
+    const checkConnection =
       async () => {
 
-      console.log(
-        '☁️ INTERNET ONLINE'
-      )
+      const online =
+        await isCloudOnline();
 
-      setHasInternet(true)
+      setHasInternet(online);
 
-      // AUTO SYNC
-      await syncRoomActions()
-    }
+      if (online) {
 
-    // ================= OFFLINE
-    const goOffline = () => {
+        console.log(
+          '☁️ INTERNET ONLINE'
+        );
 
-      console.log(
-        '📴 OFFLINE MODE'
-      )
+        // AUTO SYNC
+        await syncRoomActions();
 
-      setHasInternet(false)
-    }
+      } else {
+
+        console.log(
+          '📴 OFFLINE MODE'
+        );
+      }
+    };
 
     // ================= FIRST CHECK
-    if (navigator.onLine) {
+    checkConnection();
 
-      goOnline()
+    // ================= AUTO CHECK
+    interval = setInterval(() => {
 
-    } else {
+      checkConnection();
 
-      goOffline()
-    }
-
-    // ================= EVENT LISTENER
-    window.addEventListener(
-      'online',
-      goOnline
-    )
-
-    window.addEventListener(
-      'offline',
-      goOffline
-    )
+    }, 5000);
 
     return () => {
 
-      window.removeEventListener(
-        'online',
-        goOnline
-      )
+      clearInterval(interval);
+    };
 
-      window.removeEventListener(
-        'offline',
-        goOffline
-      )
-    }
+  }, []);
 
-  }, [])
-
-  return hasInternet
+  return hasInternet;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
+import {isCloudOnline} from '../utils/network'
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -28,17 +29,20 @@ export function useTransactions(selectedDate?: string) {
 
           // ================= LOAD CACHE FIRST
           const cachedTransactions =
+
             await db.transactions.toArray();
 
           const filteredCache =
+
             cachedTransactions.filter(
               (trx: any) => {
 
-              const trxDate =
-                trx.created_at?.slice(0, 10);
+                const trxDate =
+                  trx.created_at?.slice(0, 10);
 
-              return trxDate === filterDate;
-            });
+                return trxDate === filterDate;
+              }
+            );
 
           if (filteredCache.length > 0) {
 
@@ -51,29 +55,46 @@ export function useTransactions(selectedDate?: string) {
             );
           }
 
-          // ================= ONLINE
-          if (navigator.onLine) {
+          // ================= CHECK CLOUD
+          const cloudOnline =
+
+            await isCloudOnline();
+
+          console.log(
+
+            cloudOnline
+              ? '☁️ CLOUD ONLINE'
+              : '📴 CLOUD OFFLINE'
+          );
+
+          // ================= CLOUD FETCH
+          if (cloudOnline) {
 
             try {
 
               const res = await API.get(
+
                 `/transactions/by-date?date=${filterDate}`
               );
 
               const filtered =
+
                 (res.data || []).filter(
                   (trx: any) => {
 
-                  const trxDate =
-                    trx.created_at?.slice(0, 10);
+                    const trxDate =
+                      trx.created_at?.slice(0, 10);
 
-                  return trxDate === filterDate;
-                });
+                    return trxDate === filterDate;
+                  }
+                );
 
-              // UPDATE UI
-              setTransactions(filtered);
+              // ================= UPDATE UI
+              setTransactions(
+                filtered
+              );
 
-              // UPDATE DEXIE
+              // ================= UPDATE DEXIE
               await db.transactions.clear();
 
               await db.transactions.bulkPut(
@@ -95,19 +116,22 @@ export function useTransactions(selectedDate?: string) {
             }
           }
 
-          // ================= OFFLINE
+          // ================= OFFLINE DEXIE
           const offlineTransactions =
+
             await db.transactions.toArray();
 
           const filteredOffline =
+
             offlineTransactions.filter(
               (trx: any) => {
 
-              const trxDate =
-                trx.created_at?.slice(0, 10);
+                const trxDate =
+                  trx.created_at?.slice(0, 10);
 
-              return trxDate === filterDate;
-            });
+                return trxDate === filterDate;
+              }
+            );
 
           console.log(
             'TRANSACTIONS FROM DEXIE'
@@ -130,10 +154,13 @@ export function useTransactions(selectedDate?: string) {
         }
       };
 
-      // INITIAL LOAD ONLY
+      // ================= INITIAL LOAD
       fetchTransactions();
 
-    }, [token, filterDate]);
+    }, [
+      token,
+      filterDate
+    ]);
 
   // ================= SPLIT =================
   const activeRooms = transactions.filter(trx => trx.status === "active");

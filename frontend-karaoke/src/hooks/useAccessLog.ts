@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
+import {isCloudOnline} from '../utils/network'
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -38,116 +39,134 @@ export default function useAccessLog(initialDate?: string) {
   const itemsPerPage = 9;
 
     // ================= FETCH ACCESS LOGS
-    const fetchLogs = async () => {
+      const fetchLogs = async () => {
 
-      if (loading) return;
+        if (loading) return;
 
-      setLoading(true);
+        setLoading(true);
 
-      try {
+        try {
 
-        // ================= LOAD CACHE FIRST
-        const cachedLogs =
-          await db.logs.toArray();
+          // ================= LOAD CACHE FIRST
+          const cachedLogs =
+            await db.logs.toArray();
 
-        const filteredCache =
-          cachedLogs.filter(
-            (log: any) => {
+          const filteredCache =
 
-            const logDate =
-              log.timestamp?.slice(0, 10);
-
-            return logDate === selectedDate;
-          });
-
-        if (filteredCache.length > 0) {
-
-          setLogs(filteredCache);
-
-          console.log(
-            'LOGS CACHE LOADED'
-          );
-        }
-
-        // ================= ONLINE
-        if (navigator.onLine) {
-
-          try {
-
-            const res = await API.get(
-              `/access-logs?date=${selectedDate}`
-            );
-
-            const data =
-              res.data || [];
-
-            const filtered =
-              data.filter(
-                (log: any) => {
+            cachedLogs.filter(
+              (log: any) => {
 
                 const logDate =
                   log.timestamp?.slice(0, 10);
 
                 return logDate === selectedDate;
-              });
-
-            // UPDATE UI
-            setLogs(filtered);
-
-            // UPDATE DEXIE
-            await db.logs.clear();
-
-            await db.logs.bulkPut(
-              filtered
+              }
             );
 
-            console.log(
-              '☁️ LOGS FROM CLOUD'
-            );
+          if (filteredCache.length > 0) {
 
-            return;
-
-          } catch (err) {
+            setLogs(filteredCache);
 
             console.log(
-              'LOG CLOUD FAILED',
-              err
+              'LOGS CACHE LOADED'
             );
           }
+
+          // ================= CHECK CLOUD
+          const cloudOnline =
+            await isCloudOnline();
+
+          console.log(
+
+            cloudOnline
+              ? '☁️ CLOUD ONLINE'
+              : '📴 CLOUD OFFLINE'
+          );
+
+          // ================= CLOUD FETCH
+          if (cloudOnline) {
+
+            try {
+
+              const res = await API.get(
+
+                `/access-logs?date=${selectedDate}`
+              );
+
+              const data =
+                res.data || [];
+
+              const filtered =
+
+                data.filter(
+                  (log: any) => {
+
+                    const logDate =
+                      log.timestamp?.slice(0, 10);
+
+                    return logDate === selectedDate;
+                  }
+                );
+
+              // ================= UPDATE UI
+              setLogs(filtered);
+
+              // ================= UPDATE DEXIE
+              await db.logs.clear();
+
+              await db.logs.bulkPut(
+                filtered
+              );
+
+              console.log(
+                '☁️ LOGS FROM CLOUD'
+              );
+
+              return;
+
+            } catch (err) {
+
+              console.log(
+                'LOG CLOUD FAILED',
+                err
+              );
+            }
+          }
+
+          // ================= OFFLINE DEXIE
+          const offlineLogs =
+            await db.logs.toArray();
+
+          const filteredOffline =
+
+            offlineLogs.filter(
+              (log: any) => {
+
+                const logDate =
+                  log.timestamp?.slice(0, 10);
+
+                return logDate === selectedDate;
+              }
+            );
+
+          console.log(
+            'LOGS FROM DEXIE'
+          );
+
+          setLogs(filteredOffline);
+
+        } catch (err) {
+
+          console.log(
+            'FETCH LOG ERROR',
+            err
+          );
+
+        } finally {
+
+          setLoading(false);
         }
-
-        // ================= OFFLINE
-        const offlineLogs =
-          await db.logs.toArray();
-
-        const filteredOffline =
-          offlineLogs.filter(
-            (log: any) => {
-
-            const logDate =
-              log.timestamp?.slice(0, 10);
-
-            return logDate === selectedDate;
-          });
-
-        console.log(
-          'LOGS FROM DEXIE'
-        );
-
-        setLogs(filteredOffline);
-
-      } catch (err) {
-
-        console.log(
-          'FETCH LOG ERROR',
-          err
-        );
-
-      } finally {
-
-        setLoading(false);
       }
-    }
 
   const handleRefresh = async () => {
     setRefreshing(true);

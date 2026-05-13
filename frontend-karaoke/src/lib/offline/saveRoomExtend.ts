@@ -4,10 +4,15 @@ import { db } from '../db'
 
 import { v4 as uuidv4 } from 'uuid'
 
+import {
+  isCloudOnline
+} from '../../utils/network'
+
 interface Payload {
   room_id: number
   minutes: number
 }
+
 export async function saveRoomExtend(
   data: Payload
 ) {
@@ -35,9 +40,11 @@ export async function saveRoomExtend(
       `/local/rooms/${data.room_id}/extend`,
 
       {
-        minutes: data.minutes,
+        minutes:
+          data.minutes,
 
-        temp_id: payload.temp_id
+        temp_id:
+          payload.temp_id
       }
     )
 
@@ -53,8 +60,19 @@ export async function saveRoomExtend(
     )
   }
 
-  // ================= ONLINE CLOUD SYNC
-  if (navigator.onLine) {
+  // ================= CHECK CLOUD INTERNET
+  const cloudOnline =
+    await isCloudOnline()
+
+  console.log(
+
+    cloudOnline
+      ? '☁️ CLOUD ONLINE'
+      : '📴 CLOUD OFFLINE'
+  )
+
+  // ================= CLOUD SYNC
+  if (cloudOnline) {
 
     try {
 
@@ -63,9 +81,11 @@ export async function saveRoomExtend(
         `/rooms/${data.room_id}/extend`,
 
         {
-          minutes: data.minutes,
+          minutes:
+            data.minutes,
 
-          temp_id: payload.temp_id
+          temp_id:
+            payload.temp_id
         }
       )
 
@@ -93,14 +113,19 @@ export async function saveRoomExtend(
   if (room?.end_time) {
 
     const currentEnd =
-      new Date(room.end_time).getTime()
+      new Date(
+        room.end_time
+      ).getTime()
 
     const newEnd =
+
       currentEnd +
       (data.minutes * 60000)
 
     await db.rooms.update(
+
       data.room_id,
+
       {
         end_time:
           new Date(newEnd)
@@ -109,7 +134,7 @@ export async function saveRoomExtend(
     )
   }
 
-  // ================= SAVE QUEUE
+  // ================= SAVE OFFLINE QUEUE
   await db.room_actions.add(
     payload
   )

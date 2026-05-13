@@ -4,9 +4,14 @@ import { db } from '../db'
 
 import { v4 as uuidv4 } from 'uuid'
 
+import {
+  isCloudOnline
+} from '../../utils/network'
+
 interface Payload {
   room_id: number
 }
+
 export async function saveRoomClose(
   data: Payload
 ) {
@@ -32,7 +37,8 @@ export async function saveRoomClose(
       `/local/rooms/${data.room_id}/close`,
 
       {
-        temp_id: payload.temp_id
+        temp_id:
+          payload.temp_id
       }
     )
 
@@ -48,8 +54,19 @@ export async function saveRoomClose(
     )
   }
 
-  // ================= ONLINE CLOUD SYNC
-  if (navigator.onLine) {
+  // ================= CHECK CLOUD INTERNET
+  const cloudOnline =
+    await isCloudOnline()
+
+  console.log(
+
+    cloudOnline
+      ? '☁️ CLOUD ONLINE'
+      : '📴 CLOUD OFFLINE'
+  )
+
+  // ================= CLOUD SYNC
+  if (cloudOnline) {
 
     try {
 
@@ -58,7 +75,8 @@ export async function saveRoomClose(
         `/rooms/${data.room_id}/close`,
 
         {
-          temp_id: payload.temp_id
+          temp_id:
+            payload.temp_id
         }
       )
 
@@ -79,7 +97,9 @@ export async function saveRoomClose(
 
   // ================= UPDATE LOCAL ROOM
   await db.rooms.update(
+
     data.room_id,
+
     {
       status: 'available',
 
@@ -89,7 +109,7 @@ export async function saveRoomClose(
     }
   )
 
-  // ================= SAVE QUEUE
+  // ================= SAVE OFFLINE QUEUE
   await db.room_actions.add(
     payload
   )

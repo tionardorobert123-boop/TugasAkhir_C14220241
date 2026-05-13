@@ -2,16 +2,22 @@ import axios from 'axios'
 
 import { db } from '../db'
 
+import {isCloudOnline} from '../../utils/network'
+
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
 export async function syncRoomActions() {
 
+  // ================= REAL CLOUD CHECK
+  const cloudOnline =
+    await isCloudOnline()
+
   // ================= OFFLINE
-  if (!navigator.onLine) {
+  if (!cloudOnline) {
 
     console.log(
-      '📴 OFFLINE - SYNC SKIPPED'
+      '📴 CLOUD OFFLINE - SYNC SKIPPED'
     )
 
     return
@@ -19,9 +25,13 @@ export async function syncRoomActions() {
 
   // ================= GET QUEUE
   const unsynced =
+
     await db.room_actions
+
       .where('sync_status')
+
       .equals(0)
+
       .toArray()
 
   // ================= EMPTY
@@ -44,15 +54,18 @@ export async function syncRoomActions() {
 
       // ================= TOKEN
       const token =
+
         localStorage.getItem(
           'token'
         )
 
       const headers = token
+
         ? {
             Authorization:
               `Bearer ${token}`
           }
+
         : {}
 
       // ================= OPEN
@@ -75,6 +88,7 @@ export async function syncRoomActions() {
 
           {
             headers,
+
             timeout: 5000
           }
         )
@@ -97,6 +111,7 @@ export async function syncRoomActions() {
 
           {
             headers,
+
             timeout: 5000
           }
         )
@@ -116,6 +131,7 @@ export async function syncRoomActions() {
 
           {
             headers,
+
             timeout: 5000
           }
         )
@@ -123,7 +139,9 @@ export async function syncRoomActions() {
 
       // ================= SUCCESS
       await db.room_actions.update(
+
         item.id!,
+
         {
           sync_status: 1
         }
@@ -140,7 +158,7 @@ export async function syncRoomActions() {
         err
       )
 
-      // STOP LOOP
+      // ================= STOP LOOP
       // supaya tidak spam request
       break
     }
