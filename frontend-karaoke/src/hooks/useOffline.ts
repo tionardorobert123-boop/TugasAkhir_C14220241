@@ -11,62 +11,63 @@ export default function useOffline() {
 
   useEffect(() => {
 
-    const checkInternet =
+    // ================= ONLINE
+    const goOnline =
       async () => {
 
-      // ================= OFFLINE
-      if (!navigator.onLine) {
-
-        setHasInternet(false)
-
-        return
-      }
-
-      try {
-
-        // PING CLOUD API
-        const res = await fetch(
-          'https://tugasakhirc14220241.up.railway.app/api/ping'
-        )
-
-        if (res.ok) {
-
-          setHasInternet(true)
-
-          console.log(
-            '☁️ INTERNET ONLINE'
-          )
-
-          // AUTO SYNC
-          syncRoomActions()
-
-        } else {
-
-          setHasInternet(false)
-        }
-
-      } catch {
-
-        setHasInternet(false)
-
-        console.log(
-          '💻 OFFLINE MODE'
-        )
-      }
-    }
-
-    // FIRST CHECK
-    checkInternet()
-
-    // INTERVAL CHECK
-    const interval =
-      setInterval(
-        checkInternet,
-        5000
+      console.log(
+        '☁️ INTERNET ONLINE'
       )
 
-    return () =>
-      clearInterval(interval)
+      setHasInternet(true)
+
+      // AUTO SYNC
+      await syncRoomActions()
+    }
+
+    // ================= OFFLINE
+    const goOffline = () => {
+
+      console.log(
+        '📴 OFFLINE MODE'
+      )
+
+      setHasInternet(false)
+    }
+
+    // ================= FIRST CHECK
+    if (navigator.onLine) {
+
+      goOnline()
+
+    } else {
+
+      goOffline()
+    }
+
+    // ================= EVENT LISTENER
+    window.addEventListener(
+      'online',
+      goOnline
+    )
+
+    window.addEventListener(
+      'offline',
+      goOffline
+    )
+
+    return () => {
+
+      window.removeEventListener(
+        'online',
+        goOnline
+      )
+
+      window.removeEventListener(
+        'offline',
+        goOffline
+      )
+    }
 
   }, [])
 

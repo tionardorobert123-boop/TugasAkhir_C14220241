@@ -135,7 +135,7 @@ useEffect(() => {
     // ================= AUTO REFRESH
     const interval = setInterval(() => {
       fetchRooms();
-    }, 7000);
+    }, 10000);
 
     return () => clearInterval(interval);
 
