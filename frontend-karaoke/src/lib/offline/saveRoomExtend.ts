@@ -8,7 +8,6 @@ interface Payload {
   room_id: number
   minutes: number
 }
-
 export async function saveRoomExtend(
   data: Payload
 ) {
@@ -28,7 +27,33 @@ export async function saveRoomExtend(
     sync_status: 0
   }
 
-  // ================= ONLINE
+  // ================= ALWAYS LOCAL MQTT
+  try {
+
+    await API.post(
+
+      `/local/rooms/${data.room_id}/extend`,
+
+      {
+        minutes: data.minutes,
+
+        temp_id: payload.temp_id
+      }
+    )
+
+    console.log(
+      '📡 ROOM EXTEND LOCAL MQTT'
+    )
+
+  } catch (err) {
+
+    console.log(
+      'LOCAL MQTT EXTEND FAILED',
+      err
+    )
+  }
+
+  // ================= ONLINE CLOUD SYNC
   if (navigator.onLine) {
 
     try {
@@ -57,32 +82,6 @@ export async function saveRoomExtend(
         err
       )
     }
-  }
-
-  // ================= OFFLINE MQTT
-  try {
-
-    await API.post(
-
-      `/local/rooms/${data.room_id}/extend`,
-
-      {
-        minutes: data.minutes,
-
-        temp_id: payload.temp_id
-      }
-    )
-
-    console.log(
-      '📡 ROOM EXTEND LOCAL MQTT'
-    )
-
-  } catch (err) {
-
-    console.log(
-      'LOCAL MQTT EXTEND FAILED',
-      err
-    )
   }
 
   // ================= UPDATE ROOM LOCAL

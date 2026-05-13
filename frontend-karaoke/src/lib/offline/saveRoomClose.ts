@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid'
 interface Payload {
   room_id: number
 }
-
 export async function saveRoomClose(
   data: Payload
 ) {
@@ -25,7 +24,31 @@ export async function saveRoomClose(
     sync_status: 0
   }
 
-  // ================= ONLINE
+  // ================= ALWAYS LOCAL MQTT
+  try {
+
+    await API.post(
+
+      `/local/rooms/${data.room_id}/close`,
+
+      {
+        temp_id: payload.temp_id
+      }
+    )
+
+    console.log(
+      '📡 ROOM CLOSE LOCAL MQTT'
+    )
+
+  } catch (err) {
+
+    console.log(
+      'LOCAL MQTT CLOSE FAILED',
+      err
+    )
+  }
+
+  // ================= ONLINE CLOUD SYNC
   if (navigator.onLine) {
 
     try {
@@ -35,8 +58,7 @@ export async function saveRoomClose(
         `/rooms/${data.room_id}/close`,
 
         {
-          temp_id:
-            payload.temp_id
+          temp_id: payload.temp_id
         }
       )
 
@@ -53,31 +75,6 @@ export async function saveRoomClose(
         err
       )
     }
-  }
-
-  // ================= OFFLINE MQTT
-  try {
-
-    await API.post(
-
-      `/local/rooms/${data.room_id}/close`,
-
-      {
-        temp_id:
-          payload.temp_id
-      }
-    )
-
-    console.log(
-      '📡 ROOM CLOSE LOCAL MQTT'
-    )
-
-  } catch (err) {
-
-    console.log(
-      'LOCAL MQTT CLOSE FAILED',
-      err
-    )
   }
 
   // ================= UPDATE LOCAL ROOM
