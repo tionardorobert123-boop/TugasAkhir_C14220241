@@ -24,6 +24,7 @@ export function useRoomControl() {
 
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [extendRoomId, setExtendRoomId] = useState<number | null>(null);
+  const location = useLocation()
 
   const openExtendModal = (roomId: number) => {
     setExtendRoomId(roomId);
