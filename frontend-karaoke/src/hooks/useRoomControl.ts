@@ -5,6 +5,7 @@ import { saveRoomExtend } from "../lib/offline/saveRoomExtend";
 import { saveRoomClose } from "../lib/offline/saveRoomClose";
 import { db } from "../lib/db";
 import { useLocation } from 'react-router-dom'
+import echo from '../lib/echo';
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -159,12 +160,39 @@ export function useRoomControl() {
       // ================= FETCH BACKGROUND
       fetchRooms();
 
+      // ================= REALTIME WEBSOCKET
+      echo.channel('rooms')
+
+        .listen(
+          'RoomStatusUpdated',
+
+          async (e: any) => {
+
+            console.log(
+              'ROOM UPDATE REALTIME',
+              e
+            );
+
+            setRooms(e.rooms);
+
+            // UPDATE CACHE
+            await db.rooms.clear();
+
+            await db.rooms.bulkPut(
+              e.rooms
+            );
+          }
+        );
+
       // ================= AUTO REFRESH
       const interval = setInterval(() => {
         fetchRooms();
       }, 10000);
 
-      return () => clearInterval(interval);
+      return () => {
+      clearInterval(interval);
+      echo.leave('rooms');
+    };
 
     }, [
       token,
