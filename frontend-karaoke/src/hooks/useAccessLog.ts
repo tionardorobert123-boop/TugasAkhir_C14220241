@@ -37,7 +37,7 @@ export default function useAccessLog(initialDate?: string) {
 
   const itemsPerPage = 9;
 
-  // ================= FETCH ACCESS LOGS =================
+    // ================= FETCH ACCESS LOGS
     const fetchLogs = async () => {
 
       if (loading) return;
@@ -45,6 +45,29 @@ export default function useAccessLog(initialDate?: string) {
       setLoading(true);
 
       try {
+
+        // ================= LOAD CACHE FIRST
+        const cachedLogs =
+          await db.logs.toArray();
+
+        const filteredCache =
+          cachedLogs.filter(
+            (log: any) => {
+
+            const logDate =
+              log.timestamp?.slice(0, 10);
+
+            return logDate === selectedDate;
+          });
+
+        if (filteredCache.length > 0) {
+
+          setLogs(filteredCache);
+
+          console.log(
+            'LOGS CACHE LOADED'
+          );
+        }
 
         // ================= ONLINE
         if (navigator.onLine) {
@@ -55,22 +78,28 @@ export default function useAccessLog(initialDate?: string) {
               `/access-logs?date=${selectedDate}`
             );
 
-            const data = res.data || [];
+            const data =
+              res.data || [];
 
             const filtered =
-              data.filter((log: any) => {
+              data.filter(
+                (log: any) => {
 
-              const logDate =
-                log.timestamp?.slice(0, 10);
+                const logDate =
+                  log.timestamp?.slice(0, 10);
 
-              return logDate === selectedDate;
-            });
+                return logDate === selectedDate;
+              });
 
+            // UPDATE UI
             setLogs(filtered);
 
+            // UPDATE DEXIE
             await db.logs.clear();
 
-            await db.logs.bulkPut(filtered);
+            await db.logs.bulkPut(
+              filtered
+            );
 
             console.log(
               '☁️ LOGS FROM CLOUD'
@@ -102,7 +131,7 @@ export default function useAccessLog(initialDate?: string) {
           });
 
         console.log(
-          '💻 LOGS FROM DEXIE'
+          'LOGS FROM DEXIE'
         );
 
         setLogs(filteredOffline);
@@ -118,7 +147,7 @@ export default function useAccessLog(initialDate?: string) {
 
         setLoading(false);
       }
-    };
+    }
 
   const handleRefresh = async () => {
     setRefreshing(true);

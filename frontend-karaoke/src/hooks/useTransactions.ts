@@ -9,30 +9,29 @@ export function useTransactions(selectedDate?: string) {
 
   const today = new Date().toISOString().split("T")[0];
   const filterDate = selectedDate || today;
+
 // ================= LOAD TRANSACTIONS
-useEffect(() => {
+    useEffect(() => {
 
-  if (!token) return;
+      if (!token) return;
 
-  let isFetching = false;
+      let isFetching = false;
 
-  const fetchTransactions = async () => {
+      const fetchTransactions = async () => {
 
-    // ================= PREVENT OVERLAP
-    if (isFetching) return;
+        // ================= PREVENT OVERLAP
+        if (isFetching) return;
 
-    isFetching = true;
+        isFetching = true;
 
-    try {
-      // ================= ONLINE
-      if (navigator.onLine) {
         try {
-          const res = await API.get(
-            `/transactions/by-date?date=${filterDate}`
-          );
 
-          const filtered =
-            (res.data || []).filter(
+          // ================= LOAD CACHE FIRST
+          const cachedTransactions =
+            await db.transactions.toArray();
+
+          const filteredCache =
+            cachedTransactions.filter(
               (trx: any) => {
 
               const trxDate =
@@ -41,71 +40,101 @@ useEffect(() => {
               return trxDate === filterDate;
             });
 
-          // UPDATE UI
-          setTransactions(filtered);
+          if (filteredCache.length > 0) {
 
-          // SAVE DEXIE
-          await db.transactions.clear();
+            setTransactions(
+              filteredCache
+            );
 
-          await db.transactions.bulkPut(
-            filtered
-          );
+            console.log(
+              'TRANSACTIONS CACHE LOADED'
+            );
+          }
+
+          // ================= ONLINE
+          if (navigator.onLine) {
+
+            try {
+
+              const res = await API.get(
+                `/transactions/by-date?date=${filterDate}`
+              );
+
+              const filtered =
+                (res.data || []).filter(
+                  (trx: any) => {
+
+                  const trxDate =
+                    trx.created_at?.slice(0, 10);
+
+                  return trxDate === filterDate;
+                });
+
+              // UPDATE UI
+              setTransactions(filtered);
+
+              // UPDATE DEXIE
+              await db.transactions.clear();
+
+              await db.transactions.bulkPut(
+                filtered
+              );
+
+              console.log(
+                'TRANSACTIONS FROM CLOUD'
+              );
+
+              return;
+
+            } catch (err) {
+
+              console.log(
+                'TRANSACTION CLOUD FAILED',
+                err
+              );
+            }
+          }
+
+          // ================= OFFLINE
+          const offlineTransactions =
+            await db.transactions.toArray();
+
+          const filteredOffline =
+            offlineTransactions.filter(
+              (trx: any) => {
+
+              const trxDate =
+                trx.created_at?.slice(0, 10);
+
+              return trxDate === filterDate;
+            });
 
           console.log(
-            '☁️ TRANSACTIONS FROM CLOUD'
+            'TRANSACTIONS FROM DEXIE'
           );
 
-          return;
+          setTransactions(
+            filteredOffline
+          );
 
         } catch (err) {
 
           console.log(
-            'TRANSACTION CLOUD FAILED',
+            'FETCH TRANSACTION ERROR',
             err
           );
+
+        } finally {
+
+          isFetching = false;
         }
-      }
+      };
 
-      // ================= OFFLINE
-      const offlineTransactions =
-        await db.transactions.toArray();
+      // INITIAL LOAD ONLY
+      fetchTransactions();
 
-      // FILTER LOCAL DATE
-      const filteredOffline =
-        offlineTransactions.filter(
-          (trx: any) => {
+    }, [token, filterDate]);
 
-          const trxDate =
-            trx.created_at?.slice(0, 10);
-
-          return trxDate === filterDate;
-        });
-
-      console.log(
-        '💻 TRANSACTIONS FROM DEXIE'
-      );
-
-      setTransactions(
-        filteredOffline
-      );
-
-    } catch (err) {
-
-      console.log(
-        'FETCH TRANSACTION ERROR',
-        err
-      );
-
-    } finally {
-
-      isFetching = false;
-    }
-  };
-
-  // INITIAL LOAD ONLY
-  fetchTransactions();
-
-}, [token, filterDate]);
   // ================= SPLIT =================
   const activeRooms = transactions.filter(trx => trx.status === "active");
 

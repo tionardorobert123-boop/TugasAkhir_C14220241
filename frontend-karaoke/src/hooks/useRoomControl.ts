@@ -66,7 +66,7 @@ export function useRoomControl() {
 
       if (!token) return;
 
-      // ================= ONLY ROOM PAGE
+      // ================= ONLY DASHBOARD
       if (
         location.pathname !== '/dashboard'
       ) {
@@ -74,6 +74,21 @@ export function useRoomControl() {
       }
 
       let isFetching = false;
+
+      const loadCachedRooms = async () => {
+
+        const cachedRooms =
+          await db.rooms.toArray();
+
+        if (cachedRooms.length > 0) {
+
+          setRooms(cachedRooms);
+
+          console.log(
+            'ROOMS CACHE LOADED'
+          );
+        }
+      };
 
       const fetchRooms = async () => {
 
@@ -93,7 +108,7 @@ export function useRoomControl() {
             setRooms(offlineRooms);
 
             console.log(
-              '💻 ROOMS FROM DEXIE'
+              'ROOMS FROM DEXIE'
             );
 
             return;
@@ -113,7 +128,7 @@ export function useRoomControl() {
           );
 
           console.log(
-            '☁️ ROOMS FROM CLOUD'
+            'ROOMS FROM CLOUD'
           );
 
         } catch (err) {
@@ -123,14 +138,13 @@ export function useRoomControl() {
             err
           );
 
-          // ================= FALLBACK DEXIE
           const offlineRooms =
             await db.rooms.toArray();
 
           setRooms(offlineRooms);
 
           console.log(
-            '💻 ROOMS FROM DEXIE'
+            'ROOMS FROM DEXIE'
           );
 
         } finally {
@@ -139,7 +153,10 @@ export function useRoomControl() {
         }
       };
 
-      // ================= FIRST LOAD
+      // ================= LOAD CACHE FIRST
+      loadCachedRooms();
+
+      // ================= FETCH BACKGROUND
       fetchRooms();
 
       // ================= AUTO REFRESH
