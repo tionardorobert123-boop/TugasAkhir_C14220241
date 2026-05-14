@@ -4,16 +4,13 @@ import { db } from '../db'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import {
-  isCloudOnline
-} from '../../utils/network'
-
 interface Payload {
   room_id: number
 }
 
 export async function saveRoomClose(
-  data: Payload
+  data: Payload,
+  cloudOnline: boolean
 ) {
 
   const payload = {
@@ -53,17 +50,6 @@ export async function saveRoomClose(
       err
     )
   }
-
-  // ================= CHECK CLOUD INTERNET
-  const cloudOnline =
-    await isCloudOnline()
-
-  console.log(
-
-    cloudOnline
-      ? '☁️ CLOUD ONLINE'
-      : '📴 CLOUD OFFLINE'
-  )
 
   // ================= CLOUD SYNC
   if (cloudOnline) {

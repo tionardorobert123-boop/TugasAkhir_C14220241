@@ -2,16 +2,14 @@ import axios from 'axios'
 
 import { db } from '../db'
 
-import {isCloudOnline} from '../../utils/network'
-
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
-export async function syncRoomActions() {
+export async function syncRoomActions(
 
-  // ================= REAL CLOUD CHECK
-  const cloudOnline =
-    await isCloudOnline()
+  cloudOnline: boolean
+
+) {
 
   // ================= OFFLINE
   if (!cloudOnline) {
@@ -159,7 +157,6 @@ export async function syncRoomActions() {
       )
 
       // ================= STOP LOOP
-      // supaya tidak spam request
       break
     }
   }

@@ -1,68 +1,29 @@
-import { useEffect, useState }
-from 'react'
-
-import {
-  syncRoomActions
-}
-from '../lib/sync/syncRoomActions'
-
-import {
-  isCloudOnline
-}
-from '../utils/network'
+import {useEffect} from 'react'
+import {syncRoomActions} from '../lib/sync/syncRoomActions'
+import {useCloud} from '../context/CloudContext'
 
 export default function useOffline() {
-
-  const [hasInternet,
-    setHasInternet] =
-      useState(false)
-
+  const {cloudOnline} = useCloud()
   useEffect(() => {
+    // ================= ONLINE
+    if (cloudOnline) {
 
-    let interval: any;
+      console.log(
+        '☁️ INTERNET ONLINE'
+      )
+      // ================= AUTO SYNC
+      syncRoomActions(
+        cloudOnline
+      )
 
-    // ================= CHECK CLOUD
-    const checkConnection =
-      async () => {
+    } else {
 
-      const online =
-        await isCloudOnline();
+      console.log(
+        '📴 OFFLINE MODE'
+      )
+    }
 
-      setHasInternet(online);
+  }, [cloudOnline])
 
-      if (online) {
-
-        console.log(
-          '☁️ INTERNET ONLINE'
-        );
-
-        // AUTO SYNC
-        await syncRoomActions();
-
-      } else {
-
-        console.log(
-          '📴 OFFLINE MODE'
-        );
-      }
-    };
-
-    // ================= FIRST CHECK
-    checkConnection();
-
-    // ================= AUTO CHECK
-    interval = setInterval(() => {
-
-      checkConnection();
-
-    }, 5000);
-
-    return () => {
-
-      clearInterval(interval);
-    };
-
-  }, []);
-
-  return hasInternet;
+  return cloudOnline
 }

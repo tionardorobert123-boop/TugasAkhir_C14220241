@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
-import {isCloudOnline} from '../utils/network'
+import {useCloud} from '../context/CloudContext'
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -38,6 +38,9 @@ export default function useAccessLog(initialDate?: string) {
 
   const itemsPerPage = 9;
 
+     //check internet
+    const {cloudOnline} = useCloud()
+
     // ================= FETCH ACCESS LOGS
       const fetchLogs = async () => {
 
@@ -71,18 +74,6 @@ export default function useAccessLog(initialDate?: string) {
               'LOGS CACHE LOADED'
             );
           }
-
-          // ================= CHECK CLOUD
-          const cloudOnline =
-            await isCloudOnline();
-
-          console.log(
-
-            cloudOnline
-              ? '☁️ CLOUD ONLINE'
-              : '📴 CLOUD OFFLINE'
-          );
-
           // ================= CLOUD FETCH
           if (cloudOnline) {
 

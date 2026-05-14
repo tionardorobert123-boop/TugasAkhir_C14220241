@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
-import {isCloudOnline} from '../utils/network'
+import {useCloud} from '../context/CloudContext'
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -10,6 +10,8 @@ export function useTransactions(selectedDate?: string) {
 
   const today = new Date().toISOString().split("T")[0];
   const filterDate = selectedDate || today;
+  //check internet
+  const {cloudOnline} = useCloud()
 
 // ================= LOAD TRANSACTIONS
     useEffect(() => {
@@ -54,18 +56,6 @@ export function useTransactions(selectedDate?: string) {
               'TRANSACTIONS CACHE LOADED'
             );
           }
-
-          // ================= CHECK CLOUD
-          const cloudOnline =
-
-            await isCloudOnline();
-
-          console.log(
-
-            cloudOnline
-              ? '☁️ CLOUD ONLINE'
-              : '📴 CLOUD OFFLINE'
-          );
 
           // ================= CLOUD FETCH
           if (cloudOnline) {
@@ -159,7 +149,8 @@ export function useTransactions(selectedDate?: string) {
 
     }, [
       token,
-      filterDate
+      filterDate,
+      cloudOnline
     ]);
 
   // ================= SPLIT =================
