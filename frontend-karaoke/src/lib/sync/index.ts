@@ -1,7 +1,14 @@
-import { syncRoomActions }
-from './syncRoomActions'
+import {
+  syncRoomActions
+} from './syncRoomActions'
 
-export async function syncAll() {
+export async function syncAll(
 
-  await syncRoomActions()
+  cloudOnline: boolean
+
+) {
+
+  await syncRoomActions(
+    cloudOnline
+  )
 }
