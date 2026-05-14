@@ -291,6 +291,22 @@ useEffect(() => {
                 )
               );
             }
+
+            console.log({
+
+            room: room.room_id,
+
+            now:
+              new Date(nowTime)
+                .toISOString(),
+
+            end:
+              new Date(end)
+                .toISOString(),
+
+            diff:
+              end - nowTime
+          })
           }
         }
 
