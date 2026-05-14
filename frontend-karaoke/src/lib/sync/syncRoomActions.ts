@@ -80,6 +80,12 @@ export async function syncRoomActions(
             duration:
               item.duration,
 
+              start_time:
+                item.start_time,
+
+              end_time:
+                item.end_time,
+
             temp_id:
               item.temp_id
           },

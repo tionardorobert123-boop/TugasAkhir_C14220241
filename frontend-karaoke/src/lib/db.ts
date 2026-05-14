@@ -81,6 +81,10 @@ export interface OfflineRoomAction {
 
   minutes?: number
 
+  start_time?: string
+
+  end_time?: string
+
   created_at: string
 
   sync_status: number

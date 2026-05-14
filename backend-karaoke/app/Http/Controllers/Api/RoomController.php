@@ -109,9 +109,23 @@ class RoomController extends Controller
             }
         }
 
-        $start = now();
+        $start = $request->filled('start_time')
+
+            ? \Carbon\Carbon::parse(
+                $request->start_time
+            )
+
+            : now();
+
         $hours = $minutes / 60;
-        $end = $start->copy()->addMinutes($minutes);
+
+        $end = $request->filled('end_time')
+
+            ? \Carbon\Carbon::parse(
+                $request->end_time
+            )
+
+            : $start->copy()->addMinutes($minutes);
 
         DB::table('transactions')->insert([
         'temp_id' => $request->temp_id,

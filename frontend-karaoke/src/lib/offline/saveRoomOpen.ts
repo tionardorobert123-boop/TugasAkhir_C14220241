@@ -18,20 +18,25 @@ export async function saveRoomOpen(
 
 ) {
 
+  const startTime =
+  new Date().toISOString()
+
+  const endTime =
+    new Date(
+      Date.now() +
+      data.duration * 60000
+    ).toISOString()
+
   const payload = {
 
     temp_id: uuidv4(),
-
     room_id: data.room_id,
-
     action: 'open' as const,
-
     customer_name: data.customer_name,
-
     duration: data.duration,
-
+     start_time: startTime,
+    end_time: endTime,
     created_at: new Date().toISOString(),
-
     sync_status: 0
   }
 
@@ -88,6 +93,12 @@ export async function saveRoomOpen(
 
           duration:
             data.duration,
+            
+            start_time:
+              startTime,
+
+            end_time:
+              endTime,
 
           temp_id:
             payload.temp_id
@@ -110,15 +121,6 @@ export async function saveRoomOpen(
   }
 
   // ================= OFFLINE LOCAL UPDATE
-  const endTime =
-
-    new Date(
-
-      Date.now() +
-      data.duration * 60000
-
-    ).toISOString()
-
   await db.rooms.update(
 
     data.room_id,
