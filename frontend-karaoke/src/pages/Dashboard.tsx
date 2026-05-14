@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { saveRoomClose } from "../lib/offline/saveRoomClose";
 import RoomSettingModal from "../components/Rooms/RoomSettingModal";
+import { useCloud } from "../context/CloudContext";
 
 function Dashboard() {
   const {
@@ -60,6 +61,11 @@ function Dashboard() {
 
   const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
   const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
+
+  const {
+  cloudOnline
+} = useCloud()
+
 
   const renderRoom = (id: number) => {
     const room = rooms.find((r) => r.room_id === id);
@@ -289,10 +295,13 @@ function Dashboard() {
         total={total}
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
-        onCloseRoom={(roomId) =>
-          saveRoomClose({
+          onCloseRoom={(roomId) =>
+        saveRoomClose(
+          {
             room_id: roomId
-          })
+          },
+          cloudOnline
+        )
         }
       />
 
