@@ -33,6 +33,26 @@ Route::post(
     [IotDeviceController::class, 'sync']
 );
 
+    // LOCAL OFFLINE MQTT ONLY
+        Route::prefix('local')
+            ->group(function () {
+
+            Route::post(
+                '/rooms/{id}/open',
+                [LocalRoomController::class, 'open']
+            );
+
+            Route::post(
+                '/rooms/{id}/close',
+                [LocalRoomController::class, 'close']
+            );
+
+            Route::post(
+                '/rooms/{id}/extend',
+                [LocalRoomController::class, 'extend']
+            );
+        });
+
 // QUICK LOGS
 Route::get('/logs', function () {
     return AccessLog::latest()
@@ -83,25 +103,6 @@ Route::middleware(['auth:sanctum'])
             [RoomExtendController::class, 'extend']
         );
 
-        // LOCAL OFFLINE MQTT ONLY
-        Route::prefix('local')
-            ->group(function () {
-
-            Route::post(
-                '/rooms/{id}/open',
-                [LocalRoomController::class, 'open']
-            );
-
-            Route::post(
-                '/rooms/{id}/close',
-                [LocalRoomController::class, 'close']
-            );
-
-            Route::post(
-                '/rooms/{id}/extend',
-                [LocalRoomController::class, 'extend']
-            );
-        });
     });
 
     // OWNER
