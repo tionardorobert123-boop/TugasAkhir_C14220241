@@ -90,36 +90,6 @@ export async function saveRoomExtend(
     }
   }
 
-  // ================= UPDATE ROOM LOCAL
-  const room =
-    await db.rooms.get(
-      data.room_id
-    )
-
-  if (room?.end_time) {
-
-    const currentEnd =
-      new Date(
-        room.end_time
-      ).getTime()
-
-    const newEnd =
-
-      currentEnd +
-      (data.minutes * 60000)
-
-    await db.rooms.update(
-
-      data.room_id,
-
-      {
-        end_time:
-          new Date(newEnd)
-            .toISOString()
-      }
-    )
-  }
-
   // ================= SAVE OFFLINE QUEUE
   await db.room_actions.add(
     payload,

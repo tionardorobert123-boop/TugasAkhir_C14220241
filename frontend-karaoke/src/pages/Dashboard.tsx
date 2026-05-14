@@ -40,6 +40,7 @@ function Dashboard() {
 
     handleClick,
     startRoom,
+    closeRoom,
     handleOwnerClick,
     handleSettingSuccess,
 
@@ -295,14 +296,7 @@ function Dashboard() {
         total={total}
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
-          onCloseRoom={(roomId) =>
-        saveRoomClose(
-          {
-            room_id: roomId
-          },
-          cloudOnline
-        )
-        }
+        onCloseRoom={closeRoom}
       />
 
       <RoomSettingModal

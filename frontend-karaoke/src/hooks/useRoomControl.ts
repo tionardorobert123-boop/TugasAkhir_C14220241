@@ -397,6 +397,72 @@ useEffect(() => {
         );
       }
     };
+    // ================= CLOSE ROOM =================
+const closeRoom = async (
+  roomId: number
+) => {
+
+  try {
+
+    // ================= SAVE ACTION
+    await saveRoomClose(
+
+      {
+        room_id: roomId
+      },
+
+      cloudOnline
+    );
+
+    // ================= UPDATE UI
+    setRooms(prev =>
+
+      prev.map(room =>
+
+        room.room_id === roomId
+
+          ? {
+
+              ...room,
+
+              status: 'available',
+
+              customer_name: null,
+
+              end_time: null
+            }
+
+          : room
+      )
+    );
+
+    // ================= UPDATE DEXIE
+    await db.rooms.update(
+
+      roomId,
+
+      {
+        status: 'available',
+
+        customer_name: null,
+
+        end_time: null
+      }
+    );
+
+    console.log(
+      'ROOM CLOSE SUCCESS'
+    );
+
+  } catch (err) {
+
+    console.log(
+      'ROOM CLOSE ERROR',
+      err
+    );
+  }
+};
+
   // ================= EXTEND =================
     const extendRoom = async (
 
@@ -564,6 +630,7 @@ useEffect(() => {
     handleClick,
     startRoom,
     extendRoom,
+    closeRoom,
     handleOwnerClick,
     handleSettingSuccess,
 

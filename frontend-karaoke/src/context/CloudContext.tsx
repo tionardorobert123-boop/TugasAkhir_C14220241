@@ -141,7 +141,7 @@ export function CloudProvider({
 
         checkCloud()
 
-      }, 5000)
+      }, 10000)
 
     return () => {
 
