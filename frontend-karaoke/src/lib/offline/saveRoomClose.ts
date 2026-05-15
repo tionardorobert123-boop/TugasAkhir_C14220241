@@ -21,7 +21,8 @@ export async function saveRoomClose(
 
     action: 'close' as const,
 
-    created_at: new Date().toISOString(),
+    created_at:
+      new Date().toISOString(),
 
     sync_status: 0
   }
@@ -94,6 +95,40 @@ export async function saveRoomClose(
       end_time: null
     }
   )
+
+  // ================= UPDATE LOCAL TRANSACTION
+  const trx =
+    await db.transactions
+
+      .where('room_id')
+
+      .equals(data.room_id)
+
+      .reverse()
+
+      .first()
+
+  if (trx) {
+
+    await db.transactions.update(
+
+      trx.id!,
+
+      {
+
+        status:
+          'finished',
+
+        updated_at:
+
+          new Date()
+
+            .toLocaleString('sv-SE')
+
+            .replace(' ', 'T')
+      }
+    )
+  }
 
   // ================= SAVE OFFLINE QUEUE
   await db.room_actions.add(

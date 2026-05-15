@@ -386,16 +386,25 @@ useEffect(() => {
       try {
 
         // ================= SAVE ACTION
+        const roomData =
+          rooms.find(
+            r => r.room_id === selectedRoom
+          );
+
         await saveRoomOpen(
         {
-        room_id:
-          selectedRoom,
-        customer_name:
-          customerName,
-        duration,
-      },
-      cloudOnline
-          
+          room_id:
+            selectedRoom,
+
+          customer_name:
+            customerName,
+
+          duration,
+
+          price_per_hour:
+            roomData?.price_per_hour || 0
+        },
+        cloudOnline
         );
 
         // ================= HITUNG END TIME

@@ -8,6 +8,7 @@ interface Payload {
   room_id: number
   customer_name: string
   duration: number
+  price_per_hour: number
 }
 
 export async function saveRoomOpen(
@@ -161,6 +162,44 @@ export async function saveRoomOpen(
         endTime
     }
   )
+
+  // ================= SAVE LOCAL TRANSACTION
+await db.transactions.add({
+
+  temp_id:
+    payload.temp_id,
+
+  room_id:
+    data.room_id,
+
+  customer_name:
+    data.customer_name,
+
+  start_time:
+    startTime,
+
+  end_time:
+    endTime,
+
+  duration:
+    data.duration / 60,
+
+  price_per_hour:
+  data.price_per_hour,
+
+  total_price:
+    (data.duration / 60) *
+    data.price_per_hour,
+
+  status:
+    'active',
+
+  created_at:
+    startTime,
+
+  updated_at:
+    startTime
+})
 
   // ================= SAVE OFFLINE QUEUE
   await db.room_actions.add(

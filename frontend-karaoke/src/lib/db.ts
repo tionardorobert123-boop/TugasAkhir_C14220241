@@ -29,9 +29,12 @@ export interface OfflineRoom {
 }
 
 // ================= TRANSACTIONS
+// ================= TRANSACTIONS
 export interface OfflineTransaction {
 
   id?: number
+
+  transaction_id?: number
 
   temp_id?: string
 
@@ -39,13 +42,21 @@ export interface OfflineTransaction {
 
   customer_name?: string
 
-  total_price?: number
+  start_time?: string
+
+  end_time?: string
 
   duration?: number
 
+  price_per_hour?: number
+
+  total_price?: number
+
+  status?: 'active' | 'finished'
+
   created_at: string
 
-  status?: string
+  updated_at?: string
 }
 
 // ================= LOGS
