@@ -539,114 +539,38 @@ const closeRoom = async (
     );
   }
 };
+// ================= EXTEND
+const extendRoom = async (
 
-  // ================= EXTEND =================
-    const extendRoom = async (
+  roomId: number,
 
-      roomId: number,
+  minutes: number
 
-      minutes: number
+) => {
 
-    ) => {
+  try {
 
-      try {
+    // ================= SAVE ACTION
+    await saveRoomExtend(
 
-        // ================= SAVE ACTION
-        await saveRoomExtend(
+      {
+        room_id:
+          roomId,
 
-          {
+        minutes,
+      },
 
-            room_id:
-              roomId,
+      cloudOnline
+    );
 
-            minutes,
-          },
+  } catch (err) {
 
-          cloudOnline
-        );
-
-        // ================= UPDATE ROOM STATE
-        setRooms(prev =>
-
-          prev.map(room => {
-
-            if (
-              room.room_id !== roomId ||
-              !room.end_time
-            ) {
-              return room;
-            }
-
-            // ================= TAMBAH WAKTU
-            const currentEnd =
-
-              new Date(
-                room.end_time
-              );
-
-            currentEnd.setMinutes(
-
-              currentEnd.getMinutes() +
-              minutes
-            );
-
-            return {
-
-              ...room,
-
-              end_time:
-
-                currentEnd
-
-                  .toLocaleString('sv-SE')
-
-                  .replace(' ', 'T')
-            };
-          })
-        );
-
-        // ================= UPDATE DEXIE
-        const room =
-          await db.rooms.get(roomId);
-
-        if (room?.end_time) {
-
-          const end =
-
-            new Date(
-              room.end_time
-            );
-
-          end.setMinutes(
-
-            end.getMinutes() +
-            minutes
-          );
-
-          await db.rooms.update(
-
-            roomId,
-
-            {
-              end_time:
-
-                end
-
-                  .toLocaleString('sv-SE')
-
-                  .replace(' ', 'T')
-            }
-          );
-        }
-
-      } catch (err) {
-
-        console.log(
-          'EXTEND ERROR',
-          err
-        );
-      }
-    };
+    console.log(
+      'EXTEND ERROR',
+      err
+    );
+  }
+};
   // ================= CLICK =================
   const handleClick = (room: any) => {
     if (room.status !== "available") return;
