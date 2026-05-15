@@ -190,16 +190,15 @@ export function useTransactions(selectedDate?: string) {
     return diff > 0 && diff <= 5 * 60 * 1000;
   };
 
-  const formatDuration = (minutes: number) => {
-    if (!minutes) return "0 jam";
+  const formatDuration = (
+      hours: number
+    ) => {
 
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
+      if (!hours)
+        return '0 jam';
 
-    if (h > 0 && m > 0) return `${h} jam ${m} menit`;
-    if (h > 0) return `${h} jam`;
-    return `${m} menit`;
-  };
+      return `${hours} Jam`;
+    };
 
   return {
     activeRooms,
