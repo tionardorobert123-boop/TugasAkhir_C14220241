@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
 import {useCloud} from '../context/CloudContext'
-import { liveQuery } from 'dexie'
 
 export function useTransactions(selectedDate?: string) {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -153,52 +152,6 @@ export function useTransactions(selectedDate?: string) {
       filterDate,
       cloudOnline
     ]);
-
-    // ================= LIVE OFFLINE TRANSACTION
-useEffect(() => {
-
-  // ================= ONLY OFFLINE
-  if (cloudOnline) return;
-
-  const subscription =
-
-    liveQuery(() =>
-      db.transactions.toArray()
-    )
-
-    .subscribe({
-
-      next: (data) => {
-
-        const filtered =
-
-          data.filter((trx: any) => {
-
-            const trxDate =
-              trx.created_at?.slice(0, 10);
-
-            return trxDate === filterDate;
-          });
-
-        setTransactions(
-          filtered
-        );
-
-        console.log(
-          'LIVE OFFLINE TRANSACTION UPDATE'
-        );
-      }
-    });
-
-  return () => {
-
-    subscription.unsubscribe();
-  };
-
-}, [
-  cloudOnline,
-  filterDate
-]);
 
   // ================= SPLIT =================
   const activeRooms = transactions.filter(trx => trx.status === "active");
