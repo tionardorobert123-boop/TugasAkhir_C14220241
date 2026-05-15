@@ -267,7 +267,6 @@ const handleRefresh = async () => {
                   selesai
                 </span>
               </td>
-              // ================= WAKTU MULAI
               <td className="px-4 py-4">
                 {trx.start_time
 
@@ -283,21 +282,14 @@ const handleRefresh = async () => {
                   : '-'
                 }
               </td>
-              // ================= WAKTU SELESAI
               <td className="px-4 py-4">
-                {trx.end_time
-
-                  ? new Date(trx.end_time)
-                      .toLocaleTimeString(
-                        'en-GB',
-                        {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        }
-                      )
-
-                  : '-'
-                }
+                {new Date(trx.updated_at).toLocaleTimeString(
+                  'en-GB',
+                  {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }
+                )}
               </td>
 
             </tr>
