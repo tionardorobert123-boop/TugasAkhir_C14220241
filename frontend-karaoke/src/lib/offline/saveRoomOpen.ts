@@ -18,25 +18,51 @@ export async function saveRoomOpen(
 
 ) {
 
-  const startTime =
-  new Date().toISOString()
+  // ================= LOCAL DATETIME
+  const startDate =
+    new Date()
 
-  const endTime =
+  const endDate =
     new Date(
       Date.now() +
       data.duration * 60000
-    ).toISOString()
+    )
 
+  // ================= FORMAT LOCAL
+  const startTime =
+    startDate
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T')
+
+  const endTime =
+    endDate
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T')
+
+  // ================= PAYLOAD
   const payload = {
 
     temp_id: uuidv4(),
+
     room_id: data.room_id,
+
     action: 'open' as const,
-    customer_name: data.customer_name,
-    duration: data.duration,
-     start_time: startTime,
-    end_time: endTime,
-    created_at: new Date().toISOString(),
+
+    customer_name:
+      data.customer_name,
+
+    duration:
+      data.duration,
+
+    start_time:
+      startTime,
+
+    end_time:
+      endTime,
+
+    created_at:
+      new Date().toISOString(),
+
     sync_status: 0
   }
 
@@ -93,12 +119,12 @@ export async function saveRoomOpen(
 
           duration:
             data.duration,
-            
-            start_time:
-              startTime,
 
-            end_time:
-              endTime,
+          start_time:
+            startTime,
+
+          end_time:
+            endTime,
 
           temp_id:
             payload.temp_id

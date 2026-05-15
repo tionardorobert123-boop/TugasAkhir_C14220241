@@ -190,135 +190,167 @@ useEffect(() => {
   location.pathname,
   cloudOnline
 ]);
-
 // ================= AUTO CLOSE
-    useEffect(() => {
+useEffect(() => {
 
-      if (!token) return;
+  if (!token) return;
 
-      const interval = setInterval(async () => {
+  const interval = setInterval(async () => {
 
-        const nowTime = Date.now();
+    const nowTime = Date.now();
 
-        // ================= LOOP ROOM
-        for (const room of rooms) {
+    // ================= LOOP ROOM
+    for (const room of rooms) {
 
-          // ================= SKIP
-          if (
-            room.status !== 'occupied' ||
-            !room.end_time ||
-            room._closing
-          ) {
-            continue;
-          }
+      // ================= SKIP
+      if (
+        room.status !== 'occupied' ||
+        !room.end_time ||
+        room._closing
+      ) {
+        continue;
+      }
 
-          const end = new Date(
-            room.end_time
-          ).getTime();
+      const end = new Date(
+        room.end_time
+      ).getTime();
 
-          // ================= AUTO CLOSE
-          if (nowTime >= end) {
+      // ================= DEBUG
+      console.log({
 
-            console.log(
-              cloudOnline
-                ? 'AUTO CLOSE CLOUD'
-                : 'AUTO CLOSE LOCAL'
-            );
+        room: room.room_id,
 
-            // ================= MARK CLOSING
-            setRooms(prev =>
-              prev.map(r =>
-                r.room_id === room.room_id
-                  ? {
-                      ...r,
-                      _closing: true
-                    }
-                  : r
-              )
-            );
+        now:
 
-            try {
+          new Date(nowTime)
 
-              // ================= CLOSE ROOM
-              await saveRoomClose(
-                {
-                  room_id: room.room_id
-                },
-                cloudOnline
-              );
+            .toLocaleString('sv-SE')
 
-              // ================= UPDATE DEXIE
-              await db.rooms.update(
-                room.room_id,
-                {
-                  status: 'available',
-                  customer_name: null,
-                  end_time: null
+            .replace(' ', 'T'),
+
+        end:
+
+          new Date(end)
+
+            .toLocaleString('sv-SE')
+
+            .replace(' ', 'T'),
+
+        diff:
+          end - nowTime
+      });
+
+      // ================= AUTO CLOSE
+      if (nowTime >= end) {
+
+        console.log(
+
+          cloudOnline
+            ? 'AUTO CLOSE CLOUD'
+            : 'AUTO CLOSE LOCAL'
+        );
+
+        // ================= MARK CLOSING
+        setRooms(prev =>
+
+          prev.map(r =>
+
+            r.room_id === room.room_id
+
+              ? {
+                  ...r,
+                  _closing: true
                 }
-              );
 
-              // ================= UPDATE UI
-              setRooms(prev =>
-                prev.map(r =>
-                  r.room_id === room.room_id
-                    ? {
-                        ...r,
-                        status: 'available',
-                        customer_name: null,
-                        end_time: null,
-                        _closing: false
-                      }
-                    : r
-                )
-              );
+              : r
+          )
+        );
 
-            } catch (err) {
+        try {
 
-              console.log(
-                'AUTO CLOSE ERROR',
-                err
-              );
+          // ================= CLOSE ROOM
+          await saveRoomClose(
 
-              // ================= RESET FLAG
-              setRooms(prev =>
-                prev.map(r =>
-                  r.room_id === room.room_id
-                    ? {
-                        ...r,
-                        _closing: false
-                      }
-                    : r
-                )
-              );
+            {
+              room_id: room.room_id
+            },
+
+            cloudOnline
+          );
+
+          // ================= UPDATE DEXIE
+          await db.rooms.update(
+
+            room.room_id,
+
+            {
+              status: 'available',
+
+              customer_name: null,
+
+              end_time: null
             }
+          );
 
-            console.log({
+          // ================= UPDATE UI
+          setRooms(prev =>
 
-            room: room.room_id,
+            prev.map(r =>
 
-            now:
-              new Date(nowTime)
-                .toISOString(),
+              r.room_id === room.room_id
 
-            end:
-              new Date(end)
-                .toISOString(),
+                ? {
 
-            diff:
-              end - nowTime
-          })
-          }
+                    ...r,
+
+                    status: 'available',
+
+                    customer_name: null,
+
+                    end_time: null,
+
+                    _closing: false
+                  }
+
+                : r
+            )
+          );
+
+        } catch (err) {
+
+          console.log(
+            'AUTO CLOSE ERROR',
+            err
+          );
+
+          // ================= RESET FLAG
+          setRooms(prev =>
+
+            prev.map(r =>
+
+              r.room_id === room.room_id
+
+                ? {
+                    ...r,
+                    _closing: false
+                  }
+
+                : r
+            )
+          );
         }
+      }
+    }
 
-      }, 1000);
+  }, 1000);
 
-      return () => clearInterval(interval);
+  return () => clearInterval(interval);
 
-    }, [
-      rooms,
-      token,
-      cloudOnline
-    ]);
+}, [
+  rooms,
+  token,
+  cloudOnline
+]);
 
   // ================= WARNING =================
   const isWarning = (endTime: string) => {
@@ -368,13 +400,10 @@ useEffect(() => {
 
         // ================= HITUNG END TIME
         const endTime =
-
-          new Date(
-
-            Date.now() +
-            duration * 60000
-
-          ).toISOString();
+        new Date(
+          Date.now() +
+          duration * 60000
+        ).toLocaleString('sv-SE').replace(' ', 'T');
 
         // ================= UPDATE UI LANGSUNG
         setRooms(prev =>
@@ -435,6 +464,7 @@ useEffect(() => {
         );
       }
     };
+
     // ================= CLOSE ROOM =================
 const closeRoom = async (
   roomId: number
@@ -513,13 +543,18 @@ const closeRoom = async (
       try {
 
         // ================= SAVE ACTION
-        await saveRoomExtend({
+        await saveRoomExtend(
 
-          room_id:
-            roomId,
+          {
 
-          minutes,
-        }, cloudOnline);
+            room_id:
+              roomId,
+
+            minutes,
+          },
+
+          cloudOnline
+        );
 
         // ================= UPDATE ROOM STATE
         setRooms(prev =>
@@ -551,7 +586,12 @@ const closeRoom = async (
               ...room,
 
               end_time:
-                currentEnd.toISOString()
+
+                currentEnd
+
+                  .toLocaleString('sv-SE')
+
+                  .replace(' ', 'T')
             };
           })
         );
@@ -580,10 +620,16 @@ const closeRoom = async (
 
             {
               end_time:
-                end.toISOString()
+
+                end
+
+                  .toLocaleString('sv-SE')
+
+                  .replace(' ', 'T')
             }
           );
         }
+
       } catch (err) {
 
         console.log(
