@@ -1,37 +1,42 @@
+import { useEffect, useState } from "react";
 import API from "../services/api";
 import { db } from '../lib/db'
 import {useCloud} from '../context/CloudContext'
-import { useLiveQuery }
-from 'dexie-react-hooks'
-import type {
-  OfflineTransaction
-} from '../lib/db'
 
 export function useTransactions(selectedDate?: string) {
+  const [transactions, setTransactions] = useState<any[]>([]);
+
+  const token = localStorage.getItem("token");
 
   const today = new Date().toISOString().split("T")[0];
   const filterDate = selectedDate || today;
   //check internet
   const {cloudOnline} = useCloud()
-// ================= LIVE TRANSACTIONS
-const transactions =
-  useLiveQuery(
 
-    async () => {
+// ================= LOAD TRANSACTIONS
+    useEffect(() => {
 
-      // ================= CLOUD MODE
-      if (cloudOnline) {
+      if (!token) return;
+
+      let isFetching = false;
+
+      const fetchTransactions = async () => {
+
+        // ================= PREVENT OVERLAP
+        if (isFetching) return;
+
+        isFetching = true;
 
         try {
 
-          const res = await API.get(
+          // ================= LOAD CACHE FIRST
+          const cachedTransactions =
 
-            `/transactions/by-date?date=${filterDate}`
-          );
+            await db.transactions.toArray();
 
-          const filtered =
+          const filteredCache =
 
-            (res.data || []).filter(
+            cachedTransactions.filter(
               (trx: any) => {
 
                 const trxDate =
@@ -41,89 +46,123 @@ const transactions =
               }
             );
 
-          // ================= UPDATE DEXIE
-          await db.transactions.clear();
+          if (filteredCache.length > 0) {
 
-          await db.transactions.bulkPut(
-            filtered
-          );
+            setTransactions(
+              filteredCache
+            );
+
+            console.log(
+              'TRANSACTIONS CACHE LOADED'
+            );
+          }
+
+          // ================= CLOUD FETCH
+          if (cloudOnline) {
+
+            try {
+
+              const res = await API.get(
+
+                `/transactions/by-date?date=${filterDate}`
+              );
+
+              const filtered =
+
+                (res.data || []).filter(
+                  (trx: any) => {
+
+                    const trxDate =
+                      trx.created_at?.slice(0, 10);
+
+                    return trxDate === filterDate;
+                  }
+                );
+
+              // ================= UPDATE UI
+              setTransactions(
+                filtered
+              );
+
+              // ================= UPDATE DEXIE
+              await db.transactions.clear();
+
+              await db.transactions.bulkPut(
+                filtered
+              );
+
+              console.log(
+                'TRANSACTIONS FROM CLOUD'
+              );
+
+              return;
+
+            } catch (err) {
+
+              console.log(
+                'TRANSACTION CLOUD FAILED',
+                err
+              );
+            }
+          }
+
+          // ================= OFFLINE DEXIE
+          const offlineTransactions =
+
+            await db.transactions.toArray();
+
+          const filteredOffline =
+
+            offlineTransactions.filter(
+              (trx: any) => {
+
+                const trxDate =
+                  trx.created_at?.slice(0, 10);
+
+                return trxDate === filterDate;
+              }
+            );
 
           console.log(
-            'TRANSACTIONS FROM CLOUD'
+            'TRANSACTIONS FROM DEXIE'
           );
 
-          return filtered;
+          setTransactions(
+            filteredOffline
+          );
 
         } catch (err) {
 
           console.log(
-            'TRANSACTION CLOUD FAILED',
+            'FETCH TRANSACTION ERROR',
             err
           );
+
+        } finally {
+
+          isFetching = false;
         }
-      }
+      };
 
-      // ================= DEXIE OFFLINE
-      const all =
-        await db.transactions.toArray();
+      // ================= INITIAL LOAD
+      fetchTransactions();
 
-      const filteredOffline =
-
-        all.filter((trx: any) => {
-
-          const trxDate =
-            trx.created_at?.slice(0, 10);
-
-          return trxDate === filterDate;
-        });
-
-      console.log(
-        'TRANSACTIONS FROM DEXIE'
-      );
-
-      return filteredOffline;
-
-    },
-
-    [
+    }, [
+      token,
       filterDate,
       cloudOnline
-    ],
+    ]);
 
-    []
-  ) || [];
-// ================= SPLIT
-const activeRooms =
-  transactions.filter(
+  // ================= SPLIT =================
+  const activeRooms = transactions.filter(trx => trx.status === "active");
 
-    (trx: OfflineTransaction) =>
-
-      trx.status === 'active'
+  const finishedTransactions = transactions.filter(
+    trx => trx.status === "finished"
   );
 
-// ================= FINISHED
-const finishedTransactions =
-  transactions.filter(
-
-    (trx: OfflineTransaction) =>
-
-      trx.status === 'finished'
-  );
-
-// ================= TOTAL
-const totalIncome =
-  finishedTransactions.reduce(
-
-    (
-      sum: number,
-
-      trx: OfflineTransaction
-    ) =>
-
-      sum + Number(
-        trx.total_price || 0
-      ),
-
+  // ================= TOTAL =================
+  const totalIncome = finishedTransactions.reduce(
+    (sum, trx) => sum + Number(trx.total_price),
     0
   );
 
@@ -152,14 +191,14 @@ const totalIncome =
   };
 
   const formatDuration = (
-      hours: number
-    ) => {
+    hours: number
+  ) => {
 
-      if (!hours)
-        return '0 jam';
+    if (!hours)
+      return '0 jam';
 
-      return `${hours} Jam`;
-    };
+    return `${hours} jam`;
+  };
 
   return {
     activeRooms,
