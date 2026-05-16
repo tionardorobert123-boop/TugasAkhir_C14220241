@@ -32,7 +32,7 @@ const isWarning =
 const base = `
   rounded-2xl p-5 transition
   min-h-[160px]
-  flex flex-col justify-between
+  flex flex-col
   backdrop-blur-md border
 `;
 
@@ -255,7 +255,7 @@ function Content({
       </div>
 
       {/* BODY */}
-      <div className="min-h-[40px]">
+      <div className="flex-1 min-h-[40px] mt-2">
 
         {room.customer_name && (
           <p className="text-sm truncate">
