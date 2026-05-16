@@ -62,7 +62,7 @@ export interface OfflineTransaction {
 // ================= LOGS
 export interface OfflineLog {
 
-  id?: number
+log_id: number
 
   room_id: number
 
