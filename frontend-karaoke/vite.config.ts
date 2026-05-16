@@ -21,7 +21,7 @@ export default defineConfig({
 
         name: 'Sistem Kontrol Akses dan Monitoring Room Karaoke',
 
-        short_name: 'Karaoke',
+        short_name: 'Friendship',
 
         description: 'Monitoring dan kontrol room karaoke',
 
