@@ -24,6 +24,9 @@ export default function useAccessLog(
   initialDate?: string
 ) {
 
+const [syncing, setSyncing] =
+  useState(false);
+
   const [selectedDate, setSelectedDate] =
     useState(
       initialDate ??
@@ -64,17 +67,52 @@ export default function useAccessLog(
   // ================= FETCH LOGS
   const fetchLogs = async () => {
 
-    setLoading(true);
+  try {
 
-    try {
+    // ================= CACHE FIRST
+    const cachedLogs =
+      await db.logs.toArray();
 
-      // ================= LOAD CACHE FIRST
-      const cachedLogs =
-        await db.logs.toArray();
+    const filteredCache =
+      cachedLogs.filter((log) => {
 
-      const filteredCache =
-        cachedLogs.filter(
-          (log: any) => {
+        const logDate =
+          log.timestamp?.slice(0, 10);
+
+        return (
+          logDate === selectedDate
+        );
+      });
+
+    // ================= SHOW CACHE
+    if (filteredCache.length > 0) {
+
+      setLogs(filteredCache);
+
+      // LANGSUNG HILANGKAN LOADING
+      setLoading(false);
+
+      console.log(
+        "📦 LOGS CACHE LOADED"
+      );
+    }
+
+    // ================= CLOUD SYNC
+    if (cloudOnline) {
+
+      setSyncing(true);
+
+      try {
+
+        const res = await API.get(
+          `/access-logs?date=${selectedDate}`
+        );
+
+        const data =
+          res.data || [];
+
+        const filtered =
+          data.filter((log: any) => {
 
             const logDate =
               log.timestamp?.slice(0, 10);
@@ -82,77 +120,44 @@ export default function useAccessLog(
             return (
               logDate === selectedDate
             );
-          }
+          });
+
+        setLogs(filtered);
+
+        await db.logs.bulkPut(
+          filtered
         );
-
-      // ================= SHOW CACHE FAST
-      if (filteredCache.length > 0) {
-
-        setLogs(filteredCache);
 
         console.log(
-          "📦 LOGS CACHE LOADED"
+          "☁️ LOGS FROM CLOUD"
         );
+
+      } catch (err) {
+
+        console.log(
+          "LOG CLOUD FAILED",
+          err
+        );
+
+      } finally {
+
+        setSyncing(false);
       }
-
-      // ================= CLOUD FETCH
-      if (cloudOnline) {
-
-        try {
-
-          const res = await API.get(
-            `/access-logs?date=${selectedDate}`
-          );
-
-          const data =
-            res.data || [];
-
-          const filtered =
-            data.filter(
-              (log: any) => {
-
-                const logDate =
-                  log.timestamp?.slice(0, 10);
-
-                return (
-                  logDate === selectedDate
-                );
-              }
-            );
-
-          // ================= UPDATE UI
-          setLogs(filtered);
-
-          // ================= UPDATE CACHE
-          await db.logs.bulkPut(
-            filtered
-          );
-
-          console.log(
-            "☁️ LOGS FROM CLOUD"
-          );
-
-        } catch (err) {
-
-          console.log(
-            "LOG CLOUD FAILED",
-            err
-          );
-        }
-      }
-
-    } catch (err) {
-
-      console.log(
-        "FETCH LOG ERROR",
-        err
-      );
-
-    } finally {
-
-      setLoading(false);
     }
-  };
+
+  } catch (err) {
+
+    console.log(
+      "FETCH LOG ERROR",
+      err
+    );
+
+  } finally {
+
+    // kalau memang tidak ada cache
+    setLoading(false);
+  }
+};
 
   // ================= AUTO LOAD
   useEffect(() => {
