@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import API from "../services/api";
 import { db } from "../lib/db";
 import { useCloud } from "../context/CloudContext";
+
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -74,105 +75,117 @@ export default function useAccessLog(
   // ================= CLOUD
   const { cloudOnline } = useCloud();
 
-  // ================= FETCH LOGS
-  const fetchLogs = async () => {
+  const fetchingRef =
+  useRef(false);
+      // ================= FETCH LOGS
+const fetchLogs = async () => {
 
-    try {
+  // ================= PREVENT DOUBLE FETCH
+  if (fetchingRef.current) {
+    return;
+  }
 
-      // ================= LOAD CACHE FIRST
-      const cachedLogs =
-        await db.logs.toArray();
+  fetchingRef.current = true;
 
-      const filteredCache =
-        cachedLogs.filter(
-          (log: any) => {
+  try {
 
-            const logDate =
-              log.timestamp?.slice(0, 10);
+    // ================= LOAD CACHE FIRST
+    const cachedLogs =
+      await db.logs.toArray();
 
-            return (
-              logDate === selectedDate
-            );
-          }
-        );
+    const filteredCache =
+      cachedLogs.filter(
+        (log: any) => {
 
-      // ================= SHOW CACHE FAST
-      if (filteredCache.length > 0) {
+          const logDate =
+            log.timestamp?.slice(0, 10);
 
-        setLogs(filteredCache);
-
-        setLoading(false);
-
-        console.log(
-          "📦 LOGS CACHE LOADED"
-        );
-      }
-
-      // ================= CLOUD FETCH
-      if (cloudOnline) {
-
-        setSyncing(true);
-
-        try {
-
-          const res = await API.get(
-            `/access-logs?date=${selectedDate}`
+          return (
+            logDate === selectedDate
           );
-
-          const data =
-            res.data || [];
-
-          const filtered =
-            data.filter(
-              (log: any) => {
-
-                const logDate =
-                  log.timestamp?.slice(0, 10);
-
-                return (
-                  logDate === selectedDate
-                );
-              }
-            );
-
-          // ================= UPDATE UI
-          setLogs(filtered);
-
-          // ================= UPDATE CACHE
-          await db.logs.bulkPut(
-            filtered
-          );
-
-          console.log(
-            "☁️ LOGS FROM CLOUD"
-          );
-
-        } catch (err) {
-
-          console.log(
-            "LOG CLOUD FAILED",
-            err
-          );
-
-        } finally {
-
-          setSyncing(false);
         }
-      }
-
-    } catch (err) {
-
-      console.log(
-        "FETCH LOG ERROR",
-        err
       );
 
-    } finally {
+    // ================= SHOW CACHE FAST
+    if (filteredCache.length > 0) {
 
-      // ================= HIDE LOADING
+      setLogs(filteredCache);
+
       setLoading(false);
+
+      console.log(
+        "📦 LOGS CACHE LOADED"
+      );
     }
-  };
+
+    // ================= CLOUD FETCH
+    if (cloudOnline) {
+
+      setSyncing(true);
+
+      try {
+
+        const res = await API.get(
+          `/access-logs?date=${selectedDate}`
+        );
+
+        const data =
+          res.data || [];
+
+        const filtered =
+          data.filter(
+            (log: any) => {
+
+              const logDate =
+                log.timestamp?.slice(0, 10);
+
+              return (
+                logDate === selectedDate
+              );
+            }
+          );
+
+        // ================= UPDATE UI
+        setLogs(filtered);
+
+        // ================= UPDATE CACHE
+        await db.logs.bulkPut(
+          filtered
+        );
+
+        console.log(
+          "☁️ LOGS FROM CLOUD"
+        );
+
+      } catch (err) {
+
+        console.log(
+          "LOG CLOUD FAILED",
+          err
+        );
+
+      } finally {
+
+        setSyncing(false);
+      }
+    }
+
+  } catch (err) {
+
+    console.log(
+      "FETCH LOG ERROR",
+      err
+    );
+
+  } finally {
+
+    // ================= RELEASE LOCK
+    fetchingRef.current = false;
+
+    // ================= HIDE LOADING
+    setLoading(false);
+  }
+};
 
   // ================= AUTO LOAD
   useEffect(() => {
@@ -188,8 +201,7 @@ export default function useAccessLog(
     fetchLogs();
 
   }, [
-    selectedDate,
-    cloudOnline
+    selectedDate
   ]);
 
   // ================= REFRESH
