@@ -143,11 +143,11 @@ export default function AccessLogPage() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedLogs.map((log, index) => {
+                  paginatedLogs.map((log) => {
                     const isStandby = log.room_status === 'standby';
                     const isActiveOrExtend = ['active', 'extend'].includes(log.room_status);
                     return (
-                      <tr key={index} className="border-t border-white/10 hover:bg-white/5">
+                      <tr key={log.log_id} className="border-t border-white/10 hover:bg-white/5">
                         <td className="sticky left-0 z-10 bg-[#1a0d05] px-4 py-4 whitespace-nowrap">Room {log.room_name ?? `Room ${log.room_id}`}</td>
                         <td className="px-4 py-4">{log.customer_name ?? "-"}</td>
                         <td className="px-4 py-4">{isActiveOrExtend ? `${log.duration}jam` : '-'}</td>

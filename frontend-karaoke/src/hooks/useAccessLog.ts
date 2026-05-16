@@ -12,12 +12,19 @@ const statusLabels: Record<string, string> = {
 };
 
 export interface AccessLog {
-  room_id: number;
-  room_name?: string;
-  customer_name?: string;
-  duration: number;
-  room_status: string;
-  timestamp: string;
+   log_id: number;
+
+    room_id: number;
+
+    room_name?: string;
+
+    customer_name?: string;
+
+    duration: number;
+
+    room_status: string;
+
+    timestamp: string;
 }
 
 export default function useAccessLog(
