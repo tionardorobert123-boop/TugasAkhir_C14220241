@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "../services/api";
-import { db } from "../lib/db";
-import { useCloud } from "../context/CloudContext";
-
+import { db } from '../lib/db'
+import {useCloud} from '../context/CloudContext'
 
 const statusLabels: Record<string, string> = {
   active: "aktif",
@@ -13,79 +12,45 @@ const statusLabels: Record<string, string> = {
 };
 
 export interface AccessLog {
-   log_id: number;
-
-    room_id: number;
-
-    room_name?: string;
-
-    customer_name?: string;
-
-    duration: number;
-
-    room_status: string;
-
-    timestamp: string;
+  room_id: number;
+  room_name?: string;
+  customer_name?: string;
+  duration: number;
+  room_status: string;
+  timestamp: string;
 }
 
-export default function useAccessLog(
-  initialDate?: string
-) {
-
+export default function useAccessLog(initialDate?: string) {
   const [selectedDate, setSelectedDate] =
-    useState(
-      initialDate ??
-      new Date()
-        .toISOString()
-        .split("T")[0]
-    );
+  useState(
+    initialDate ??
+    new Date().toISOString().split("T")[0]
+  );
+  const [logs, setLogs] = useState<AccessLog[]>([]);
+  const [loading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const [logs, setLogs] =
-    useState<AccessLog[]>([]);
-
-  // ================= LOADING
-  const [loading, setLoading] =
-    useState(true);
-
-  // ================= BACKGROUND SYNC
-  const [syncing, setSyncing] =
-    useState(false);
-
-  // ================= MANUAL REFRESH
-  const [refreshing, setRefreshing] =
-    useState(false);
-
-  // ================= FILTER
-  const [roomSearch, setRoomSearch] =
-    useState("");
-
-  const [
-    customerSearch,
-    setCustomerSearch
-  ] = useState("");
-
-  const [statusFilter, setStatusFilter] =
-    useState("");
-
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  // Filter states
+  const [roomSearch, setRoomSearch] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 9;
 
-  // ================= CLOUD
-  const { cloudOnline } = useCloud();
+     //check internet
+    const {cloudOnline} = useCloud()
+    const token =
+  localStorage.getItem("token");
 
-  const fetchingRef =
-  useRef(false);
-      // ================= FETCH LOGS
+    // ================= FETCH ACCESS LOGS
+      let isFetching = false;
+
 const fetchLogs = async () => {
 
-  // ================= PREVENT DOUBLE FETCH
-  if (fetchingRef.current) {
-    return;
-  }
+  if (isFetching) return;
 
-  fetchingRef.current = true;
+  isFetching = true;
 
   try {
 
@@ -94,6 +59,7 @@ const fetchLogs = async () => {
       await db.logs.toArray();
 
     const filteredCache =
+
       cachedLogs.filter(
         (log: any) => {
 
@@ -106,22 +72,17 @@ const fetchLogs = async () => {
         }
       );
 
-    // ================= SHOW CACHE FAST
     if (filteredCache.length > 0) {
 
       setLogs(filteredCache);
 
-      setLoading(false);
-
       console.log(
-        "📦 LOGS CACHE LOADED"
+        'LOGS CACHE LOADED'
       );
     }
 
     // ================= CLOUD FETCH
     if (cloudOnline) {
-
-      setSyncing(true);
 
       try {
 
@@ -129,11 +90,9 @@ const fetchLogs = async () => {
           `/access-logs?date=${selectedDate}`
         );
 
-        const data =
-          res.data || [];
-
         const filtered =
-          data.filter(
+
+          (res.data || []).filter(
             (log: any) => {
 
               const logDate =
@@ -148,215 +107,155 @@ const fetchLogs = async () => {
         // ================= UPDATE UI
         setLogs(filtered);
 
-        // ================= UPDATE CACHE
+        // ================= UPDATE DEXIE
+        await db.logs.clear();
+
         await db.logs.bulkPut(
           filtered
         );
 
         console.log(
-          "☁️ LOGS FROM CLOUD"
+          '☁️ LOGS FROM CLOUD'
         );
+
+        return;
 
       } catch (err) {
 
         console.log(
-          "LOG CLOUD FAILED",
+          'LOG CLOUD FAILED',
           err
         );
-
-      } finally {
-
-        setSyncing(false);
       }
     }
+
+    // ================= OFFLINE DEXIE
+    const offlineLogs =
+      await db.logs.toArray();
+
+    const filteredOffline =
+
+      offlineLogs.filter(
+        (log: any) => {
+
+          const logDate =
+            log.timestamp?.slice(0, 10);
+
+          return (
+            logDate === selectedDate
+          );
+        }
+      );
+
+    console.log(
+      'LOGS FROM DEXIE'
+    );
+
+    setLogs(filteredOffline);
 
   } catch (err) {
 
     console.log(
-      "FETCH LOG ERROR",
+      'FETCH LOG ERROR',
       err
     );
 
   } finally {
 
-    // ================= RELEASE LOCK
-    fetchingRef.current = false;
-
-    // ================= HIDE LOADING
-    setLoading(false);
+    isFetching = false;
   }
 };
 
-  // ================= AUTO LOAD
-  useEffect(() => {
+useEffect(() => {
 
-    const role =
-      localStorage.getItem("role");
+  if (!token) return;
 
-    const isOwner =
-      role === "owner";
+  fetchLogs();
 
-    if (!isOwner) return;
+}, [
+  token,
+  selectedDate,
+  cloudOnline
+]);
 
-    fetchLogs();
-
-  }, [
-    selectedDate
-  ]);
-
-  // ================= REFRESH
   const handleRefresh = async () => {
-
     setRefreshing(true);
-
     await fetchLogs();
-
     setRefreshing(false);
   };
 
-  // ================= FILTER LOGS
-  const filteredLogs = logs.filter(
-    (log) => {
+  // Filter logs based on search criteria
+  const filteredLogs = logs.filter((log) => {
+    const roomMatch = (log.room_name ?? `Room ${log.room_id}`)
+      .toLowerCase()
+      .includes(roomSearch.toLowerCase());
+    const customerMatch = (log.customer_name ?? "")
+      .toLowerCase()
+      .includes(customerSearch.toLowerCase());
+    const statusMatch = statusFilter === "" || log.room_status === statusFilter;
 
-      const roomMatch =
-        (
-          log.room_name ??
-          `Room ${log.room_id}`
-        )
-          .toLowerCase()
-          .includes(
-            roomSearch.toLowerCase()
-          );
+    return roomMatch && customerMatch && statusMatch;
+  });
 
-      const customerMatch =
-        (
-          log.customer_name ?? ""
-        )
-          .toLowerCase()
-          .includes(
-            customerSearch.toLowerCase()
-          );
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
 
-      const statusMatch =
-        statusFilter === "" ||
-        log.room_status === statusFilter;
-
-      return (
-        roomMatch &&
-        customerMatch &&
-        statusMatch
-      );
-    }
-  );
-
-  // ================= PAGINATION
-  const totalPages = Math.ceil(
-    filteredLogs.length /
-    itemsPerPage
-  );
-
-  const startIndex =
-    (currentPage - 1) *
-    itemsPerPage;
-
-  const endIndex =
-    startIndex + itemsPerPage;
-
-  const paginatedLogs =
-    filteredLogs.slice(
-      startIndex,
-      endIndex
-    );
-
-  // ================= RESET PAGE
+  // Reset to page 1 when filters change
   const handleFilterChange = () => {
     setCurrentPage(1);
   };
 
-  // ================= FORMAT DATE
-  const formatDate = (
-    value: string
-  ) => {
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    const isOwner = role === "owner";
+    if (!isOwner) return;
+    fetchLogs();
+  }, [selectedDate]);
 
+  const formatDate = (value: string) => {
     if (!value) return "-";
-
-    return new Date(value)
-      .toLocaleTimeString(
-        "en-GB",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }
-      );
+    return new Date(value).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   };
 
-  // ================= FORMAT DURATION
-  const formatDuration = (
-    minutes: number | null
-  ) => {
-
-    if (!minutes || minutes <= 0)
-      return "-";
-
-    const hours =
-      Math.floor(minutes / 60);
-
-    const mins =
-      minutes % 60;
-
-    if (hours > 0 && mins > 0)
-      return `${hours}jam ${mins}menit`;
-
-    if (hours > 0)
-      return `${hours}jam`;
-
+  const formatDuration = (minutes: number | null) => {
+    if (!minutes || minutes <= 0) return "-";
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0 && mins > 0) return `${hours}jam ${mins}menit`;
+    if (hours > 0) return `${hours}jam`;
     return `${mins}menit`;
   };
 
   return {
-
-    // ================= DATA
-    logs,
-    filteredLogs,
-    paginatedLogs,
-
-    // ================= DATE
     selectedDate,
     setSelectedDate,
-
-    // ================= LOADING
+    logs,
     loading,
-    syncing,
     refreshing,
-
-    // ================= FILTER
     roomSearch,
     setRoomSearch,
-
     customerSearch,
     setCustomerSearch,
-
     statusFilter,
     setStatusFilter,
-
-    // ================= PAGINATION
     currentPage,
     setCurrentPage,
-
+    filteredLogs,
+    paginatedLogs,
     totalPages,
     startIndex,
     endIndex,
-
-    // ================= ACTION
     handleRefresh,
     handleFilterChange,
-
-    // ================= FORMAT
     formatDate,
     formatDuration,
-
-    // ================= LABEL
     statusLabels,
   };
 }
