@@ -24,9 +24,6 @@ export default function useAccessLog(
   initialDate?: string
 ) {
 
-const [syncing, setSyncing] =
-  useState(false);
-
   const [selectedDate, setSelectedDate] =
     useState(
       initialDate ??
@@ -38,9 +35,15 @@ const [syncing, setSyncing] =
   const [logs, setLogs] =
     useState<AccessLog[]>([]);
 
+  // ================= LOADING
   const [loading, setLoading] =
+    useState(true);
+
+  // ================= BACKGROUND SYNC
+  const [syncing, setSyncing] =
     useState(false);
 
+  // ================= MANUAL REFRESH
   const [refreshing, setRefreshing] =
     useState(false);
 
@@ -67,52 +70,15 @@ const [syncing, setSyncing] =
   // ================= FETCH LOGS
   const fetchLogs = async () => {
 
-  try {
+    try {
 
-    // ================= CACHE FIRST
-    const cachedLogs =
-      await db.logs.toArray();
+      // ================= LOAD CACHE FIRST
+      const cachedLogs =
+        await db.logs.toArray();
 
-    const filteredCache =
-      cachedLogs.filter((log) => {
-
-        const logDate =
-          log.timestamp?.slice(0, 10);
-
-        return (
-          logDate === selectedDate
-        );
-      });
-
-    // ================= SHOW CACHE
-    if (filteredCache.length > 0) {
-
-      setLogs(filteredCache);
-
-      // LANGSUNG HILANGKAN LOADING
-      setLoading(false);
-
-      console.log(
-        "📦 LOGS CACHE LOADED"
-      );
-    }
-
-    // ================= CLOUD SYNC
-    if (cloudOnline) {
-
-      setSyncing(true);
-
-      try {
-
-        const res = await API.get(
-          `/access-logs?date=${selectedDate}`
-        );
-
-        const data =
-          res.data || [];
-
-        const filtered =
-          data.filter((log: any) => {
+      const filteredCache =
+        cachedLogs.filter(
+          (log: any) => {
 
             const logDate =
               log.timestamp?.slice(0, 10);
@@ -120,44 +86,86 @@ const [syncing, setSyncing] =
             return (
               logDate === selectedDate
             );
-          });
-
-        setLogs(filtered);
-
-        await db.logs.bulkPut(
-          filtered
+          }
         );
+
+      // ================= SHOW CACHE FAST
+      if (filteredCache.length > 0) {
+
+        setLogs(filteredCache);
+
+        setLoading(false);
 
         console.log(
-          "☁️ LOGS FROM CLOUD"
+          "📦 LOGS CACHE LOADED"
         );
-
-      } catch (err) {
-
-        console.log(
-          "LOG CLOUD FAILED",
-          err
-        );
-
-      } finally {
-
-        setSyncing(false);
       }
+
+      // ================= CLOUD FETCH
+      if (cloudOnline) {
+
+        setSyncing(true);
+
+        try {
+
+          const res = await API.get(
+            `/access-logs?date=${selectedDate}`
+          );
+
+          const data =
+            res.data || [];
+
+          const filtered =
+            data.filter(
+              (log: any) => {
+
+                const logDate =
+                  log.timestamp?.slice(0, 10);
+
+                return (
+                  logDate === selectedDate
+                );
+              }
+            );
+
+          // ================= UPDATE UI
+          setLogs(filtered);
+
+          // ================= UPDATE CACHE
+          await db.logs.bulkPut(
+            filtered
+          );
+
+          console.log(
+            "☁️ LOGS FROM CLOUD"
+          );
+
+        } catch (err) {
+
+          console.log(
+            "LOG CLOUD FAILED",
+            err
+          );
+
+        } finally {
+
+          setSyncing(false);
+        }
+      }
+
+    } catch (err) {
+
+      console.log(
+        "FETCH LOG ERROR",
+        err
+      );
+
+    } finally {
+
+      // ================= HIDE LOADING
+      setLoading(false);
     }
-
-  } catch (err) {
-
-    console.log(
-      "FETCH LOG ERROR",
-      err
-    );
-
-  } finally {
-
-    // kalau memang tidak ada cache
-    setLoading(false);
-  }
-};
+  };
 
   // ================= AUTO LOAD
   useEffect(() => {
@@ -289,14 +297,21 @@ const [syncing, setSyncing] =
 
   return {
 
+    // ================= DATA
+    logs,
+    filteredLogs,
+    paginatedLogs,
+
+    // ================= DATE
     selectedDate,
     setSelectedDate,
 
-    logs,
-
+    // ================= LOADING
     loading,
+    syncing,
     refreshing,
 
+    // ================= FILTER
     roomSearch,
     setRoomSearch,
 
@@ -306,22 +321,23 @@ const [syncing, setSyncing] =
     statusFilter,
     setStatusFilter,
 
+    // ================= PAGINATION
     currentPage,
     setCurrentPage,
-
-    filteredLogs,
-    paginatedLogs,
 
     totalPages,
     startIndex,
     endIndex,
 
+    // ================= ACTION
     handleRefresh,
     handleFilterChange,
 
+    // ================= FORMAT
     formatDate,
     formatDuration,
 
+    // ================= LABEL
     statusLabels,
   };
 }
