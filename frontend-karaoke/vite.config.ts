@@ -35,13 +35,13 @@ export default defineConfig({
 
         icons: [
           {
-            src: '/launchericon-192x192.png',
+            src: '/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
 
           {
-            src: '/launchericon-512x512.png',
+            src: '/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           }
