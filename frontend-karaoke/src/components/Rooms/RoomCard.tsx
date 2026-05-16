@@ -31,7 +31,7 @@ const isWarning =
 
 const base = `
   rounded-2xl p-5 transition
-  h-[140px]
+  min-h-[160px]
   flex flex-col justify-between
   backdrop-blur-md border
 `;
@@ -272,30 +272,29 @@ function Content({
       </div>
 
       {/* FOOTER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mt-2">
 
-        <p className="text-sm font-mono opacity-80">
-          ⏱ {timer ?? "-"}
-        </p>
+          <p className="text-sm font-mono opacity-80">
+            ⏱ {timer ?? "-"}
+          </p>
 
-      </div>
+          <div className="flex gap-2 opacity-80">
 
-      {/* ICON */}
-      <div className="absolute bottom-3 right-3 flex gap-2 opacity-80">
+            {lock === "locked" ? (
+              <Lock className="w-4 h-4 text-red-400" />
+            ) : (
+              <Unlock className="w-4 h-4 text-green-400" />
+            )}
 
-        {lock === "locked" ? (
-          <Lock className="w-4 h-4 text-red-400" />
-        ) : (
-          <Unlock className="w-4 h-4 text-green-400" />
-        )}
+            {door === "closed" ? (
+              <DoorClosed className="w-4 h-4 text-gray-300" />
+            ) : (
+              <DoorOpen className="w-4 h-4 text-yellow-400" />
+            )}
 
-        {door === "closed" ? (
-          <DoorClosed className="w-4 h-4 text-gray-300" />
-        ) : (
-          <DoorOpen className="w-4 h-4 text-yellow-400" />
-        )}
+          </div>
 
-      </div>
+        </div>
 
     </>
   );
