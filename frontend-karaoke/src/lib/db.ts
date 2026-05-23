@@ -124,7 +124,7 @@ class AppDB extends Dexie {
 
       // ================= TRANSACTIONS
       transactions:
-        'temp_id,transaction_id,room_id,created_at',
+      'temp_id,transaction_id,room_id,status,created_at',
 
       // ================= LOGS
       logs:
