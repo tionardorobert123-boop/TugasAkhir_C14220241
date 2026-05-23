@@ -21,7 +21,7 @@ export default function TransactionsPage() {
 
   const {
     activeRooms,
-    finishedTransactions,
+    sortedFinishedTransactions,
     totalIncome,
     formatTimer,
     isWarning,
@@ -47,12 +47,12 @@ const handleRefresh = async () => {
   }, 1000);
 };
 
-  const paginatedFinished = finishedTransactions.slice(
+  const paginatedFinished = sortedFinishedTransactions.slice(
     (page - 1) * perPage,
     page * perPage
   );
 
-  const totalPage = Math.ceil(finishedTransactions.length / perPage);
+  const totalPage = Math.ceil(sortedFinishedTransactions.length / perPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-900 to-black text-white p-4 md:p-6">
@@ -300,15 +300,15 @@ const handleRefresh = async () => {
   </div>
 
   {/* PAGINATION */}
-  {finishedTransactions.length > 0 && (
+  {sortedFinishedTransactions.length > 0 && (
 
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
 
       <p className="text-xs opacity-60">
         Menampilkan {(page - 1) * perPage + 1}
         -
-        {Math.min(page * perPage, finishedTransactions.length)}
-        dari {finishedTransactions.length} transaksi
+        {Math.min(page * perPage, sortedFinishedTransactions.length)}
+        dari {sortedFinishedTransactions.length} transaksi
       </p>
 
       <div className="flex flex-wrap gap-2 w-full md:w-auto">

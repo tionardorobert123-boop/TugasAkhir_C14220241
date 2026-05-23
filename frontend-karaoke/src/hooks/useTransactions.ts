@@ -159,10 +159,36 @@ export function useTransactions(selectedDate?: string) {
   const finishedTransactions = transactions.filter(
     trx => trx.status === "finished"
   );
+// ================= SORT DESC
+const sortedFinishedTransactions =
 
-  // ================= TOTAL =================
-  const totalIncome = finishedTransactions.reduce(
-    (sum, trx) => sum + Number(trx.total_price),
+  [...finishedTransactions].sort(
+    (a: any, b: any) => {
+
+      const dateA =
+        new Date(
+          a.created_at ||
+          a.start_time
+        ).getTime();
+
+      const dateB =
+        new Date(
+          b.created_at ||
+          b.start_time
+        ).getTime();
+
+      return dateB - dateA;
+    }
+  );
+
+// ================= TOTAL
+const totalIncome =
+
+  sortedFinishedTransactions.reduce(
+    (sum, trx) =>
+
+      sum + Number(trx.total_price),
+
     0
   );
 
@@ -202,7 +228,7 @@ export function useTransactions(selectedDate?: string) {
 
   return {
     activeRooms,
-    finishedTransactions,
+    sortedFinishedTransactions,
     totalIncome,
     today,
 

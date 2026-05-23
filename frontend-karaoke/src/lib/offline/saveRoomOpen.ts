@@ -136,8 +136,6 @@ export async function saveRoomOpen(
         '☁️ ROOM OPEN CLOUD'
       )
 
-      return
-
     } catch (err) {
 
       console.log(
@@ -202,9 +200,16 @@ await db.transactions.add({
 })
 
   // ================= SAVE OFFLINE QUEUE
-  await db.room_actions.add(
-    payload
-  )
+  if (!cloudOnline) {
+
+    await db.room_actions.add(
+      payload
+    );
+
+    console.log(
+      '💾 ROOM OPEN SAVED OFFLINE'
+    );
+  }
 
   console.log(
     '💾 ROOM OPEN SAVED OFFLINE'
