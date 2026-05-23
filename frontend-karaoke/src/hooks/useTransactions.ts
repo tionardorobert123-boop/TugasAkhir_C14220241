@@ -85,8 +85,6 @@ export function useTransactions(selectedDate?: string) {
               );
 
               // ================= UPDATE DEXIE
-              await db.transactions.clear();
-
               await db.transactions.bulkPut(
                 filtered
               );

@@ -117,6 +117,19 @@ useEffect(() => {
         return;
       }
 
+      // ================= CHECK PENDING QUEUE
+      const pending =
+        await db.room_actions.count();
+
+      if (pending > 0) {
+
+        console.log(
+          'SKIP CLOUD FETCH - PENDING LOCAL ACTION'
+        );
+
+        return;
+      }
+
       // ================= CLOUD FETCH
       const res =
         await API.get('/rooms');
@@ -125,8 +138,6 @@ useEffect(() => {
       setRooms(res.data);
 
       // ================= UPDATE DEXIE
-      await db.rooms.clear();
-
       await db.rooms.bulkPut(
         res.data
       );
@@ -190,6 +201,7 @@ useEffect(() => {
   location.pathname,
   cloudOnline
 ]);
+
 // ================= AUTO CLOSE
 useEffect(() => {
 
