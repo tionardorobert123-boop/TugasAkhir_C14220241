@@ -80,7 +80,6 @@ export async function saveRoomExtend(
         '☁️ ROOM EXTEND CLOUD'
       )
 
-      return
 
     } catch (err) {
 
@@ -116,12 +115,7 @@ export async function saveRoomExtend(
 
       {
         end_time:
-
-          currentEnd
-
-            .toLocaleString('sv-SE')
-
-            .replace(' ', 'T')
+          currentEnd.toISOString()
       }
     )
   }
@@ -164,7 +158,7 @@ export async function saveRoomExtend(
 
     await db.transactions.update(
 
-      trx.id!,
+      trx.temp_id!,
 
       {
 

@@ -142,13 +142,8 @@ export async function syncRoomActions(
       }
 
       // ================= SUCCESS
-      await db.room_actions.update(
-
-        item.id!,
-
-        {
-          sync_status: 1
-        }
+      await db.room_actions.delete(
+        item.id!
       )
 
       console.log(

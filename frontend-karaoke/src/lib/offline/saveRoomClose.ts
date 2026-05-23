@@ -71,8 +71,6 @@ export async function saveRoomClose(
         '☁️ ROOM CLOSE CLOUD'
       )
 
-      return
-
     } catch (err) {
 
       console.log(
@@ -120,7 +118,7 @@ export async function saveRoomClose(
 
     await db.transactions.update(
 
-      trx.id!,
+      trx.temp_id!,
 
       {
 
@@ -130,10 +128,7 @@ export async function saveRoomClose(
         updated_at:
 
           new Date()
-
-            .toLocaleString('sv-SE')
-
-            .replace(' ', 'T')
+            .toISOString()
       }
     )
   }
