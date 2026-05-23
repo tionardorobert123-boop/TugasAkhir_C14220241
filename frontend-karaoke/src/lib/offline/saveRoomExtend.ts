@@ -115,7 +115,12 @@ export async function saveRoomExtend(
 
       {
         end_time:
-          currentEnd.toISOString()
+
+          currentEnd
+
+            .toLocaleString('sv-SE')
+
+            .replace(' ', 'T')
       }
     )
   }

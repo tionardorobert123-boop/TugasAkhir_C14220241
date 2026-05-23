@@ -32,11 +32,13 @@ export async function saveRoomOpen(
   // ================= FORMAT LOCAL
   const startTime =
     startDate
-      .toISOString()
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T')
 
   const endTime =
     endDate
-      .toISOString()
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T')
 
   // ================= PAYLOAD
   const payload = {

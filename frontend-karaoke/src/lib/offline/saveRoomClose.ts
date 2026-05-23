@@ -128,7 +128,10 @@ export async function saveRoomClose(
         updated_at:
 
           new Date()
-            .toISOString()
+
+            .toLocaleString('sv-SE')
+
+            .replace(' ', 'T')
       }
     )
   }
