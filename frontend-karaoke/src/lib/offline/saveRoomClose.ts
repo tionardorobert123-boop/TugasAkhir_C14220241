@@ -97,15 +97,24 @@ export async function saveRoomClose(
   )
 
   // ================= UPDATE LOCAL TRANSACTION
-  const trx =
+  const transactions =
     await db.transactions
-      .where('status')
-      .equals('active')
-      .and(
-        trx =>
-          trx.room_id === data.room_id
+      .where('room_id')
+      .equals(data.room_id)
+      .toArray();
+
+  const trx =
+    transactions
+      .filter(
+        (t: any) =>
+          t.status === 'active'
       )
-      .first();
+      .sort(
+        (a: any, b: any) =>
+
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+      )[0];
 
   if (trx) {
 
