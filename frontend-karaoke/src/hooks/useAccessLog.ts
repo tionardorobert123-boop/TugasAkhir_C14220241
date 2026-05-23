@@ -107,9 +107,6 @@ const fetchLogs = async () => {
         // ================= UPDATE UI
         setLogs(filtered);
 
-        // ================= UPDATE DEXIE
-        await db.logs.clear();
-
         await db.logs.bulkPut(
           filtered
         );

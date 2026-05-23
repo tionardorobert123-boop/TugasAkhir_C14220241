@@ -29,7 +29,6 @@ export interface OfflineRoom {
 }
 
 // ================= TRANSACTIONS
-// ================= TRANSACTIONS
 export interface OfflineTransaction {
 
   id?: number
@@ -117,7 +116,7 @@ class AppDB extends Dexie {
 
     super('karaokeDB')
 
-    this.version(1).stores({
+      this.version(1).stores({
 
       // ================= ROOMS
       rooms:
@@ -125,11 +124,11 @@ class AppDB extends Dexie {
 
       // ================= TRANSACTIONS
       transactions:
-        '++id,room_id,created_at',
+        'temp_id,transaction_id,room_id,created_at',
 
       // ================= LOGS
       logs:
-        '++id,room_id,timestamp',
+        'log_id,room_id,timestamp',
 
       // ================= ACTIONS
       room_actions:
