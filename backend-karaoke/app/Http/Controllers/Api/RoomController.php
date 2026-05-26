@@ -64,6 +64,8 @@ class RoomController extends Controller
     {
         $minutes = (int) $request->duration;
 
+        $startApi = microtime(true);
+
         if ($minutes <= 0) {
             return response()->json([
                 "message" => "Durasi tidak valid"
@@ -159,9 +161,24 @@ class RoomController extends Controller
             'timestamp' => $start,
         ]);
 
+        $apiMs = round(
+            (
+                microtime(true)
+                - $startApi
+            ) * 1000,
+            2
+        );
+
+                Log::info(
+            "API PROCESS: "
+            . $apiMs
+            . " ms"
+        );
+
         return response()->json([
             "message" => "Room started",
             "end_time" => $end,
+            "api_ms" => $apiMs
         ]);
     }
 
@@ -170,6 +187,8 @@ class RoomController extends Controller
     // =============================
     public function close(Request $request, $id)
     {
+        $startApi = microtime(true);
+
         $transaction = DB::table('transactions')
             ->where('room_id', $id)
             ->where('status', 'active')
@@ -219,8 +238,24 @@ class RoomController extends Controller
             'duration' => $totalDuration,
             'timestamp' => now(),
         ]);
+
+        $apiMs = round(
+            (
+                microtime(true)
+                - $startApi
+            ) * 1000,
+            2
+        );
+
+                Log::info(
+            "API PROCESS: "
+            . $apiMs
+            . " ms"
+        );
+
         return response()->json([
             "message" => "Room closed",
+            "api_ms" => $apiMs
         ]);
     }
 
