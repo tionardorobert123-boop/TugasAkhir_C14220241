@@ -8,9 +8,73 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\AccessLog;
+use PhpMqtt\Client\MqttClient;
+use PhpMqtt\Client\ConnectionSettings;
 
 class RoomController extends Controller
 {
+
+//cek timer backend ke mqtt
+private function publishMQTT($roomId, $action)
+{
+    $server = '127.0.0.1';
+    $port = 1883;
+
+    $clientId =
+        'laravel-publisher-'
+        . uniqid();
+
+    $mqtt =
+        new MqttClient(
+            $server,
+            $port,
+            $clientId
+        );
+
+    $connectionSettings =
+        (new ConnectionSettings)
+            ->setKeepAliveInterval(60);
+
+    $mqtt->connect(
+        $connectionSettings,
+        false
+    );
+
+    // ================= TIMER START
+    $startMqtt =
+        microtime(true);
+
+    $mqtt->publish(
+        "room/{$roomId}/control",
+
+        json_encode([
+            'action' => $action
+        ]),
+
+        0
+    );
+
+    // ================= TIMER END
+    $mqttMs =
+        round(
+            (
+                microtime(true)
+                - $startMqtt
+            ) * 1000,
+            2
+        );
+
+    echo
+        "MQTT PUBLISH: "
+        . $mqttMs
+        . " ms"
+        . PHP_EOL;
+
+    $mqtt->disconnect();
+
+    return $mqttMs;
+}
+
     // =============================
     // GET ROOMS + ACTIVE TRANSACTION
     // =============================
@@ -112,7 +176,7 @@ class RoomController extends Controller
        $start = $request->filled('start_time')
         ? Carbon::parse($request->start_time)
         : now();
-        
+
         $hours = $minutes / 60;
 
         $end = $request->filled('end_time')
@@ -155,9 +219,16 @@ class RoomController extends Controller
             'timestamp' => $start,
         ]);
 
+        // ================= MQTT OPEN
+        $mqttMs =
+            $this->publishMQTT(
+                $id,
+                'open'
+            );
         return response()->json([
             "message" => "Room started",
-            "end_time" => $end
+            "end_time" => $end,
+            "mqtt_ms" => $mqttMs
         ]);
     }
 
@@ -216,9 +287,15 @@ class RoomController extends Controller
             'timestamp' => now(),
         ]);
 
-
+        // ================= MQTT CLOSE
+        $mqttMs =
+            $this->publishMQTT(
+                $id,
+                'close'
+            );
         return response()->json([
-            "message" => "Room closed"
+            "message" => "Room closed",
+            "mqtt_ms" => $mqttMs
         ]);
     }
 

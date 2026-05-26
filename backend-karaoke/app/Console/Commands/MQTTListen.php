@@ -75,6 +75,17 @@ class MQTTListen extends Command
                             $data['timestamp']
                             ?? 0;
 
+                            // ================= MQTT CALLBACK TIME
+                        $callbackMs =
+                            abs(
+                                round(
+                                    microtime(true) * 1000
+                                    -
+                                    $espTimestamp,
+                                    2
+                                )
+                            );
+
                         $lock =
                             $data['lock']
                             ?? 'unknown';

@@ -30,6 +30,9 @@ export function useRoomControl() {
    //check internet
   const {cloudOnline} = useCloud()
 
+  //untuk hitung MS ui update
+  let uiStart = 0;
+
   const openExtendModal = (roomId: number) => {
     setExtendRoomId(roomId);
     setShowExtendModal(true);
@@ -280,6 +283,8 @@ useEffect(() => {
 
         try {
 
+          uiStart =
+            performance.now();
           // ================= CLOSE ROOM
           await saveRoomClose(
 
@@ -326,6 +331,17 @@ useEffect(() => {
 
                 : r
             )
+          );
+          const uiEnd =
+            performance.now();
+
+          const uiMs =
+            (
+              uiEnd - uiStart
+            ).toFixed(2);
+
+          console.log(
+            `UI UPDATE: ${uiMs} ms`
           );
 
         } catch (err) {
@@ -426,7 +442,11 @@ useEffect(() => {
           duration * 60000
         ).toLocaleString('sv-SE').replace(' ', 'T');
 
-        // ================= UPDATE UI LANGSUNG
+        // ================= UI TIMER START
+        uiStart =
+          performance.now();
+
+       // ================= UPDATE UI LANGSUNG
         setRooms(prev =>
 
           prev.map(room =>
@@ -451,6 +471,19 @@ useEffect(() => {
 
               : room
           )
+        );
+
+        // ================= UI TIMER END
+        const uiEnd =
+          performance.now();
+
+        const uiMs =
+          (
+            uiEnd - uiStart
+          ).toFixed(2);
+
+        console.log(
+          `UI UPDATE: ${uiMs} ms`
         );
 
         // ================= UPDATE DEXIE CACHE
@@ -493,6 +526,8 @@ const closeRoom = async (
 
   try {
 
+    uiStart =
+    performance.now();
     // ================= SAVE ACTION
     await saveRoomClose(
 
@@ -523,6 +558,18 @@ const closeRoom = async (
 
           : room
       )
+    );
+
+    const uiEnd =
+      performance.now();
+
+    const uiMs =
+      (
+        uiEnd - uiStart
+      ).toFixed(2);
+
+    console.log(
+      `UI UPDATE: ${uiMs} ms`
     );
 
     // ================= UPDATE DEXIE
