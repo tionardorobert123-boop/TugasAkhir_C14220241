@@ -9,6 +9,68 @@ use App\Services\MQTTService;
 
 class LocalRoomController extends Controller
 {
+
+
+//cek timer backend ke mqtt
+private function publishMQTT($roomId, $action)
+{
+    $server = '127.0.0.1';
+    $port = 1883;
+
+    $clientId =
+        'laravel-publisher-'
+        . uniqid();
+
+    $mqtt =
+        new MqttClient(
+            $server,
+            $port,
+            $clientId
+        );
+
+    $connectionSettings =
+        (new ConnectionSettings)
+            ->setKeepAliveInterval(60);
+
+    $mqtt->connect(
+        $connectionSettings,
+        false
+    );
+
+    // ================= TIMER START
+    $startMqtt =
+        microtime(true);
+
+    $mqtt->publish(
+        "room/{$roomId}/control",
+
+        json_encode([
+            'action' => $action
+        ]),
+
+        0
+    );
+
+    // ================= TIMER END
+    $mqttMs =
+        round(
+            (
+                microtime(true)
+                - $startMqtt
+            ) * 1000,
+            2
+        );
+
+    Log::info(
+        "MQTT PUBLISH: "
+        . $mqttMs
+        . " ms"
+    );
+
+    $mqtt->disconnect();
+
+    return $mqttMs;
+}
     // =============================
     // OPEN ROOM (LOCAL MQTT ONLY)
     // =============================
@@ -24,6 +86,10 @@ class LocalRoomController extends Controller
 
             $mqtt = new MQTTService();
 
+             // ================= TIMER START
+            $startMqtt =
+                microtime(true);
+
             $mqtt->publish(
                 "room/$id/control",
                 json_encode([
@@ -32,6 +98,23 @@ class LocalRoomController extends Controller
                     "duration" => $minutes
                 ])
             );
+
+             // ================= TIMER END
+                $mqttMs =
+                    round(
+                        (
+                            microtime(true)
+                            - $startMqtt
+                        ) * 1000,
+                        2
+                    );
+
+                Log::info(
+                    "MQTT PUBLISH: "
+                    . $mqttMs
+                    . " ms"
+                );
+
 
             return response()->json([
                 "success" => true,
@@ -65,6 +148,10 @@ class LocalRoomController extends Controller
 
             $mqtt = new MQTTService();
 
+             // ================= TIMER START
+            $startMqtt =
+                microtime(true);
+
             $mqtt->publish(
                 "room/$id/control",
                 json_encode([
@@ -72,6 +159,23 @@ class LocalRoomController extends Controller
                     "action" => "close"
                 ])
             );
+
+             // ================= TIMER END
+                $mqttMs =
+                    round(
+                        (
+                            microtime(true)
+                            - $startMqtt
+                        ) * 1000,
+                        2
+                    );
+
+                Log::info(
+                    "MQTT PUBLISH: "
+                    . $mqttMs
+                    . " ms"
+                );
+
 
             return response()->json([
                 "success" => true,

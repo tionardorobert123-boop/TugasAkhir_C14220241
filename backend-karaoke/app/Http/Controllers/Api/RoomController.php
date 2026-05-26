@@ -15,67 +15,6 @@ use Illuminate\Support\Facades\Log;
 class RoomController extends Controller
 {
 
-//cek timer backend ke mqtt
-private function publishMQTT($roomId, $action)
-{
-    $server = '127.0.0.1';
-    $port = 1883;
-
-    $clientId =
-        'laravel-publisher-'
-        . uniqid();
-
-    $mqtt =
-        new MqttClient(
-            $server,
-            $port,
-            $clientId
-        );
-
-    $connectionSettings =
-        (new ConnectionSettings)
-            ->setKeepAliveInterval(60);
-
-    $mqtt->connect(
-        $connectionSettings,
-        false
-    );
-
-    // ================= TIMER START
-    $startMqtt =
-        microtime(true);
-
-    $mqtt->publish(
-        "room/{$roomId}/control",
-
-        json_encode([
-            'action' => $action
-        ]),
-
-        0
-    );
-
-    // ================= TIMER END
-    $mqttMs =
-        round(
-            (
-                microtime(true)
-                - $startMqtt
-            ) * 1000,
-            2
-        );
-
-    Log::info(
-        "MQTT PUBLISH: "
-        . $mqttMs
-        . " ms"
-    );
-
-    $mqtt->disconnect();
-
-    return $mqttMs;
-}
-
     // =============================
     // GET ROOMS + ACTIVE TRANSACTION
     // =============================
@@ -220,16 +159,9 @@ private function publishMQTT($roomId, $action)
             'timestamp' => $start,
         ]);
 
-        // ================= MQTT OPEN
-        $mqttMs =
-            $this->publishMQTT(
-                $id,
-                'open'
-            );
         return response()->json([
             "message" => "Room started",
             "end_time" => $end,
-            "mqtt_ms" => $mqttMs
         ]);
     }
 
@@ -287,16 +219,8 @@ private function publishMQTT($roomId, $action)
             'duration' => $totalDuration,
             'timestamp' => now(),
         ]);
-
-        // ================= MQTT CLOSE
-        $mqttMs =
-            $this->publishMQTT(
-                $id,
-                'close'
-            );
         return response()->json([
             "message" => "Room closed",
-            "mqtt_ms" => $mqttMs
         ]);
     }
 
