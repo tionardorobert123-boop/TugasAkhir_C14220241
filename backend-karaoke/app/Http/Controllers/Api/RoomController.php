@@ -64,7 +64,7 @@ private function publishMQTT($roomId, $action)
             2
         );
 
-    logger(
+    Log::info(
         "MQTT PUBLISH: "
         . $mqttMs
         . " ms"
