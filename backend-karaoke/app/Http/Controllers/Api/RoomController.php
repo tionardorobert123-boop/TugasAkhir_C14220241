@@ -64,11 +64,11 @@ private function publishMQTT($roomId, $action)
             2
         );
 
-    echo
+    logger(
         "MQTT PUBLISH: "
         . $mqttMs
         . " ms"
-        . PHP_EOL;
+    );
 
     $mqtt->disconnect();
 
