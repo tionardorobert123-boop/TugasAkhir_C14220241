@@ -108,15 +108,11 @@ class RoomController extends Controller
                 ]);
             }
         }
-
-        $start = $request->filled('start_time')
-
-            ? \Carbon\Carbon::parse(
-                $request->start_time
-            )
-
-            : now();
-
+        
+       $start = $request->filled('start_time')
+        ? Carbon::parse($request->start_time)
+        : now();
+        
         $hours = $minutes / 60;
 
         $end = $request->filled('end_time')
