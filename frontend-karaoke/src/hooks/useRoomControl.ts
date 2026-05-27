@@ -278,14 +278,23 @@ useEffect(() => {
 
     try {
 
-      // ================= FETCH IOT
+      // ================= OFFLINE
+      if (!cloudOnline) {
+
+        console.log(
+          '📴 IOT FROM DEXIE'
+        );
+
+        return;
+      }
+
+      // ================= FETCH CLOUD
       const res =
         await API.get(
           '/iot-devices'
         );
 
-      // ================= SAVE DEXIE
-      await db.iot_devices.bulkPut(
+      const iotData =
 
         res.data.map((iot: any) => ({
 
@@ -306,7 +315,11 @@ useEffect(() => {
 
           last_seen:
             iot.last_seen
-        }))
+        }));
+
+      // ================= SAVE DEXIE
+      await db.iot_devices.bulkPut(
+        iotData
       );
 
       console.log(
@@ -325,20 +338,27 @@ useEffect(() => {
   // ================= INITIAL
   fetchIoTStatus();
 
-  // ================= POLLING
-  interval = setInterval(() => {
+  // ================= POLLING ONLY ONLINE
+  if (cloudOnline) {
 
-    fetchIoTStatus();
+    interval = setInterval(() => {
 
-  }, 3000);
+      fetchIoTStatus();
+
+    }, 3000);
+  }
 
   return () => {
 
-    clearInterval(interval);
+    if (interval) {
+
+      clearInterval(interval);
+    }
   };
 
 }, [
-  token
+  token,
+  cloudOnline
 ]);
 
 // ================= AUTO CLOSE
