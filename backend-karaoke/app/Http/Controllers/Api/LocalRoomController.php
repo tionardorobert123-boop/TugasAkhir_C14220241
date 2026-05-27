@@ -244,4 +244,33 @@ private function publishMQTT($roomId, $action)
             ], 500);
         }
     }
+
+    //resync iot ketika terjadi mati lampu/power off
+        public function resync($id)
+    {
+        try {
+
+            $mqtt = new MQTTService();
+
+            $mqtt->publish(
+                "room/$id/control",
+                json_encode([
+                    "room_id" => (int) $id,
+                    "action" => "open"
+                ])
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'ROOM RESYNC SENT'
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

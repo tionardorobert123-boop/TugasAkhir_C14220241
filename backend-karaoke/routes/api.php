@@ -51,6 +51,11 @@ Route::post(
                 '/rooms/{id}/extend',
                 [LocalRoomController::class, 'extend']
             );
+
+            Route::post(
+                '/rooms/{id}/resync',
+                [LocalRoomController::class, 'resync']
+            );
         });
 
 // QUICK LOGS

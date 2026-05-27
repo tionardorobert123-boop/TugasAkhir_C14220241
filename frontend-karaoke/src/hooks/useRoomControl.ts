@@ -380,6 +380,72 @@ useEffect(() => {
   cloudOnline
 ]);
 
+//SELF HEALING MQTT
+useEffect(() => {
+
+  if (!token) return;
+
+  // ================= CHECK ONLY WHEN ROOM DATA CHANGED
+  const syncMismatch = async () => {
+
+    for (const room of rooms) {
+
+      // ================= ROOM SHOULD BE OPEN
+      const shouldUnlocked =
+
+        room.status === 'occupied';
+
+      // ================= MQTT WRONG STATE
+      const mqttLocked =
+
+        room.lock_status === 'locked';
+
+      // ================= DEVICE ONLINE
+      const online =
+
+        room.status_online === true;
+
+      // ================= MISMATCH
+      if (
+        shouldUnlocked &&
+        mqttLocked &&
+        online
+      ) {
+
+        console.log(
+          `SYNC MISMATCH ROOM ${room.room_id}`
+        );
+
+        try {
+
+          // ================= RESEND OPEN COMMAND
+          await API.post(
+            `/local/rooms/${room.room_id}/resync`
+
+          );
+
+          console.log(
+            `RETRY OPEN ROOM ${room.room_id}`
+          );
+
+        } catch (err) {
+
+          console.log(
+            'RETRY MQTT FAILED',
+            err
+          );
+        }
+      }
+    }
+  };
+
+  syncMismatch();
+
+}, [
+  rooms,
+  token
+]);
+
   // ================= WARNING =================
   const isWarning = (endTime: string) => {
     if (!endTime) return false;
