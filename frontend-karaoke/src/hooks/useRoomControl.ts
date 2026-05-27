@@ -367,29 +367,29 @@ useEffect(() => {
       ).getTime();
 
       // ================= DEBUG
-      console.log({
+      // console.log({
 
-        room: room.room_id,
+      //   room: room.room_id,
 
-        now:
+      //   now:
 
-          new Date(nowTime)
+      //     new Date(nowTime)
 
-            .toLocaleString('sv-SE')
+      //       .toLocaleString('sv-SE')
 
-            .replace(' ', 'T'),
+      //       .replace(' ', 'T'),
 
-        end:
+      //   end:
 
-          new Date(end)
+      //     new Date(end)
 
-            .toLocaleString('sv-SE')
+      //       .toLocaleString('sv-SE')
 
-            .replace(' ', 'T'),
+      //       .replace(' ', 'T'),
 
-        diff:
-          end - nowTime
-      });
+      //   diff:
+      //     end - nowTime
+      // });
 
       // ================= AUTO CLOSE
       if (nowTime >= end) {
@@ -536,26 +536,18 @@ useEffect(() => {
 
         room.lock_status === 'locked';
 
-      // ================= DEVICE ONLINE
-      const online =
-
-        room.status_online === true;
-
       console.log({
 
         room: room.room_id,
 
         shouldUnlocked,
 
-        mqttLocked,
-
-        online
+        mqttLocked
       });
 
       if (
         shouldUnlocked &&
-        mqttLocked &&
-        online
+        mqttLocked
       ) {
 
         console.log(
