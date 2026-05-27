@@ -69,6 +69,11 @@ Route::get('/logs', function () {
 Route::middleware(['auth:sanctum'])
     ->group(function () {
 
+     Route::get(
+        '/iot-devices',
+        [IoTDeviceController::class, 'index']
+    );
+    
     // ROOMS
     Route::get(
         '/rooms',

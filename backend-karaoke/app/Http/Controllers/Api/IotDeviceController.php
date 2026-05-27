@@ -51,4 +51,9 @@ class IotDeviceController extends Controller
             ], 500);
         }
     }
+
+    public function index()
+{
+    return DB::table('iot_devices')->get();
+}
 }

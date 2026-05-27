@@ -81,6 +81,46 @@ useEffect(() => {
 
   let isFetching = false;
 
+  // ================= MERGE ROOM + IOT
+  const mergeRooms = async (
+    roomData: any[]
+  ) => {
+
+    const iotDevices =
+      await db.iot_devices.toArray();
+
+    return roomData.map(room => {
+
+      const device =
+        iotDevices.find(
+
+          d =>
+            d.room_id === room.room_id
+        );
+
+      return {
+
+        ...room,
+
+        lock_status:
+
+          device?.lock_status
+          || 'unknown',
+
+        door_status:
+
+          device?.door_status
+          || 'unknown',
+
+        status_online:
+
+          device?.status_online
+          || false
+      };
+    });
+  };
+
+  // ================= LOAD CACHE
   const loadCachedRooms = async () => {
 
     const cachedRooms =
@@ -88,7 +128,12 @@ useEffect(() => {
 
     if (cachedRooms.length > 0) {
 
-      setRooms(cachedRooms);
+      const merged =
+        await mergeRooms(
+          cachedRooms
+        );
+
+      setRooms(merged);
 
       console.log(
         'ROOMS CACHE LOADED'
@@ -96,6 +141,7 @@ useEffect(() => {
     }
   };
 
+  // ================= FETCH
   const fetchRooms = async () => {
 
     // ================= PREVENT OVERLAP
@@ -111,7 +157,12 @@ useEffect(() => {
         const offlineRooms =
           await db.rooms.toArray();
 
-        setRooms(offlineRooms);
+        const merged =
+          await mergeRooms(
+            offlineRooms
+          );
+
+        setRooms(merged);
 
         console.log(
           'ROOMS FROM DEXIE'
@@ -137,13 +188,19 @@ useEffect(() => {
       const res =
         await API.get('/rooms');
 
-      // ================= UPDATE UI
-      setRooms(res.data);
-
-      // ================= UPDATE DEXIE
+      // ================= SAVE ROOM CACHE
       await db.rooms.bulkPut(
         res.data
       );
+
+      // ================= MERGE WITH IOT
+      const merged =
+        await mergeRooms(
+          res.data
+        );
+
+      // ================= UPDATE UI
+      setRooms(merged);
 
       console.log(
         'ROOMS FROM CLOUD'
@@ -160,7 +217,12 @@ useEffect(() => {
       const offlineRooms =
         await db.rooms.toArray();
 
-      setRooms(offlineRooms);
+      const merged =
+        await mergeRooms(
+          offlineRooms
+        );
+
+      setRooms(merged);
 
       console.log(
         'ROOMS FROM DEXIE'
@@ -181,14 +243,14 @@ useEffect(() => {
   // ================= AUTO REFRESH
   let interval: any;
 
-  // ONLY POLLING IF CLOUD ONLINE
+  // ================= CLOUD POLLING
   if (cloudOnline) {
 
     interval = setInterval(() => {
 
       fetchRooms();
 
-    }, 3000);
+    }, 10000);
   }
 
   return () => {
@@ -203,6 +265,80 @@ useEffect(() => {
   token,
   location.pathname,
   cloudOnline
+]);
+
+// ================= FETCH IOT STATUS
+useEffect(() => {
+
+  if (!token) return;
+
+  let interval: any;
+
+  const fetchIoTStatus = async () => {
+
+    try {
+
+      // ================= FETCH IOT
+      const res =
+        await API.get(
+          '/iot-devices'
+        );
+
+      // ================= SAVE DEXIE
+      await db.iot_devices.bulkPut(
+
+        res.data.map((iot: any) => ({
+
+          device_id:
+            iot.device_id,
+
+          room_id:
+            iot.device_id,
+
+          lock_status:
+            iot.lock_status,
+
+          door_status:
+            iot.door_status,
+
+          status_online:
+            iot.status_online,
+
+          last_seen:
+            iot.last_seen
+        }))
+      );
+
+      console.log(
+        'IOT STATUS UPDATED'
+      );
+
+    } catch (err) {
+
+      console.log(
+        'FETCH IOT FAILED',
+        err
+      );
+    }
+  };
+
+  // ================= INITIAL
+  fetchIoTStatus();
+
+  // ================= POLLING
+  interval = setInterval(() => {
+
+    fetchIoTStatus();
+
+  }, 3000);
+
+  return () => {
+
+    clearInterval(interval);
+  };
+
+}, [
+  token
 ]);
 
 // ================= AUTO CLOSE

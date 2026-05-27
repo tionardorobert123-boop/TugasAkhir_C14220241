@@ -100,6 +100,28 @@ export interface OfflineRoomAction {
   sync_status: number
 }
 
+// ================= IOT DEVICES
+export interface OfflineIoT {
+
+  device_id?: number
+
+  room_id: number
+
+  lock_status:
+    'locked' |
+    'unlocked' |
+    'unknown'
+
+  door_status:
+    'open' |
+    'closed' |
+    'unknown'
+
+  status_online: boolean
+
+  last_seen?: string
+}
+
 // ================= DATABASE
 class AppDB extends Dexie {
 
@@ -111,6 +133,8 @@ class AppDB extends Dexie {
   logs!: Table<OfflineLog>
 
   room_actions!: Table<OfflineRoomAction>
+
+  iot_devices!: Table<OfflineIoT>
 
   constructor() {
 
@@ -132,7 +156,9 @@ class AppDB extends Dexie {
 
       // ================= ACTIONS
       room_actions:
-        '++id,temp_id,action,sync_status,created_at'
+        '++id,temp_id,action,sync_status,created_at',
+
+      iot_devices:'room_id,status_online,lock_status'
     })
   }
 }
