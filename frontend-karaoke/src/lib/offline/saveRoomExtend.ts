@@ -126,16 +126,29 @@ export async function saveRoomExtend(
   }
 
   // ================= UPDATE LOCAL TRANSACTION
-  const trx =
+  const transactions =
+
     await db.transactions
-
       .where('room_id')
-
       .equals(data.room_id)
+      .toArray();
 
-      .reverse()
+  const trx =
 
-      .first()
+    transactions
+
+      .filter(
+        (t: any) =>
+          t.status === 'active'
+      )
+
+      .sort(
+        (a: any, b: any) =>
+
+          new Date(b.created_at).getTime() -
+
+          new Date(a.created_at).getTime()
+      )[0];
 
   if (trx) {
 
