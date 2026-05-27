@@ -188,7 +188,7 @@ useEffect(() => {
 
       fetchRooms();
 
-    }, 10000);
+    }, 3000);
   }
 
   return () => {
@@ -405,7 +405,17 @@ useEffect(() => {
 
         room.status_online === true;
 
-      // ================= MISMATCH
+      console.log({
+
+        room: room.room_id,
+
+        shouldUnlocked,
+
+        mqttLocked,
+
+        online
+      });
+
       if (
         shouldUnlocked &&
         mqttLocked &&
