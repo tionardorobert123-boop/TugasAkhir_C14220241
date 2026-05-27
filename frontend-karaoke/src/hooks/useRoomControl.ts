@@ -515,23 +515,21 @@ useEffect(() => {
   token,
   cloudOnline
 ]);
-
-//SELF HEALING MQTT
+// ================= SELF HEALING MQTT
 useEffect(() => {
 
   if (!token) return;
 
-  // ================= CHECK ONLY WHEN ROOM DATA CHANGED
   const syncMismatch = async () => {
 
     for (const room of rooms) {
 
-      // ================= ROOM SHOULD BE OPEN
+      // ================= ROOM SHOULD OPEN
       const shouldUnlocked =
 
         room.status === 'occupied';
 
-      // ================= MQTT WRONG STATE
+      // ================= MQTT LOCKED
       const mqttLocked =
 
         room.lock_status === 'locked';
@@ -542,24 +540,50 @@ useEffect(() => {
 
         shouldUnlocked,
 
-        mqttLocked
+        mqttLocked,
+
+        resyncing:
+          room._resyncing
       });
 
+      // ================= MISMATCH
       if (
+
         shouldUnlocked &&
-        mqttLocked
+
+        mqttLocked &&
+
+        !room._resyncing
       ) {
 
         console.log(
           `SYNC MISMATCH ROOM ${room.room_id}`
         );
 
+        // ================= LOCK RESYNC
+        setRooms(prev =>
+
+          prev.map(r =>
+
+            r.room_id === room.room_id
+
+              ? {
+
+                  ...r,
+
+                  _resyncing: true
+                }
+
+              : r
+          )
+        );
+
         try {
 
-          // ================= RESEND OPEN COMMAND
+          // ================= RESEND OPEN
           await API.post(
-            `/local/rooms/${room.room_id}/resync`
 
+            `/local/rooms/${room.room_id}/resync`
           );
 
           console.log(
@@ -573,6 +597,28 @@ useEffect(() => {
             err
           );
         }
+
+        // ================= COOLDOWN
+        setTimeout(() => {
+
+          setRooms(prev =>
+
+            prev.map(r =>
+
+              r.room_id === room.room_id
+
+                ? {
+
+                    ...r,
+
+                    _resyncing: false
+                  }
+
+                : r
+            )
+          );
+
+        }, 5000);
       }
     }
   };
