@@ -266,7 +266,6 @@ useEffect(() => {
   location.pathname,
   cloudOnline
 ]);
-
 // ================= FETCH IOT STATUS
 useEffect(() => {
 
@@ -278,14 +277,21 @@ useEffect(() => {
 
     try {
 
-      // ================= OFFLINE
-      if (!cloudOnline) {
+      // ================= OFFLINE MODE
+      if (
+        !navigator.onLine ||
+        !cloudOnline
+      ) {
+
+        const cachedIoT =
+
+          await db.iot_devices.toArray();
 
         console.log(
           '📴 IOT FROM DEXIE'
         );
 
-        return;
+        return cachedIoT;
       }
 
       // ================= FETCH CLOUD
@@ -294,6 +300,7 @@ useEffect(() => {
           '/iot-devices'
         );
 
+      // ================= FORMAT
       const iotData =
 
         res.data.map((iot: any) => ({
@@ -301,6 +308,7 @@ useEffect(() => {
           device_id:
             iot.device_id,
 
+          // DEVICE ID = ROOM ID
           room_id:
             iot.device_id,
 
@@ -317,7 +325,7 @@ useEffect(() => {
             iot.last_seen
         }));
 
-      // ================= SAVE DEXIE
+      // ================= SAVE CACHE
       await db.iot_devices.bulkPut(
         iotData
       );
@@ -326,12 +334,20 @@ useEffect(() => {
         'IOT STATUS UPDATED'
       );
 
+      return iotData;
+
     } catch (err) {
 
+      // ================= FALLBACK DEXIE
+      const cachedIoT =
+
+        await db.iot_devices.toArray();
+
       console.log(
-        'FETCH IOT FAILED',
-        err
+        '📴 IOT FALLBACK DEXIE'
       );
+
+      return cachedIoT;
     }
   };
 
