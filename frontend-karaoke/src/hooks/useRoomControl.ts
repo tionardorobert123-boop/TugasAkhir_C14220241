@@ -171,18 +171,18 @@ useEffect(() => {
         return;
       }
 
-      // ================= CHECK PENDING QUEUE
-      const pending =
-        await db.room_actions.count();
+      // // ================= CHECK PENDING QUEUE
+      // const pending =
+      //   await db.room_actions.count();
 
-      if (pending > 0) {
+      // if (pending > 0) {
 
-        console.log(
-          'SKIP CLOUD FETCH - PENDING LOCAL ACTION'
-        );
+      //   console.log(
+      //     'SKIP CLOUD FETCH - PENDING LOCAL ACTION'
+      //   );
 
-        return;
-      }
+      //   return;
+      // }
 
       // ================= CLOUD FETCH
       const res =

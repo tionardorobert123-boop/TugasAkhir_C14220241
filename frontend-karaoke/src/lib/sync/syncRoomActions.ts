@@ -150,15 +150,29 @@ export async function syncRoomActions(
         '☁️ SYNC BERHASIL'
       )
 
-    } catch (err) {
+    } catch (err: any) {
 
       console.log(
         '❌ SYNC GAGAL',
         err
       )
 
-      // ================= STOP LOOP
-      break
+      // ================= DELETE INVALID AUTH
+      if (
+        err?.response?.status === 401
+      ) {
+
+        await db.room_actions.delete(
+          item.id!
+        )
+
+        console.log(
+          '🗑 INVALID TOKEN ACTION REMOVED'
+        )
+      }
+
+      // ================= CONTINUE NEXT
+      continue
     }
   }
 }
