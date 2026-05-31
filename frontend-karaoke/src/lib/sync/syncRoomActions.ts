@@ -172,7 +172,7 @@ export async function syncRoomActions(
 
       console.log(
         '❌ SYNC GAGAL',
-        err
+        err?.response?.data
       )
 
       // ================= DELETE INVALID AUTH
