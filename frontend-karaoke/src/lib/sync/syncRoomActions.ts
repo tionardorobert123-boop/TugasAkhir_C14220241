@@ -181,6 +181,15 @@ try {
 
       successCount++
 
+      const endAction =
+        performance.now()
+
+      console.log(
+        `ACTION ${item.action}
+        ROOM ${item.room_id}
+        : ${(endAction-startAction).toFixed(2)} ms`
+      )
+
       console.log(
         '☁️ SYNC BERHASIL'
       )
@@ -188,6 +197,16 @@ try {
     } catch (err: any) {
 
       failedCount++
+
+      const endAction =
+      performance.now()
+
+      console.log(
+          `ACTION ${item.action}
+          ROOM ${item.room_id}
+          FAILED
+          : ${(endAction-startAction).toFixed(2)} ms`
+      )
 
       console.log(
         '❌ SYNC GAGAL',
@@ -207,15 +226,6 @@ try {
           '🗑 INVALID TOKEN ACTION REMOVED'
         )
       }
-
-      const endAction =
-        performance.now()
-
-      console.log(
-        `ACTION ${item.action}
-        ROOM ${item.room_id}
-        : ${(endAction-startAction).toFixed(2)} ms`
-      )
       // ================= CONTINUE NEXT
       continue
     }
