@@ -5,18 +5,27 @@ import { db } from '../db'
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
+  let isSyncing = false
+
 export async function syncRoomActions(
 
   cloudOnline: boolean
 
 ) {
 
-   console.log(
-    '🚀 SYNC FUNCTION CALLED',
-    new Date()
-  )
-  console.trace(
-  'SYNC TRACE'
+    if (isSyncing) {
+
+    console.log(
+      '⛔ SYNC ALREADY RUNNING'
+    )
+
+    return
+  }
+
+  isSyncing = true
+
+  console.log(
+    '🚀 SYNC FUNCTION CALLED'
   )
   // ================= OFFLINE
   if (!cloudOnline) {

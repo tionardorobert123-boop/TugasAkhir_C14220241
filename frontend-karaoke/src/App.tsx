@@ -4,18 +4,6 @@ import {
   Route
 } from "react-router-dom";
 
-import {
-  useEffect
-} from 'react';
-
-import {
-  useCloud
-} from './context/CloudContext';
-
-import {
-  syncAll
-} from './lib/sync';
-
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,22 +12,6 @@ import TransactionsPage from "./pages/TransactionsPage";
 import AccessLogPage from "./pages/AccessLogPage";
 
 function App() {
-
-  const {
-    cloudOnline
-  } = useCloud();
-
-  useEffect(() => {
-
-    if (cloudOnline) {
-
-      syncAll(
-        cloudOnline
-      );
-    }
-
-  }, [cloudOnline]);
-
   return (
 
     <BrowserRouter>
