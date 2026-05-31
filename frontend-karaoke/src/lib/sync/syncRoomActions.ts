@@ -21,6 +21,13 @@ export async function syncRoomActions(
     return
   }
 
+  const startSync =
+  performance.now()
+
+  let successCount = 0
+
+  let failedCount = 0
+
   // ================= GET QUEUE
   const unsynced =
 
@@ -146,11 +153,15 @@ export async function syncRoomActions(
         item.id!
       )
 
+      successCount++
+
       console.log(
         '☁️ SYNC BERHASIL'
       )
 
     } catch (err: any) {
+
+      failedCount++
 
       console.log(
         '❌ SYNC GAGAL',
@@ -175,4 +186,30 @@ export async function syncRoomActions(
       continue
     }
   }
+
+  const endSync =
+  performance.now()
+
+  const durationMs =
+    Number(
+      (
+        endSync - startSync
+      ).toFixed(2)
+    )
+
+  console.log(
+    `✅ SYNC FINISHED`
+  )
+
+  console.log(
+    `SUCCESS : ${successCount}`
+  )
+
+  console.log(
+    `FAILED : ${failedCount}`
+  )
+
+  console.log(
+    `DURATION : ${durationMs} ms`
+  )
 }
