@@ -56,7 +56,7 @@ try {
       .equals(0)
 
       .toArray()
-      
+
       console.log(
       'PENDING QUEUE:',
       unsynced.length
@@ -77,6 +77,9 @@ try {
   )
 
   for (const item of unsynced) {
+
+    const startAction =
+    performance.now()
 
     try {
 
@@ -205,6 +208,14 @@ try {
         )
       }
 
+      const endAction =
+        performance.now()
+
+      console.log(
+        `ACTION ${item.action}
+        ROOM ${item.room_id}
+        : ${(endAction-startAction).toFixed(2)} ms`
+      )
       // ================= CONTINUE NEXT
       continue
     }

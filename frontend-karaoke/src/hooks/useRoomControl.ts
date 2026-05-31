@@ -551,122 +551,125 @@ useEffect(() => {
   token,
   cloudOnline
 ]);
+
 // ================= SELF HEALING MQTT
-useEffect(() => {
 
-  if (!token) return;
+// useEffect(() => {
 
-  const syncMismatch = async () => {
+//   if (!token) return;
 
-    for (const room of rooms) {
+//   const syncMismatch = async () => {
 
-      // ================= ROOM SHOULD OPEN
-      const shouldUnlocked =
+//     for (const room of rooms) {
 
-        room.status === 'occupied';
+//       // ================= ROOM SHOULD OPEN
+//       const shouldUnlocked =
 
-      // ================= MQTT LOCKED
-      const mqttLocked =
+//         room.status === 'occupied';
 
-        room.lock_status === 'locked';
+//       // ================= MQTT LOCKED
+//       const mqttLocked =
 
-      console.log({
+//         room.lock_status === 'locked';
 
-        room: room.room_id,
+//       console.log({
 
-        shouldUnlocked,
+//         room: room.room_id,
 
-        mqttLocked,
+//         shouldUnlocked,
 
-        resyncing:
-          room._resyncing
-      });
+//         mqttLocked,
 
-      // ================= MISMATCH
-      if (
+//         resyncing:
+//           room._resyncing
+//       });
 
-        shouldUnlocked &&
+//       // ================= MISMATCH
+//       if (
 
-        mqttLocked &&
+//         shouldUnlocked &&
 
-        !room._resyncing
-      ) {
+//         mqttLocked &&
 
-        console.log(
-          `SYNC MISMATCH ROOM ${room.room_id}`
-        );
+//         !room._resyncing
+//       ) {
 
-        // ================= LOCK RESYNC
-        setRooms(prev =>
+//         console.log(
+//           `SYNC MISMATCH ROOM ${room.room_id}`
+//         );
 
-          prev.map(r =>
+//         // ================= LOCK RESYNC
+//         setRooms(prev =>
 
-            r.room_id === room.room_id
+//           prev.map(r =>
 
-              ? {
+//             r.room_id === room.room_id
 
-                  ...r,
+//               ? {
 
-                  _resyncing: true
-                }
+//                   ...r,
 
-              : r
-          )
-        );
+//                   _resyncing: true
+//                 }
 
-        try {
+//               : r
+//           )
+//         );
 
-          // ================= RESEND OPEN
-          await API.post(
+//         try {
 
-            `/local/rooms/${room.room_id}/resync`
-          );
+//           // ================= RESEND OPEN
+//           await API.post(
 
-          console.log(
-            `RETRY OPEN ROOM ${room.room_id}`
-          );
+//             `/local/rooms/${room.room_id}/resync`
+//           );
 
-        } catch (err) {
+//           console.log(
+//             `RETRY OPEN ROOM ${room.room_id}`
+//           );
 
-          console.log(
-            'RETRY MQTT FAILED',
-            err
-          );
-        }
+//         } catch (err) {
 
-        // ================= COOLDOWN
-        setTimeout(() => {
+//           console.log(
+//             'RETRY MQTT FAILED',
+//             err
+//           );
+//         }
 
-          setRooms(prev =>
+//         // ================= COOLDOWN
+//         setTimeout(() => {
 
-            prev.map(r =>
+//           setRooms(prev =>
 
-              r.room_id === room.room_id
+//             prev.map(r =>
 
-                ? {
+//               r.room_id === room.room_id
 
-                    ...r,
+//                 ? {
 
-                    _resyncing: false
-                  }
+//                     ...r,
 
-                : r
-            )
-          );
+//                     _resyncing: false
+//                   }
 
-        }, 5000);
-      }
-    }
-  };
+//                 : r
+//             )
+//           );
 
-  syncMismatch();
+//         }, 5000);
+//       }
+//     }
+//   };
 
-}, [
-  rooms,
-  token
-]);
+//   syncMismatch();
+
+// }, [
+//   rooms,
+//   token
+// ]);
 
   // ================= WARNING =================
+ 
   const isWarning = (endTime: string) => {
     if (!endTime) return false;
 
