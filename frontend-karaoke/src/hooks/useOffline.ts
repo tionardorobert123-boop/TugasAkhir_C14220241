@@ -3,7 +3,9 @@ import {syncRoomActions} from '../lib/sync/syncRoomActions'
 import {useCloud} from '../context/CloudContext'
 
 export default function useOffline() {
-  const {cloudOnline} = useCloud()
+  const {cloudOnline,
+  setSyncInfo} = useCloud()
+
   useEffect(() => {
     // ================= ONLINE
     if (cloudOnline) {
@@ -13,7 +15,8 @@ export default function useOffline() {
       )
       // ================= AUTO SYNC
       syncRoomActions(
-        cloudOnline
+        cloudOnline,
+         setSyncInfo
       )
 
     } else {
@@ -23,7 +26,9 @@ export default function useOffline() {
       )
     }
 
-  }, [cloudOnline])
+  }, [cloudOnline,
+
+    setSyncInfo])
 
   return cloudOnline
 }

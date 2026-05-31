@@ -9,7 +9,9 @@ const CLOUD_API =
 
 export async function syncRoomActions(
 
-  cloudOnline: boolean
+  cloudOnline: boolean,
+
+  setSyncInfo?: any
 
 ) {
   // ================= OFFLINE
@@ -62,8 +64,40 @@ try {
       unsynced.length
     )
 
+    setSyncInfo?.({
+
+      syncing: true,
+
+      pending: unsynced.length,
+
+      success: 0,
+
+      failed: 0,
+
+      duration: 0,
+
+      lastSync: null
+    })
+
   // ================= EMPTY
   if (!unsynced.length) {
+
+    setSyncInfo?.({
+
+      syncing: false,
+
+      pending: 0,
+
+      success: 0,
+
+      failed: 0,
+
+      duration: 0,
+
+      lastSync:
+        new Date()
+          .toLocaleTimeString()
+    })
 
     console.log(
       '✅ NO PENDING SYNC'
@@ -181,6 +215,13 @@ try {
 
       successCount++
 
+      setSyncInfo?.((prev: any) => ({
+
+        ...prev,
+
+        success: successCount
+      }))
+
       const endAction =
         performance.now()
 
@@ -197,6 +238,13 @@ try {
     } catch (err: any) {
 
       failedCount++
+
+      setSyncInfo?.((prev: any) => ({
+
+        ...prev,
+
+        failed: failedCount
+      }))
 
       const endAction =
       performance.now()
@@ -241,6 +289,23 @@ try {
       ).toFixed(2)
     )
 
+    setSyncInfo?.({
+
+      syncing: false,
+
+      pending: 0,
+
+      success: successCount,
+
+      failed: failedCount,
+
+      duration: durationMs,
+
+      lastSync:
+        new Date()
+          .toLocaleTimeString()
+    })
+
   console.log(
     `✅ SYNC FINISHED`
   )
@@ -257,12 +322,20 @@ try {
     `DURATION : ${durationMs} ms`
   )
   }
-finally {
 
-  isSyncing = false
+  finally {
 
-  console.log(
-    '🔓 SYNC LOCK RELEASED'
-  )
-}
+    isSyncing = false
+
+    setSyncInfo?.((prev: any) => ({
+
+      ...prev,
+
+      syncing: false
+    }))
+
+    console.log(
+      '🔓 SYNC LOCK RELEASED'
+    )
+  }
 }

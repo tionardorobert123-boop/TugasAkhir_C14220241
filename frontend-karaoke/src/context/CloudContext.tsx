@@ -13,11 +13,33 @@ import {
 const CLOUD_API =
   'https://tugasakhirc14220241.up.railway.app/api'
 
+interface SyncInfo {
+
+  syncing: boolean
+
+  pending: number
+
+  success: number
+
+  failed: number
+
+  duration: number
+
+  lastSync: string | null
+}
+
 interface CloudContextType {
 
   cloudOnline: boolean
 
   checking: boolean
+
+  syncInfo: SyncInfo
+
+  setSyncInfo:
+    React.Dispatch<
+      React.SetStateAction<SyncInfo>
+    >
 }
 
 const CloudContext =
@@ -25,7 +47,24 @@ const CloudContext =
 
     cloudOnline: false,
 
-    checking: true
+    checking: true,
+
+    syncInfo: {
+
+      syncing: false,
+
+      pending: 0,
+
+      success: 0,
+
+      failed: 0,
+
+      duration: 0,
+
+      lastSync: null
+    },
+
+    setSyncInfo: () => {}
   })
 
 export function CloudProvider({
@@ -37,6 +76,24 @@ export function CloudProvider({
   children: React.ReactNode
 
 }) {
+
+  const [syncInfo,
+  setSyncInfo] =
+
+    useState<SyncInfo>({
+
+      syncing: false,
+
+      pending: 0,
+
+      success: 0,
+
+      failed: 0,
+
+      duration: 0,
+
+      lastSync: null
+    })
 
   const [cloudOnline,
     setCloudOnline] =
@@ -158,10 +215,14 @@ export function CloudProvider({
 
       value={{
 
-        cloudOnline,
+      cloudOnline,
 
-        checking
-      }}
+      checking,
+
+      syncInfo,
+
+      setSyncInfo
+    }}
     >
 
       {children}
