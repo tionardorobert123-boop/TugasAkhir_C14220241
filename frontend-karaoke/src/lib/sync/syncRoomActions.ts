@@ -12,6 +12,15 @@ export async function syncRoomActions(
   cloudOnline: boolean
 
 ) {
+  // ================= OFFLINE
+   if (!cloudOnline) {
+
+    console.log(
+      '📴 CLOUD OFFLINE - SYNC SKIPPED'
+    )
+
+    return
+  }
 
     if (isSyncing) {
 
@@ -23,19 +32,12 @@ export async function syncRoomActions(
   }
 
   isSyncing = true
-
+try { 
   console.log(
     '🚀 SYNC FUNCTION CALLED'
   )
-  // ================= OFFLINE
-  if (!cloudOnline) {
-
-    console.log(
-      '📴 CLOUD OFFLINE - SYNC SKIPPED'
-    )
-
-    return
-  }
+  
+ 
 
   const startSync =
   performance.now()
@@ -54,6 +56,11 @@ export async function syncRoomActions(
       .equals(0)
 
       .toArray()
+      
+      console.log(
+      'PENDING QUEUE:',
+      unsynced.length
+    )
 
   // ================= EMPTY
   if (!unsynced.length) {
@@ -228,4 +235,13 @@ export async function syncRoomActions(
   console.log(
     `DURATION : ${durationMs} ms`
   )
+  }
+finally {
+
+  isSyncing = false
+
+  console.log(
+    '🔓 SYNC LOCK RELEASED'
+  )
+}
 }
