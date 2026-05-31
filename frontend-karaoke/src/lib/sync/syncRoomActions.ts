@@ -11,6 +11,13 @@ export async function syncRoomActions(
 
 ) {
 
+   console.log(
+    '🚀 SYNC FUNCTION CALLED',
+    new Date()
+  )
+  console.trace(
+  'SYNC TRACE'
+  )
   // ================= OFFLINE
   if (!cloudOnline) {
 
