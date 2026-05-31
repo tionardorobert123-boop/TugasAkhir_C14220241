@@ -4,6 +4,7 @@ import { useRoomControl } from "../hooks/useRoomControl";
 import { useNavigate,useLocation } from "react-router-dom";
 import TransactionCard from "../components/Transactions/TransactionCard";
 import { RefreshCw } from "lucide-react";
+import useOffline from "../hooks/useOffline";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -35,6 +36,8 @@ export default function TransactionsPage() {
   const [page, setPage] = useState(1);
   const perPage = 4;
 const [refreshing, setRefreshing] = useState(false);
+
+  const hasInternet = useOffline();
 
 const handleRefresh = async () => {
 
@@ -100,6 +103,30 @@ const handleRefresh = async () => {
                 Log Akses
               </button>
             </>
+          )}
+
+           {!hasInternet && (
+            <div
+              className="
+                mb-6 flex items-center justify-center gap-3 bg-red-600/85 border border-red-400 backdrop-blur-md px-6 py-3
+                rounded-2xl shadow-lg shadow-red-900/40  w-fit  mx-auto">
+              {/* STATUS DOT */}
+              <div className="relative flex items-center justify-center">
+                <div className="w-3 h-3 rounded-full bg-white animate-ping absolute" />
+                <div className="w-3 h-3 rounded-full bg-white relative" />
+              </div>
+
+              {/* TEXT */}
+              <div className="text-center">
+                <p className="font-bold text-base tracking-wide">
+                  MODE OFFLINE LOKAL
+                </p>
+
+                <p className="text-xs opacity-90">
+                  Internet tidak tersedia • Sistem berjalan melalui jaringan lokal
+                </p>
+              </div>
+            </div>
           )}
 
           <button
