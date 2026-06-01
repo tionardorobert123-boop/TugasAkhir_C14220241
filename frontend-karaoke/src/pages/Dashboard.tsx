@@ -82,42 +82,34 @@ function Dashboard() {
 
  return (
 
-  <div
+     <div className="min-h-screen ... relative">
+
+        {/* SYNC STATUS */}
+        <div
           className="
             hidden md:flex
             absolute
             left-1/2
             top-[18%]
             -translate-x-1/2
-            z-30
+            z-50
           "
         >
           <SyncStatus />
- 
-    <div
-      className="
-      min-h-screen
-      overflow-auto
-      bg-gradient-to-b
-      from-yellow-900
-      to-black
-      text-white
-      px-4 md:px-6 py-3
-      relative
-    ">
+        </div>
 
-      <div
-        className="
-        hidden md:flex
-        absolute inset-0
-        flex-col items-center
-        justify-center
-        opacity-80
-        pointer-events-none
-      "
-      >
+        {/* CENTER */}
+        <div
+          className="
+            hidden md:flex
+            absolute inset-0
+            flex-col items-center
+            justify-center
+            opacity-80
+            pointer-events-none
+          "
+        >
 
-         
 
       {!hasInternet && (
         <div
@@ -162,7 +154,6 @@ function Dashboard() {
         <p className="text-xl font-mono">
           {now.toLocaleTimeString("en-GB")}
         </p>
-      </div>
       </div>
 
       {/* ================= MOBILE HEADER ================= */}
@@ -285,7 +276,6 @@ function Dashboard() {
           </p>
         </div>
       </div>
-             
 
       {/* ================= MODALS ================= */}
       <OpenRoomModal
@@ -329,7 +319,6 @@ function Dashboard() {
       />
 
     </div>
-    
   );
 }
 
