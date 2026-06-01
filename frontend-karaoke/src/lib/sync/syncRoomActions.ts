@@ -64,40 +64,28 @@ try {
       unsynced.length
     )
 
-    setSyncInfo?.({
 
-      syncing: true,
+ // ================= EMPTY
+if (!unsynced.length) {
 
-      pending: unsynced.length,
+  setSyncInfo?.({
 
-      success: 0,
+    syncing: false,
 
-      failed: 0,
+    pending: 0,
 
-      duration: 0,
+    success: 0,
 
-      lastSync: null
-    })
+    failed: 0,
 
-  // ================= EMPTY
-  if (!unsynced.length) {
+    duration: 0,
 
-    setSyncInfo?.({
+    total: 0,
 
-      syncing: false,
-
-      pending: 0,
-
-      success: 0,
-
-      failed: 0,
-
-      duration: 0,
-
-      lastSync:
-        new Date()
-          .toLocaleTimeString()
-    })
+    lastSync:
+      new Date()
+        .toLocaleTimeString()
+  })
 
     console.log(
       '✅ NO PENDING SYNC'
@@ -105,6 +93,25 @@ try {
 
     return
   }
+
+
+  // ================= START SYNC
+  setSyncInfo?.({
+
+    syncing: true,
+
+    pending: unsynced.length,
+
+    success: 0,
+
+    failed: 0,
+
+    duration: 0,
+
+    total: unsynced.length,
+
+    lastSync: null
+  })
 
   console.log(
     `🔄 SYNC ${unsynced.length} ACTION`
@@ -300,6 +307,8 @@ try {
       failed: failedCount,
 
       duration: durationMs,
+
+      total: successCount + failedCount,
 
       lastSync:
         new Date()

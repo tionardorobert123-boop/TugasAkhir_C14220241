@@ -9,54 +9,58 @@ from './SyncModal'
 export default function SyncStatus() {
 
   const {
-
     syncInfo
-
   } = useCloud()
 
   const [open,
     setOpen] = useState(false)
 
-  let text =
-    '☁ Synced'
+  const completed =
+    syncInfo.success +
+    syncInfo.failed
 
-  let bg =
-    'bg-green-500/20 border-green-500/40'
+  const total =
+    syncInfo.total || 0
 
-  if (syncInfo.syncing) {
+  const DotAnimation = () => (
 
-    text =
-      '🔄 Synchronizing'
+    <span
+      className="
+      inline-flex
+      ml-1"
+    >
 
-    bg =
-      'bg-blue-500/20 border-blue-500/40'
-  }
+      <span
+        className="
+        animate-bounce"
+      >
+        .
+      </span>
 
-  else if (
+      <span
+        className="
+        animate-bounce"
+        style={{
+          animationDelay:
+            '0.15s'
+        }}
+      >
+        .
+      </span>
 
-    syncInfo.failed > 0
+      <span
+        className="
+        animate-bounce"
+        style={{
+          animationDelay:
+            '0.3s'
+        }}
+      >
+        .
+      </span>
 
-  ) {
-
-    text =
-      '❌ Synchronization Failed'
-
-    bg =
-      'bg-red-500/20 border-red-500/40'
-  }
-
-  else if (
-
-    syncInfo.pending > 0
-
-  ) {
-
-    text =
-      '⚠ Synchronization Required'
-
-    bg =
-      'bg-yellow-500/20 border-yellow-500/40'
-  }
+    </span>
+  )
 
   return (
 
@@ -71,10 +75,140 @@ export default function SyncStatus() {
           px-4 py-2
           rounded-xl
           border
-          ${bg}
+          flex items-center
+          gap-2
+          transition-all
+          hover:scale-105
+          ${
+
+            syncInfo.syncing
+
+              ? 'bg-blue-500/20 border-blue-500/40'
+
+              : syncInfo.failed > 0
+
+              ? 'bg-red-500/20 border-red-500/40'
+
+              : syncInfo.pending > 0
+
+              ? 'bg-yellow-500/20 border-yellow-500/40'
+
+              : 'bg-green-500/20 border-green-500/40'
+          }
         `}
       >
-        {text}
+
+        {/* SYNCING */}
+        {syncInfo.syncing && (
+
+          <>
+            <svg
+              className="
+              w-4 h-4
+              animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="3"
+                opacity="0.25"
+              />
+
+              <path
+                fill="currentColor"
+                opacity="0.75"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+
+            </svg>
+
+            <span>
+
+              Synchronizing
+
+              {' '}
+
+              ({completed}/{total})
+
+              <DotAnimation />
+
+            </span>
+          </>
+        )}
+
+        {/* FAILED */}
+        {!syncInfo.syncing &&
+        syncInfo.failed > 0 && (
+
+          <>
+            <span
+              className="
+              animate-pulse"
+            >
+              ❌
+            </span>
+
+            <span>
+
+              Sync Failed
+
+              {' '}
+
+              ({syncInfo.failed})
+
+            </span>
+          </>
+        )}
+
+        {/* PENDING */}
+        {!syncInfo.syncing &&
+        syncInfo.failed === 0 &&
+        syncInfo.pending > 0 && (
+
+          <>
+            <span
+              className="
+              animate-pulse"
+            >
+              ⚠
+            </span>
+
+            <span>
+
+              Sync Required
+
+              {' '}
+
+              ({syncInfo.pending})
+
+            </span>
+          </>
+        )}
+
+        {/* SUCCESS */}
+        {!syncInfo.syncing &&
+        syncInfo.failed === 0 &&
+        syncInfo.pending === 0 && (
+
+          <>
+            <span>
+              ☁
+            </span>
+
+            <span>
+
+              All Systems Synced
+
+            </span>
+          </>
+        )}
+
       </button>
 
       <SyncModal
@@ -85,6 +219,7 @@ export default function SyncStatus() {
           setOpen(false)
         }
       />
+
     </>
   )
 }

@@ -25,6 +25,8 @@ interface SyncInfo {
 
   duration: number
 
+  total: number
+
   lastSync: string | null
 }
 
@@ -51,17 +53,19 @@ const CloudContext =
 
     syncInfo: {
 
-      syncing: false,
+       syncing: false,
 
-      pending: 0,
+        pending: 0,
 
-      success: 0,
+        success: 0,
 
-      failed: 0,
+        failed: 0,
 
-      duration: 0,
+        duration: 0,
 
-      lastSync: null
+        total: 0,
+
+        lastSync: null
     },
 
     setSyncInfo: () => {}
@@ -92,8 +96,10 @@ export function CloudProvider({
 
       duration: 0,
 
+      total: 0,
+
       lastSync: null
-    })
+        })
 
   const [cloudOnline,
     setCloudOnline] =
