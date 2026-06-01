@@ -66,37 +66,32 @@ export default function SyncStatus() {
 
     <>
       <button
-
-        onClick={() =>
-          setOpen(true)
-        }
-
-        className={`
-          px-4 py-2
-          rounded-xl
-          border
-          flex items-center
-          gap-2
-          transition-all
-          hover:scale-105
-          ${
-
-            syncInfo.syncing
-
-              ? 'bg-blue-500/20 border-blue-500/40'
-
-              : syncInfo.failed > 0
-
-              ? 'bg-red-500/20 border-red-500/40'
-
-              : syncInfo.pending > 0
-
-              ? 'bg-yellow-500/20 border-yellow-500/40'
-
-              : 'bg-green-500/20 border-green-500/40'
-          }
-        `}
-      >
+            onClick={() => setOpen(true)}
+            className={`
+                px-6 py-3
+                min-w-[220px]
+                rounded-2xl
+                border
+                flex items-center
+                justify-center
+                gap-3
+                text-base
+                font-semibold
+                backdrop-blur-md
+                shadow-lg
+                transition-all
+                hover:scale-105
+                ${
+                syncInfo.syncing
+                    ? 'bg-blue-500/20 border-blue-500/40'
+                    : syncInfo.failed > 0
+                    ? 'bg-red-500/20 border-red-500/40'
+                    : syncInfo.pending > 0
+                    ? 'bg-yellow-500/20 border-yellow-500/40'
+                    : 'bg-green-500/20 border-green-500/40'
+                }
+            `}
+            >
 
         {/* SYNCING */}
         {syncInfo.syncing && (
