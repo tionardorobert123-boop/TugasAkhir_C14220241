@@ -1,137 +1,147 @@
-import { useCloud }
-from '../../../context/CloudContext'
+import { useCloud } from '../../../context/CloudContext'
 
 interface Props {
-
   open: boolean
-
   onClose: () => void
 }
 
 export default function SyncModal({
-
   open,
-
   onClose
-
 }: Props) {
 
-  const {
+  const { syncInfo } = useCloud()
 
-    syncInfo
+  if (!open) return null
 
-  } = useCloud()
+  const statusText =
+    syncInfo.syncing
+      ? 'Synchronizing'
+      : syncInfo.failed > 0
+      ? 'Failed'
+      : 'Success'
 
-  if (!open)
-    return null
+  const statusColor =
+    syncInfo.syncing
+      ? 'text-yellow-400'
+      : syncInfo.failed > 0
+      ? 'text-red-400'
+      : 'text-green-400'
 
   return (
-
     <div
       className="
-      fixed inset-0
-      bg-black/60
-      flex items-center
-      justify-center
-      z-[99999]"
+        fixed inset-0
+        bg-black/60
+        backdrop-blur-sm
+        flex items-center
+        justify-center
+        z-[99999]
+      "
     >
-
       <div
         className="
-        bg-zinc-900
-        border border-white/10
-        rounded-2xl
-        p-6
-        w-[400px]
-        max-w-[90%]"
+          bg-zinc-900
+          border border-yellow-500/20
+          rounded-3xl
+          p-8
+          w-[500px]
+          max-w-[90%]
+          shadow-2xl
+        "
       >
-
         <h2
           className="
-          text-lg
-          font-bold
-          mb-4"
+            text-xl
+            font-bold
+            text-center
+            mb-6
+          "
         >
           Synchronization Details
         </h2>
 
-        <div
-          className="
-          space-y-2
-          text-sm"
-        >
+        <div className="space-y-4 text-sm">
 
-          <p>
-            Status :
-            {' '}
-            {
+          <div className="flex justify-between items-center border-b border-white/10 pb-3">
+            <span className="text-gray-400">
+              Status
+            </span>
 
-              syncInfo.syncing
+            <span className={`font-semibold ${statusColor}`}>
+              {statusText}
+            </span>
+          </div>
 
-                ? 'Synchronizing'
+          <div className="flex justify-between">
+            <span className="text-gray-400">
+              Pending Queue
+            </span>
 
-                : syncInfo.failed > 0
+            <span className="font-medium">
+              {syncInfo.pending}
+            </span>
+          </div>
 
-                ? 'Failed'
+          <div className="flex justify-between">
+            <span className="text-gray-400">
+              Success
+            </span>
 
-                : 'Success'
-            }
-          </p>
+            <span className="text-green-400 font-medium">
+              {syncInfo.success}
+            </span>
+          </div>
 
-          <p>
-            Pending :
-            {' '}
-            {syncInfo.pending}
-          </p>
+          <div className="flex justify-between">
+            <span className="text-gray-400">
+              Failed
+            </span>
 
-          <p>
-            Success :
-            {' '}
-            {syncInfo.success}
-          </p>
+            <span className="text-red-400 font-medium">
+              {syncInfo.failed}
+            </span>
+          </div>
 
-          <p>
-            Failed :
-            {' '}
-            {syncInfo.failed}
-          </p>
+          <div className="flex justify-between">
+            <span className="text-gray-400">
+              Duration
+            </span>
 
-          <p>
-            Duration :
-            {' '}
-            {syncInfo.duration}
-            {' '}
-            ms
-          </p>
+            <span>
+              {syncInfo.duration} ms
+            </span>
+          </div>
 
-          <p>
-            Last Sync :
-            {' '}
-            {
-              syncInfo.lastSync ??
-              '-'
-            }
-          </p>
+          <div className="flex justify-between">
+            <span className="text-gray-400">
+              Last Sync
+            </span>
+
+            <span>
+              {syncInfo.lastSync ?? '-'}
+            </span>
+          </div>
 
         </div>
 
         <button
-
           onClick={onClose}
-
           className="
-          mt-6
-          w-full
-          bg-yellow-500/20
-          border border-yellow-500/30
-          py-2
-          rounded-xl"
+            mt-8
+            w-full
+            py-3
+            rounded-xl
+            bg-yellow-500/20
+            border border-yellow-500/40
+            hover:bg-yellow-500/30
+            transition
+            font-medium
+          "
         >
           Close
         </button>
-
       </div>
-
     </div>
   )
 }
