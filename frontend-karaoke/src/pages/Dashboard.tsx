@@ -80,25 +80,43 @@ function Dashboard() {
     );
   };
 
-  return (
-    <div className="
+ return (
+
+    <div
+      className="
       min-h-screen
       overflow-auto
-      bg-gradient-to-b from-yellow-900 to-black text-white
+      bg-gradient-to-b
+      from-yellow-900
+      to-black
+      text-white
       px-4 md:px-6 py-3
       relative
     ">
 
-      {/* ================= CENTER (DESKTOP ONLY) ================= */}
-      <div className="
+      {/* FIXED STATUS */}
+      <div
+        className="
+        fixed
+        top-4
+        right-4
+        z-[9999]
+      "
+      >
+        <SyncStatus />
+      </div>
+
+      {/* CENTER */}
+      <div
+        className="
         hidden md:flex
         absolute inset-0
-        flex-col items-center justify-center
+        flex-col items-center
+        justify-center
         opacity-80
-      ">
-        <div className="mb-4">
-          <SyncStatus />
-        </div>
+        pointer-events-none
+        "
+      >
 
       {!hasInternet && (
         <div

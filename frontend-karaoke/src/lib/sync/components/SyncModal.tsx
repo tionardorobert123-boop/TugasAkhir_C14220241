@@ -33,7 +33,7 @@ export default function SyncModal({
       bg-black/60
       flex items-center
       justify-center
-      z-50"
+      z-[99999]"
     >
 
       <div

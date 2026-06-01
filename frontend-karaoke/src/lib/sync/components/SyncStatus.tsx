@@ -209,6 +209,11 @@ export default function SyncStatus() {
           </>
         )}
 
+        console.log(
+            'MODAL OPEN:',
+            open
+            )
+
       </button>
 
       <SyncModal
