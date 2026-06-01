@@ -163,6 +163,7 @@ function Dashboard() {
           {now.toLocaleTimeString("en-GB")}
         </p>
       </div>
+      </div>
 
       {/* ================= MOBILE HEADER ================= */}
       <div className="md:hidden sticky top-0 z-40 text-center pt-2 pb-3 backdrop-blur-md">
@@ -328,7 +329,7 @@ function Dashboard() {
       />
 
     </div>
-    </div>
+    
   );
 }
 
