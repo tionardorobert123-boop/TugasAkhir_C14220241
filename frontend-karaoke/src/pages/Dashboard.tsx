@@ -82,7 +82,18 @@ function Dashboard() {
 
  return (
 
-     <div className="min-h-screen ... relative">
+    <div
+      className="
+      min-h-screen
+      overflow-auto
+      bg-gradient-to-b
+      from-yellow-900
+      to-black
+      text-white
+      px-4 md:px-6 py-3
+      relative
+    ">
+
 
         {/* SYNC STATUS */}
         <div
@@ -97,7 +108,6 @@ function Dashboard() {
         >
           <SyncStatus />
         </div>
-
         {/* CENTER */}
         <div
           className="
@@ -108,7 +118,6 @@ function Dashboard() {
             pointer-events-none
           "
         >
-
 
       {!hasInternet && (
         <div
@@ -134,10 +143,9 @@ function Dashboard() {
         </div>
       )}
        
-      <img
-        src={logo}
-        className="w-80 opacity-20 mb-4"
-      />
+
+        <img src={logo} className="w-80 opacity-20 mb-4" />
+
         <h1 className="text-2xl font-bold tracking-wide">
           FRIENDSHIP KARAOKE & PUB
         </h1>
