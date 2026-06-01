@@ -105,11 +105,6 @@ function Dashboard() {
       "
       >
 
-        {/* SYNC STATUS */}
-        <div className="mb-4 pointer-events-auto">
-          <SyncStatus />
-        </div>
-
       {!hasInternet && (
         <div
           className="
@@ -133,6 +128,19 @@ function Dashboard() {
           </div>
         </div>
       )}
+        <div
+          className="
+            hidden md:flex
+            absolute
+            left-1/2
+            top-[18%]
+            -translate-x-1/2
+            z-30
+          "
+        >
+          <SyncStatus />
+        </div>
+
         <img src={logo} className="w-80 opacity-20 mb-4" />
 
         <h1 className="text-2xl font-bold tracking-wide">
