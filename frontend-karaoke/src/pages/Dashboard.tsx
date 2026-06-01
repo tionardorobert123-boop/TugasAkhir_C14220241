@@ -82,6 +82,18 @@ function Dashboard() {
 
  return (
 
+  <div
+          className="
+            hidden md:flex
+            absolute
+            left-1/2
+            top-[18%]
+            -translate-x-1/2
+            z-30
+          "
+        >
+          <SyncStatus />
+ 
     <div
       className="
       min-h-screen
@@ -101,9 +113,11 @@ function Dashboard() {
         flex-col items-center
         justify-center
         opacity-80
-        
+        pointer-events-none
       "
       >
+
+         
 
       {!hasInternet && (
         <div
@@ -128,18 +142,7 @@ function Dashboard() {
           </div>
         </div>
       )}
-        <div
-          className="
-            hidden md:flex
-            absolute
-            left-1/2
-            top-[18%]
-            -translate-x-1/2
-            z-30
-          "
-        >
-          <SyncStatus />
-        </div>
+       
 
         <img src={logo} className="w-80 opacity-20 mb-4" />
 
@@ -281,6 +284,7 @@ function Dashboard() {
           </p>
         </div>
       </div>
+             </div>
 
       {/* ================= MODALS ================= */}
       <OpenRoomModal
