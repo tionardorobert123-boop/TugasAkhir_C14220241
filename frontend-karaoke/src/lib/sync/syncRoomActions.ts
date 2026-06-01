@@ -3,7 +3,7 @@ import axios from 'axios'
 import { db } from '../db'
 
 const CLOUD_API =
-  'https://tugasakhirc14220241.up.railway.app/api'
+  'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
 
   let isSyncing = false
 

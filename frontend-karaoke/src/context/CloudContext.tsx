@@ -11,7 +11,7 @@ import {
 } from 'react'
 
 const CLOUD_API =
-  'https://tugasakhirc14220241.up.railway.app/api'
+  'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
 
 interface SyncInfo {
 

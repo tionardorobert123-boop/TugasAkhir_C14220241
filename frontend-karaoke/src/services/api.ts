@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const CLOUD_API =
-  "https://tugasakhirc14220241.up.railway.app/api";
+  "https://tugasakhirc14220241-production-11c4.up.railway.app/api";
 
 const LOCAL_API =
   "http://localhost:8000/api";
