@@ -284,7 +284,7 @@ function Dashboard() {
           </p>
         </div>
       </div>
-             </div>
+             
 
       {/* ================= MODALS ================= */}
       <OpenRoomModal
@@ -327,6 +327,7 @@ function Dashboard() {
         onSuccess={handleSettingSuccess}
       />
 
+    </div>
     </div>
   );
 }
