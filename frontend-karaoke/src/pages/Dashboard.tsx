@@ -105,7 +105,6 @@ function Dashboard() {
             absolute inset-0
             flex-col items-center
             justify-center
-            opacity-80
             pointer-events-none
           "
         >
@@ -135,9 +134,10 @@ function Dashboard() {
         </div>
       )}
        
-
-        <img src={logo} className="w-80 opacity-20 mb-4" />
-
+      <img
+        src={logo}
+        className="w-80 opacity-20 mb-4"
+      />
         <h1 className="text-2xl font-bold tracking-wide">
           FRIENDSHIP KARAOKE & PUB
         </h1>
