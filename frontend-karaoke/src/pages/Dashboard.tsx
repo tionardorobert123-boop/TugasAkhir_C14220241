@@ -88,7 +88,6 @@ function Dashboard() {
       px-4 md:px-6 py-3
       relative
     ">
-      <SyncStatus />
 
       {/* ================= CENTER (DESKTOP ONLY) ================= */}
       <div className="
@@ -97,6 +96,9 @@ function Dashboard() {
         flex-col items-center justify-center
         opacity-80
       ">
+        <div className="mb-4">
+          <SyncStatus />
+        </div>
 
       {!hasInternet && (
         <div
