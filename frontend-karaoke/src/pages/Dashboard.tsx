@@ -101,7 +101,7 @@ function Dashboard() {
         flex-col items-center
         justify-center
         opacity-80
-        pointer-events-none
+        
       "
       >
 
