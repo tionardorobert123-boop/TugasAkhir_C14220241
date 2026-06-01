@@ -94,19 +94,6 @@ function Dashboard() {
       relative
     ">
 
-      {/* FIXED STATUS */}
-      <div
-        className="
-        fixed
-        top-4
-        right-4
-        z-[9999]
-      "
-      >
-        <SyncStatus />
-      </div>
-
-      {/* CENTER */}
       <div
         className="
         hidden md:flex
@@ -115,8 +102,13 @@ function Dashboard() {
         justify-center
         opacity-80
         pointer-events-none
-        "
+      "
       >
+
+        {/* SYNC STATUS */}
+        <div className="mb-4 pointer-events-auto">
+          <SyncStatus />
+        </div>
 
       {!hasInternet && (
         <div

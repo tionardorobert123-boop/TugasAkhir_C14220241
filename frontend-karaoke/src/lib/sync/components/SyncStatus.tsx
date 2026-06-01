@@ -203,16 +203,11 @@ export default function SyncStatus() {
 
             <span>
 
-              All Systems Synced
+              Synced
 
             </span>
           </>
         )}
-
-        console.log(
-            'MODAL OPEN:',
-            open
-            )
 
       </button>
 
