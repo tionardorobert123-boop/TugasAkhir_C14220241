@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 
 import logo from "../assets/logo.png";
 import RoomSettingModal from "../components/Rooms/RoomSettingModal";
-import { useCloud } from "../context/CloudContext";
+
+import SyncStatus from "../lib/sync/components/SyncStatus";
 
 function Dashboard() {
   const {
@@ -62,15 +63,6 @@ function Dashboard() {
   const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
   const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
 
-  const {
-  syncInfo
-} = useCloud()
-
-console.log(
-  'SYNC INFO',
-  syncInfo
-)
-
   const renderRoom = (id: number) => {
     const room = rooms.find((r) => r.room_id === id);
     if (!room) return null;
@@ -104,6 +96,9 @@ console.log(
         flex-col items-center justify-center
         opacity-80
       ">
+        
+        <SyncStatus />
+
       {!hasInternet && (
         <div
           className="
