@@ -5,10 +5,7 @@ export const emergencyOpen = async (
   roomId: number
 ) => {
 
-  const { data } = await API.post(
-    `/local/rooms/${roomId}/emergency-open`
-  )
-
+  // SIMPAN DULU KE DEXIE
   await db.logs.add({
 
     temp_id: crypto.randomUUID(),
@@ -21,19 +18,34 @@ export const emergencyOpen = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+
+    synced: false
   })
 
-  return data
+  try {
+
+    const { data } = await API.post(
+      `/local/rooms/${roomId}/emergency-open`
+    )
+
+    return data
+
+  } catch (err) {
+
+    console.log(
+      'EMERGENCY OPEN OFFLINE'
+    )
+
+    return {
+      success: false
+    }
+  }
 }
 
 export const emergencyClose = async (
   roomId: number
 ) => {
-
-  const { data } = await API.post(
-    `/local/rooms/${roomId}/emergency-close`
-  )
 
   await db.logs.add({
 
@@ -47,8 +59,27 @@ export const emergencyClose = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+
+    synced: false
   })
 
-  return data
+  try {
+
+    const { data } = await API.post(
+      `/local/rooms/${roomId}/emergency-close`
+    )
+
+    return data
+
+  } catch (err) {
+
+    console.log(
+      'Emergency MQTT offline'
+    )
+
+    return {
+      success: false
+    }
+  }
 }
