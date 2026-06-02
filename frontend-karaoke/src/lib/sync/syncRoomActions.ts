@@ -71,6 +71,13 @@ try {
  // ================= EMPTY
 if (!unsynced.length) {
 
+  console.log(
+    '✅ NO ROOM ACTION PENDING'
+  )
+
+  // tetap sync log
+  await syncLogs()
+
   setSyncInfo?.({
 
     syncing: false,
@@ -90,13 +97,8 @@ if (!unsynced.length) {
         .toLocaleTimeString()
   })
 
-    console.log(
-      '✅ NO PENDING SYNC'
-    )
-
-    return
-  }
-
+  return
+}
 
   // ================= START SYNC
   setSyncInfo?.({
