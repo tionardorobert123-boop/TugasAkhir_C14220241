@@ -12,10 +12,6 @@ import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 import SyncStatus from "../lib/sync/components/SyncStatus";
 import { useState } from "react";
 import EmergencyModal from "../components/Rooms/EmergencyModal";
-import {
-  emergencyOpen,
-  emergencyClose
-} from '../lib/offline/emergencyService'
 
 function Dashboard() {
   const {
