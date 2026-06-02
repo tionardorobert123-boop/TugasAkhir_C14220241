@@ -61,7 +61,9 @@ export interface OfflineTransaction {
 // ================= LOGS
 export interface OfflineLog {
 
-log_id: number
+  log_id?: number
+
+  temp_id: string
 
   room_id: number
 
@@ -72,8 +74,9 @@ log_id: number
   duration: number
 
   timestamp: string
-}
 
+  synced?: boolean
+}
 // ================= ACTION QUEUE
 export interface OfflineRoomAction {
 

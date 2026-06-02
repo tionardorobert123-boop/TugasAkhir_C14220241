@@ -3,6 +3,7 @@ import API from "../services/api";
 import { saveRoomOpen } from "../lib/offline/saveRoomOpen";
 import { saveRoomExtend } from "../lib/offline/saveRoomExtend";
 import { saveRoomClose } from "../lib/offline/saveRoomClose";
+import { emergencyOpen, emergencyClose } from "../lib/offline/emergencyService";
 import { db } from "../lib/db";
 import { useLocation } from 'react-router-dom'
 import {useCloud} from '../context/CloudContext'
@@ -919,6 +920,22 @@ const extendRoom = async (
     );
   }
 };
+
+//emergency
+  const openDoor = async (
+      roomId: number
+    ) => {
+
+      return emergencyOpen(roomId);
+    };
+
+    const closeDoor = async (
+      roomId: number
+    ) => {
+
+      return emergencyClose(roomId);
+    };
+    
   // ================= CLICK =================
   const handleClick = (room: any) => {
     if (room.status !== "available") return;
@@ -1007,5 +1024,8 @@ const extendRoom = async (
     extendRoomId,
     openExtendModal,
     submitExtend,
+
+    openDoor,
+    closeDoor
   };
 }

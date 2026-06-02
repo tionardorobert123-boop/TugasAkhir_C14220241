@@ -273,4 +273,58 @@ private function publishMQTT($roomId, $action)
             ], 500);
         }
     }
+
+    public function emergencyOpen($id)
+        {
+            try {
+
+                $mqtt = new MQTTService();
+
+                $mqtt->publish(
+                    "room/$id/control",
+                    json_encode([
+                        "room_id" => (int)$id,
+                        "action" => "open"
+                    ])
+                );
+
+                return response()->json([
+                    "success" => true,
+                    "message" => "EMERGENCY OPEN SENT"
+                ]);
+
+            } catch (\Throwable $e) {
+
+                return response()->json([
+                    "success" => false
+                ], 500);
+            }
+        }
+
+         public function emergencyClose($id)
+        {
+            try {
+
+                $mqtt = new MQTTService();
+
+                $mqtt->publish(
+                    "room/$id/control",
+                    json_encode([
+                        "room_id" => (int)$id,
+                        "action" => "close"
+                    ])
+                );
+
+                return response()->json([
+                    "success" => true,
+                    "message" => "EMERGENCY CLOSE SENT"
+                ]);
+
+            } catch (\Throwable $e) {
+
+                return response()->json([
+                    "success" => false
+                ], 500);
+            }
+        }
 }

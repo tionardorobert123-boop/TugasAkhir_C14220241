@@ -56,6 +56,16 @@ Route::post(
                 '/rooms/{id}/resync',
                 [LocalRoomController::class, 'resync']
             );
+
+             Route::post(
+                '/rooms/{id}/emergency-open',
+                [LocalRoomController::class, 'emergencyOpen']
+            );
+
+             Route::post(
+                '/rooms/{id}/emergency-close',
+                [LocalRoomController::class, 'emergencyClose']
+            );
         });
 
 // QUICK LOGS
@@ -111,6 +121,11 @@ Route::middleware(['auth:sanctum'])
         Route::post(
             '/rooms/{id}/extend',
             [RoomExtendController::class, 'extend']
+        );
+
+        Route::post(
+            '/sync/access-log',
+            [CloudSyncController::class, 'syncAccessLog']
         );
 
     });

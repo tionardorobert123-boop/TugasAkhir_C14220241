@@ -290,4 +290,26 @@ class RoomController extends Controller
 
         return response()->json(['message' => 'Setting room berhasil diupdate']);
     }
+
+            public function syncAccessLog(
+                Request $request
+            ) {
+
+               AccessLog::updateOrCreate(
+                [
+                    'temp_id' => $request->temp_id
+                ],
+                [
+                    'room_id' => $request->room_id,
+                    'customer_name' => $request->customer_name,
+                    'room_status' => $request->room_status,
+                    'duration' => $request->duration,
+                    'timestamp' => $request->timestamp,
+                ]
+            );
+
+                return response()->json([
+                    'success' => true
+                ]);
+            }
 }
