@@ -9,6 +9,8 @@ type Props = {
   total: number;
   onClose: () => void;
   onNext: () => void;
+   
+   onEmergency: () => void;
 };
 
 export default function OpenRoomModal({
@@ -22,6 +24,7 @@ export default function OpenRoomModal({
   total,
   onClose,
   onNext,
+  onEmergency
 }: Props) {
   if (!show) return null;
 
@@ -75,6 +78,27 @@ export default function OpenRoomModal({
           <p className="text-lg font-bold text-yellow-400">
             Total: Rp {rupiah(total)}
           </p>
+        </div>
+
+        <div className="mt-4 mb-4">
+
+          <button
+            onClick={onEmergency}
+            className="
+              w-full
+              py-3
+              rounded-xl
+              bg-red-600/20
+              border border-red-500/40
+              text-red-300
+              font-semibold
+              hover:bg-red-600/30
+              transition
+            "
+          >
+            🚨 Emergency Action
+          </button>
+
         </div>
 
         {/* ACTION */}

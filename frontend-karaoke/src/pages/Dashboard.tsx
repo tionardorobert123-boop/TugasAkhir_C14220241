@@ -10,6 +10,12 @@ import logo from "../assets/logo.png";
 import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 
 import SyncStatus from "../lib/sync/components/SyncStatus";
+import { useState } from "react";
+import EmergencyModal from "../components/Rooms/EmergencyModal";
+import {
+  emergencyOpen,
+  emergencyClose
+} from '../lib/offline/emergencyService'
 
 function Dashboard() {
   const {
@@ -50,7 +56,9 @@ function Dashboard() {
     submitExtend,
     setShowExtendModal,
 
-    logout
+    logout,
+    openDoor,
+    closeDoor
   } = useRoomControl();
 
   const hasInternet = useOffline();
@@ -63,9 +71,52 @@ function Dashboard() {
   const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
   const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
 
+     const [showEmergency, setShowEmergency] =
+    useState(false)
+
+    const handleEmergencyOpen = async () => {
+
+      if (!selectedRoom)
+        return
+
+      try {
+
+        await openDoor(
+          selectedRoom
+        )
+
+        setShowEmergency(false)
+
+      } catch (err) {
+
+        console.error(err)
+      }
+    }
+
+    const handleEmergencyClose = async () => {
+
+      if (!selectedRoom)
+        return
+
+      try {
+
+        await closeDoor(
+          selectedRoom
+        )
+
+        setShowEmergency(false)
+
+      } catch (err) {
+
+        console.error(err)
+      }
+    }
+
   const renderRoom = (id: number) => {
     const room = rooms.find((r) => r.room_id === id);
     if (!room) return null;
+
+ 
 
     return (
       <RoomCard
@@ -297,6 +348,28 @@ function Dashboard() {
         total={total}
         onClose={() => setShowModal(false)}
         onNext={() => setShowConfirm(true)}
+        onEmergency={() =>
+          setShowEmergency(true)
+        }
+      />
+
+      <EmergencyModal
+
+        show={showEmergency}
+
+        roomId={selectedRoom}
+
+        onClose={() =>
+          setShowEmergency(false)
+        }
+
+        onEmergencyOpen={() =>
+          handleEmergencyOpen()
+        }
+
+        onEmergencyClose={() =>
+          handleEmergencyClose()
+        }
       />
 
       <ConfirmModal
