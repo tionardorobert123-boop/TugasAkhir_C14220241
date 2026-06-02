@@ -143,7 +143,7 @@ class AppDB extends Dexie {
 
     super('karaokeDB')
 
-      this.version(1).stores({
+      this.version(2).stores({
 
       // ================= ROOMS
       rooms:
@@ -155,7 +155,7 @@ class AppDB extends Dexie {
 
       // ================= LOGS
       logs:
-        'log_id,room_id,timestamp',
+      '++log_id,temp_id,room_id,timestamp',
 
       // ================= ACTIONS
       room_actions:
