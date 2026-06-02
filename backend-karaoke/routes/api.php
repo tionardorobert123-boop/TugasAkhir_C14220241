@@ -125,7 +125,7 @@ Route::middleware(['auth:sanctum'])
 
         Route::post(
             '/sync/access-log',
-            [CloudSyncController::class, 'syncAccessLog']
+            [RoomController::class, 'syncAccessLog']
         );
 
     });
