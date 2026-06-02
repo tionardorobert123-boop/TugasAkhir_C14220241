@@ -2,6 +2,9 @@ import axios from 'axios'
 
 import { db } from '../db'
 
+import { syncLogs }
+from './syncLogs'
+
 const CLOUD_API =
   'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
 
@@ -287,6 +290,8 @@ if (!unsynced.length) {
     }
   }
 
+  await syncLogs()
+  
   const endSync =
   performance.now()
 

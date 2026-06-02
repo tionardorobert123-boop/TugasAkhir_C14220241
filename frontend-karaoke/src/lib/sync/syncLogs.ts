@@ -2,43 +2,69 @@ import axios from 'axios'
 import { db } from '../db'
 
 const CLOUD_API =
-  'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
+'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
 
 export async function syncLogs() {
 
-  const logs =
-    await db.logs.toArray()
+  const logs = await db.logs
+    .filter(log => !log.synced)
+    .toArray()
+
+  console.log(
+    'LOG PENDING:',
+    logs.length
+  )
 
   for (const log of logs) {
 
     try {
 
-      await axios.post(
+      const response =
+        await axios.post(
 
-        `${CLOUD_API}/sync/access-log`,
+          `${CLOUD_API}/sync/access-log`,
 
+          {
+            temp_id: log.temp_id,
+
+            room_id: log.room_id,
+
+            customer_name:
+              log.customer_name,
+
+            room_status:
+              log.room_status,
+
+            duration:
+              log.duration,
+
+            timestamp:
+              log.timestamp
+          }
+        )
+
+      console.log(
+        'SYNC RESPONSE:',
+        response.data
+      )
+
+      await db.logs.update(
+        log.log_id!,
         {
-          temp_id: log.temp_id,
-
-          room_id: log.room_id,
-
-          customer_name: log.customer_name,
-
-          room_status: log.room_status,
-
-          duration: log.duration,
-
-          timestamp: log.timestamp
+          synced: true
         }
       )
 
-      await db.logs.delete(
-        log.log_id!
+      console.log(
+        '☁️ LOG SYNCED'
       )
 
-    } catch {
+    } catch (err) {
 
-      continue
+      console.log(
+        '❌ LOG SYNC FAILED',
+        err
+      )
     }
   }
 }
