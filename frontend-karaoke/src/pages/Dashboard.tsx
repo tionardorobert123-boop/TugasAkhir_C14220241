@@ -350,19 +350,14 @@ function Dashboard() {
       />
 
       <EmergencyModal
-
         show={showEmergency}
-
         roomId={selectedRoom}
-
         onClose={() =>
           setShowEmergency(false)
         }
-
         onEmergencyOpen={() =>
           handleEmergencyOpen()
         }
-
         onEmergencyClose={() =>
           handleEmergencyClose()
         }

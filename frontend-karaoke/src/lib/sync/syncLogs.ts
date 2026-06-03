@@ -6,6 +6,11 @@ const CLOUD_API =
 
 export async function syncLogs() {
 
+
+  console.log(
+    '🚀 syncLogs CALLED'
+  )
+  
   const logs = await db.logs
     .filter(log => !log.synced)
     .toArray()
