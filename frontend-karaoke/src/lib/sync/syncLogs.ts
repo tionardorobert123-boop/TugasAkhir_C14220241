@@ -3,6 +3,18 @@ import { db } from '../db'
 
 export async function syncLogs() {
 
+   const role =
+    localStorage.getItem('role')
+
+  if (role !== 'cashier') {
+
+    console.log(
+      '🚫 LOG SYNC DISABLED FOR OWNER'
+    )
+
+    return
+  }
+
   console.log(
     '🚀 syncLogs CALLED'
   )
