@@ -10,9 +10,22 @@ export async function syncRoomActions(
 
   setSyncInfo?: any
 
-) {
+)  {
+
+  const role =
+    localStorage.getItem('role')
+
+  if (role !== 'kasir') {
+
+    console.log(
+      '🚫 SYNC DISABLED FOR OWNER'
+    )
+
+    return
+  }
+
   // ================= OFFLINE
-   if (!cloudOnline) {
+  if (!cloudOnline) {
 
     console.log(
       '📴 CLOUD OFFLINE - SYNC SKIPPED'
