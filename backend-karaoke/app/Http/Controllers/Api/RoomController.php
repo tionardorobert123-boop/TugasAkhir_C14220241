@@ -304,7 +304,7 @@ class RoomController extends Controller
                     'customer_name' => $request->customer_name,
                     'room_status' => $request->room_status,
                     'duration' => $request->duration,
-                    'timestamp' => $request->timestamp,
+                    'timestamp' => now(),
                 ]
             );
 
