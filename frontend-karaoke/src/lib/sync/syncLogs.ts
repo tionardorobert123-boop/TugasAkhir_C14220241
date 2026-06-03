@@ -6,11 +6,20 @@ const CLOUD_API =
 
 export async function syncLogs() {
 
+  const token =
+  localStorage.getItem('token')
+
+  const headers = token
+    ? {
+        Authorization:
+          `Bearer ${token}`
+      }
+    : {}
 
   console.log(
     '🚀 syncLogs CALLED'
   )
-  
+
   const logs = await db.logs
     .filter(log => !log.synced)
     .toArray()
@@ -24,29 +33,25 @@ export async function syncLogs() {
 
     try {
 
-      const response =
-        await axios.post(
+     const response =
+      await axios.post(
 
-          `${CLOUD_API}/sync/access-log`,
+        `${CLOUD_API}/sync/access-log`,
 
-          {
-            temp_id: log.temp_id,
+        {
+          temp_id: log.temp_id,
+          room_id: log.room_id,
+          customer_name: log.customer_name,
+          room_status: log.room_status,
+          duration: log.duration,
+          timestamp: log.timestamp
+        },
 
-            room_id: log.room_id,
-
-            customer_name:
-              log.customer_name,
-
-            room_status:
-              log.room_status,
-
-            duration:
-              log.duration,
-
-            timestamp:
-              log.timestamp
-          }
-        )
+        {
+          headers,
+          timeout: 5000
+        }
+      )
 
       console.log(
         'SYNC RESPONSE:',
