@@ -1,20 +1,7 @@
-import axios from 'axios'
+import API from '../../services/api'
 import { db } from '../db'
 
-const CLOUD_API =
-'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
-
 export async function syncLogs() {
-
-  const token =
-  localStorage.getItem('token')
-
-  const headers = token
-    ? {
-        Authorization:
-          `Bearer ${token}`
-      }
-    : {}
 
   console.log(
     '🚀 syncLogs CALLED'
@@ -33,25 +20,29 @@ export async function syncLogs() {
 
     try {
 
-     const response =
-      await axios.post(
+      const response =
+        await API.post(
 
-        `${CLOUD_API}/sync/access-log`,
+          '/sync/access-log',
 
-        {
-          temp_id: log.temp_id,
-          room_id: log.room_id,
-          customer_name: log.customer_name,
-          room_status: log.room_status,
-          duration: log.duration,
-          timestamp: log.timestamp
-        },
+          {
+            temp_id: log.temp_id,
 
-        {
-          headers,
-          timeout: 5000
-        }
-      )
+            room_id: log.room_id,
+
+            customer_name:
+              log.customer_name,
+
+            room_status:
+              log.room_status,
+
+            duration:
+              log.duration,
+
+            timestamp:
+              log.timestamp
+          }
+        )
 
       console.log(
         'SYNC RESPONSE:',

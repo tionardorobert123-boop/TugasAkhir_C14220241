@@ -5,8 +5,7 @@ export const emergencyOpen = async (
   roomId: number
 ) => {
 
-  // SIMPAN DULU KE DEXIE
-  await db.logs.add({
+  const payload = {
 
     temp_id: crypto.randomUUID(),
 
@@ -18,24 +17,55 @@ export const emergencyOpen = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
+  }
 
-    synced: false
-  })
-
+  // ================= MQTT LOCAL
   try {
 
-    const { data } = await API.post(
+    await API.post(
       `/local/rooms/${roomId}/emergency-open`
     )
 
-    return data
+    console.log(
+      '📡 MQTT OPEN SENT'
+    )
 
   } catch (err) {
 
     console.log(
-      'EMERGENCY OPEN OFFLINE'
+      '❌ MQTT OPEN FAILED'
     )
+  }
+
+  // ================= CLOUD LOG
+  try {
+
+    await API.post(
+      '/sync/access-log',
+      payload
+    )
+
+    console.log(
+      '☁️ EMERGENCY OPEN SAVED'
+    )
+
+    return {
+      success: true
+    }
+
+  } catch (err) {
+
+    console.log(
+      '📴 CLOUD FAILED -> SAVE DEXIE'
+    )
+
+    await db.logs.add({
+
+      ...payload,
+
+      synced: false
+    })
 
     return {
       success: false
@@ -47,7 +77,7 @@ export const emergencyClose = async (
   roomId: number
 ) => {
 
-  await db.logs.add({
+  const payload = {
 
     temp_id: crypto.randomUUID(),
 
@@ -59,24 +89,55 @@ export const emergencyClose = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
+  }
 
-    synced: false
-  })
-
+  // ================= MQTT LOCAL
   try {
 
-    const { data } = await API.post(
+    await API.post(
       `/local/rooms/${roomId}/emergency-close`
     )
 
-    return data
+    console.log(
+      '📡 MQTT CLOSE SENT'
+    )
 
   } catch (err) {
 
     console.log(
-      'Emergency MQTT offline'
+      '❌ MQTT CLOSE FAILED'
     )
+  }
+
+  // ================= CLOUD LOG
+  try {
+
+    await API.post(
+      '/sync/access-log',
+      payload
+    )
+
+    console.log(
+      '☁️ EMERGENCY CLOSE SAVED'
+    )
+
+    return {
+      success: true
+    }
+
+  } catch (err) {
+
+    console.log(
+      '📴 CLOUD FAILED -> SAVE DEXIE'
+    )
+
+    await db.logs.add({
+
+      ...payload,
+
+      synced: false
+    })
 
     return {
       success: false

@@ -1,12 +1,6 @@
-import axios from 'axios'
-
+import API from '../../services/api'
 import { db } from '../db'
-
-import { syncLogs }
-from './syncLogs'
-
-const CLOUD_API =
-  'https://tugasakhirc14220241-production-11c4.up.railway.app/api'
+import { syncLogs } from './syncLogs'
 
   let isSyncing = false
 
@@ -128,29 +122,12 @@ if (!unsynced.length) {
     performance.now()
 
     try {
-
-      // ================= TOKEN
-      const token =
-
-        localStorage.getItem(
-          'token'
-        )
-
-      const headers = token
-
-        ? {
-            Authorization:
-              `Bearer ${token}`
-          }
-
-        : {}
-
       // ================= OPEN
       if (item.action === 'open') {
 
-        await axios.post(
+        await API.post(
 
-          `${CLOUD_API}/rooms/${item.room_id}/open`,
+          `/rooms/${item.room_id}/open`,
 
           {
             customer_name:
@@ -159,20 +136,14 @@ if (!unsynced.length) {
             duration:
               item.duration,
 
-              start_time:
-                item.start_time,
+            start_time:
+              item.start_time,
 
-              end_time:
-                item.end_time,
+            end_time:
+              item.end_time,
 
             temp_id:
               item.temp_id
-          },
-
-          {
-            headers,
-
-            timeout: 5000
           }
         )
       }
@@ -180,9 +151,8 @@ if (!unsynced.length) {
       // ================= EXTEND
       if (item.action === 'extend') {
 
-        await axios.post(
-
-          `${CLOUD_API}/rooms/${item.room_id}/extend`,
+        await API.post(
+          `/rooms/${item.room_id}/extend`,
 
           {
             minutes:
@@ -192,31 +162,19 @@ if (!unsynced.length) {
               item.temp_id
           },
 
-          {
-            headers,
-
-            timeout: 5000
-          }
         )
       }
 
       // ================= CLOSE
       if (item.action === 'close') {
 
-        await axios.post(
-
-          `${CLOUD_API}/rooms/${item.room_id}/close`,
+        await API.post(
+         `/rooms/${item.room_id}/close`,
 
           {
             temp_id:
               item.temp_id
           },
-
-          {
-            headers,
-
-            timeout: 5000
-          }
         )
       }
 
