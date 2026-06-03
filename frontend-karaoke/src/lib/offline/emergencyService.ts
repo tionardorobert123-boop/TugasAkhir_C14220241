@@ -13,7 +13,7 @@ export const emergencyOpen = async (
 
     customer_name: 'EMERGENCY OPEN',
 
-    room_status: 'active',
+    room_status: 'standby',
 
     duration: 0,
 
