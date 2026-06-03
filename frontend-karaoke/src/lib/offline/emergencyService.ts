@@ -14,7 +14,7 @@ export const emergencyOpen = async (
 
     customer_name: 'EMERGENCY OPEN',
 
-    room_status: 'disabled',
+    room_status: 'active',
 
     duration: 0,
 
@@ -55,7 +55,7 @@ export const emergencyClose = async (
 
     customer_name: 'EMERGENCY CLOSE',
 
-    room_status: 'disabled',
+    room_status: 'standby',
 
     duration: 0,
 
