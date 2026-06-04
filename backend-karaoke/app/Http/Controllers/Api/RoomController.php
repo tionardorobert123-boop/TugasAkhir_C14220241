@@ -8,16 +8,12 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\AccessLog;
-use PhpMqtt\Client\MqttClient;
-use PhpMqtt\Client\ConnectionSettings;
 use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
 
-    // =============================
     // GET ROOMS + ACTIVE TRANSACTION
-    // =============================
     public function index()
     {
         $rooms = DB::table('rooms')
@@ -57,9 +53,9 @@ class RoomController extends Controller
         return response()->json($rooms);
     }
 
-    // =============================
-    // OPEN ROOM (START)
-    // =============================
+  
+    // OPEN ROOM 
+
     public function open(Request $request, $id)
     {
         $minutes = (int) $request->duration;
@@ -72,7 +68,7 @@ class RoomController extends Controller
             ], 400);
         }
 
-        // 🔥 wajib kelipatan 60 menit
+        //kelipatan 60 menit
         if ($minutes % 60 !== 0) {
             return response()->json([
                 "message" => "Durasi harus kelipatan 60 menit"
@@ -182,9 +178,8 @@ class RoomController extends Controller
         ]);
     }
 
-    // =============================
-    // CLOSE ROOM (AUTO / FORCE)
-    // =============================
+   
+    // CLOSE ROOM
     public function close(Request $request, $id)
     {
         $startApi = microtime(true);
