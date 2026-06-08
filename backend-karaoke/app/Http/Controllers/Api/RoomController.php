@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\AccessLog;
+use PhpMqtt\Client\MqttClient;
+use PhpMqtt\Client\ConnectionSettings;
 use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller

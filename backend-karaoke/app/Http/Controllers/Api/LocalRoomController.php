@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Services\MQTTService;
+use PhpMqtt\Client\MqttClient;
+use PhpMqtt\Client\ConnectionSettings;
 
 class LocalRoomController extends Controller
 {
 
 
 //cek timer backend ke mqtt
-private function publishMQTT($roomId, $action)
+private function publishMQTT(int $roomId, string $action)
 {
     $server = '127.0.0.1';
     $port = 1883;
@@ -76,7 +78,7 @@ private function publishMQTT($roomId, $action)
     // =============================
     public function open(
         Request $request,
-        $id
+        int $id
     ) {
 
         try {
@@ -141,7 +143,7 @@ private function publishMQTT($roomId, $action)
     // =============================
     // CLOSE ROOM (LOCAL MQTT ONLY)
     // =============================
-    public function close($id)
+    public function close(int $id)
     {
 
         try {
@@ -204,7 +206,7 @@ private function publishMQTT($roomId, $action)
     // =============================
     public function extend(
         Request $request,
-        $id
+        int $id
     ) {
 
         try {
@@ -246,7 +248,7 @@ private function publishMQTT($roomId, $action)
     }
 
     //resync iot ketika terjadi mati lampu/power off
-        public function resync($id)
+        public function resync(int $id)
     {
         try {
 
@@ -274,7 +276,7 @@ private function publishMQTT($roomId, $action)
         }
     }
 
-    public function emergencyOpen($id)
+    public function emergencyOpen(int $id)
         {
             try {
 
@@ -301,7 +303,7 @@ private function publishMQTT($roomId, $action)
             }
         }
 
-         public function emergencyClose($id)
+         public function emergencyClose(int $id)
         {
             try {
 
