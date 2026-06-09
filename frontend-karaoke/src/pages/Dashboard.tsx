@@ -10,7 +10,6 @@ import logo from "../assets/logo.png";
 import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 
 import SyncStatus from "../lib/sync/components/SyncStatus";
-import { useState } from "react";
 import EmergencyModal from "../components/Rooms/EmergencyModal";
 
 function Dashboard() {
@@ -55,7 +54,12 @@ function Dashboard() {
 
     logout,
     openDoor,
-    closeDoor
+    closeDoor,
+
+    showEmergency,
+    setShowEmergency,
+    emergencyRoomId,
+    setEmergencyRoomId
   } = useRoomControl();
 
   const hasInternet = useOffline();
@@ -67,47 +71,35 @@ function Dashboard() {
 
   const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
   const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
+const handleEmergencyOpen = async () => {
 
-     const [showEmergency, setShowEmergency] =
-    useState(false)
+  if (!emergencyRoomId)
+    return;
 
-    const handleEmergencyOpen = async () => {
+  try {
 
-      if (!selectedRoom)
-        return
+    await openDoor(emergencyRoomId);
 
-      try {
+  } catch (err) {
 
-        await openDoor(
-          selectedRoom
-        )
+    console.error(err);
+  }
+};
 
-        setShowEmergency(false)
+const handleEmergencyClose = async () => {
 
-      } catch (err) {
+  if (!emergencyRoomId)
+    return;
 
-        console.error(err)
-      }
-    }
+  try {
 
-    const handleEmergencyClose = async () => {
+    await closeDoor(emergencyRoomId);
 
-      if (!selectedRoom)
-        return
+  } catch (err) {
 
-      try {
-
-        await closeDoor(
-          selectedRoom
-        )
-
-        setShowEmergency(false)
-
-      } catch (err) {
-
-        console.error(err)
-      }
-    }
+    console.error(err);
+  }
+};
 
   const renderRoom = (id: number) => {
     const room = rooms.find((r) => r.room_id === id);
@@ -349,24 +341,29 @@ function Dashboard() {
         total_minutes={total_minutes}
         onClose={() => setShowModal(false)}
         onNext={() => setShowConfirm(true)}
-        onEmergency={() =>
-          setShowEmergency(true)
-        }
+        onEmergency={() => {
+          if (selectedRoom) {
+            setEmergencyRoomId(selectedRoom);
+            setShowEmergency(true);
+          }
+        }}
       />
 
       <EmergencyModal
-        show={showEmergency}
-        roomId={selectedRoom}
-        onClose={() =>
-          setShowEmergency(false)
-        }
-        onEmergencyOpen={() =>
-          handleEmergencyOpen()
-        }
-        onEmergencyClose={() =>
-          handleEmergencyClose()
-        }
-      />
+          show={showEmergency}
+          roomId={emergencyRoomId}
+          onClose={() =>
+            setShowEmergency(false)
+          }
+          onEmergencyOpen={async () => {
+            await handleEmergencyOpen();
+            setShowEmergency(false);
+          }}
+          onEmergencyClose={async () => {
+            await handleEmergencyClose();
+            setShowEmergency(false);
+          }}
+        />
 
       <ConfirmModal
         show={showConfirm}
@@ -387,9 +384,12 @@ function Dashboard() {
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
         onCloseRoom={closeRoom}
-         onEmergency={() =>
-          setShowEmergency(true)
-        }
+         onEmergency={() => {
+            if (extendRoomId) {
+              setEmergencyRoomId(extendRoomId);
+              setShowEmergency(true);
+            }
+          }}
       />
 
       <RoomSettingModal

@@ -29,6 +29,11 @@ export function useRoomControl() {
 
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [extendRoomId, setExtendRoomId] = useState<number | null>(null);
+
+  const [showEmergency, setShowEmergency] =
+  useState(false);
+  const [emergencyRoomId, setEmergencyRoomId] =
+  useState<number | null>(null);
   
   const location = useLocation()
    //check internet
@@ -938,6 +943,17 @@ const extendRoom = async (
 
       return emergencyClose(roomId);
     };
+
+      const handleEmergencyClick = (
+    room: any
+  ) => {
+
+    setEmergencyRoomId(
+      room.room_id
+    );
+
+    setShowEmergency(true);
+  };
     
   // ================= CLICK =================
   const handleClick = (room: any) => {
@@ -1042,6 +1058,12 @@ const extendRoom = async (
     extendRoomId,
     openExtendModal,
     submitExtend,
+
+    showEmergency,
+    setShowEmergency,
+    handleEmergencyClick,
+    emergencyRoomId,
+    setEmergencyRoomId,
 
     openDoor,
     closeDoor
