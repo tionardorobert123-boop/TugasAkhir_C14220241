@@ -221,14 +221,26 @@ useEffect(() => {
     });
   };
 
-  const formatDuration = (minutes: number | null) => {
-    if (!minutes || minutes <= 0) return "-";
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0 && mins > 0) return `${hours}jam ${mins}menit`;
-    if (hours > 0) return `${hours}jam`;
-    return `${mins}menit`;
-  };
+  const formatDuration = (
+      minutes: number | string | null
+    ) => {
+
+      const value = Number(minutes);
+
+      if (!value || value <= 0)
+        return "-";
+
+      const hours = Math.floor(value / 60);
+      const mins = value % 60;
+
+      if (hours > 0 && mins > 0)
+        return `${hours}jam ${mins}menit`;
+
+      if (hours > 0)
+        return `${hours}jam`;
+
+      return `${mins}menit`;
+    };
 
   return {
     selectedDate,

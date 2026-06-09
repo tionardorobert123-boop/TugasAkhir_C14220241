@@ -58,12 +58,15 @@ class RoomExtendController extends Controller
         $newEnd = Carbon::parse($transaction->end_time)
             ->addMinutes($minutes);
 
-        $hours = $minutes / 60;
-
         // UPDATE TRANSACTION
         $transaction->end_time = $newEnd;
-        $transaction->duration += $hours; // tambah jam
-        $transaction->total_price = $transaction->duration * $transaction->price_per_hour;
+
+        $transaction->duration += $minutes; // tambah MENIT
+
+        $transaction->total_price =
+            ceil($transaction->duration / 60)
+            * $transaction->price_per_hour;
+
         $transaction->save();
 
         //LOG
@@ -81,12 +84,11 @@ class RoomExtendController extends Controller
         ]);
 
         // LOG ACCESS
-        $extendHours = $minutes / 60;
         AccessLog::create([
             'room_id' => $id,
             'customer_name' => $transaction->customer_name,
             'room_status' => 'extend',
-            'duration' => (int) $extendHours,
+            'duration' => $minutes,
             'timestamp' => now(),
         ]);
 
