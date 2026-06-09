@@ -381,6 +381,9 @@ function Dashboard() {
         onClose={() => setShowExtendModal(false)}
         onSubmit={submitExtend}
         onCloseRoom={closeRoom}
+         onEmergency={() =>
+          setShowEmergency(true)
+        }
       />
 
       <RoomSettingModal

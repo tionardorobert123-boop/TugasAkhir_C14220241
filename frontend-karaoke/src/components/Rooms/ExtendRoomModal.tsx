@@ -10,6 +10,7 @@ type Props = {
   onClose: () => void;
   onSubmit: (minutes: number) => void;
   onCloseRoom: (roomId: number) => void;
+  onEmergency: () => void;
 };
 
 export default function ExtendRoomModal({
@@ -19,6 +20,7 @@ export default function ExtendRoomModal({
   onClose,
   onSubmit,
   onCloseRoom,
+  onEmergency
 }: Props) {
   const [selectedMinutes, setSelectedMinutes] = useState(60);
 
@@ -84,9 +86,32 @@ export default function ExtendRoomModal({
             </p>
           </div>
 
+              <div className="mt-4 mb-4">
+
+          <button
+            onClick={onEmergency}
+            className="
+              w-full
+              py-3
+              rounded-xl
+              bg-red-600/20
+              border border-red-500/40
+              text-red-300
+              font-semibold
+              hover:bg-red-600/30
+              transition
+            "
+          >
+            🚨 Emergency Action
+          </button>
+
+        </div>
           {/* ACTION */}
           <div className="flex justify-between gap-2">
 
+             <div className="mt-4 mb-4">
+
+        </div>
             <button
               onClick={() => setShowConfirmClose(true)}
               className="px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition"

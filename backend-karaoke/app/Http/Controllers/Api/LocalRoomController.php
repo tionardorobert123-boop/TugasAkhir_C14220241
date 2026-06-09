@@ -201,9 +201,7 @@ private function publishMQTT(int $roomId, string $action)
         }
     }
 
-    // =============================
     // EXTEND ROOM (LOCAL MQTT ONLY)
-    // =============================
     public function extend(
         Request $request,
         int $id

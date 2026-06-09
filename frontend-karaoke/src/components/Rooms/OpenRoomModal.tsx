@@ -56,6 +56,21 @@ export default function OpenRoomModal({
           Pilih Durasi
         </p>
 
+      <div className="grid grid-cols-3 gap-2 mb-5">
+
+                {[5].map(h => (
+                  <button
+                    key={h}
+                    onClick={() => setDuration(h * 1)}
+                    className={`p-2 rounded-xl text-sm transition
+                    ${duration === h*1
+                      ? "bg-yellow-500 text-black font-semibold"
+                      : "bg-white/10 hover:bg-white/20"}`}
+                  >
+                    {h} Menit
+                  </button>
+                ))}
+              </div>
         <div className="grid grid-cols-3 gap-2 mb-5">
 
           {[1,2,3,4].map(h => (

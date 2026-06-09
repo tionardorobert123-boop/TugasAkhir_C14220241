@@ -71,11 +71,11 @@ class RoomController extends Controller
         }
 
         //kelipatan 60 menit
-        if ($minutes % 60 !== 0) {
-            return response()->json([
-                "message" => "Durasi harus kelipatan 60 menit"
-            ], 400);
-        }
+        // if ($minutes % 60 !== 0) {
+        //     return response()->json([
+        //         "message" => "Durasi harus kelipatan 60 menit"
+        //     ], 400);
+        // }
 
         $room = DB::table('rooms')->where('room_id', $id)->first();
 
@@ -117,7 +117,7 @@ class RoomController extends Controller
         ? Carbon::parse($request->start_time)
         : now();
 
-        $hours = $minutes / 60;
+        // $hours = $minutes / 60;
 
         $end = $request->filled('end_time')
 
@@ -134,11 +134,11 @@ class RoomController extends Controller
             $request->customer_name ?? 'Guest',
         'start_time' => $start,
         'end_time' => $end,
-        'duration' => $hours,
+        'duration' => $minutes,
         'price_per_hour' =>
             $room->price_per_hour,
         'total_price' =>
-            $hours * $room->price_per_hour,
+            $minutes * $room->price_per_hour,
         'status' => 'active',
         'created_at' => $start,
         'updated_at' => $start
@@ -155,7 +155,7 @@ class RoomController extends Controller
             'customer_name' =>
                 $request->customer_name ?? 'Guest',
             'room_status' => 'active',
-            'duration' => (int) $hours,
+            'duration' => (int) $minutes,
             'timestamp' => $start,
         ]);
 

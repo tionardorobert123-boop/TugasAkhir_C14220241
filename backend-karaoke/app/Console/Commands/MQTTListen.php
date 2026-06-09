@@ -19,13 +19,15 @@ class MQTTListen extends Command
 
     public function handle(): void
     {
+        //alamat broker mqtt
         $server = '127.0.0.1';
         $port = 1883;
-        $clientId =
-            'laravel-listener';
-        $connectionSettings =
-            (new ConnectionSettings)
-                ->setKeepAliveInterval(60);
+        $clientId = 'laravel-listener';
+
+        //mengirim ping ke broker untuk memastikan koneksi tetap aktif
+        $connectionSettings = (new ConnectionSettings) ->setKeepAliveInterval(60);
+
+        //reconnecting
         while (true) {
             try {
                 $mqtt =
@@ -38,7 +40,7 @@ class MQTTListen extends Command
                 $this->info(
                     'MQTT Listener connected...'
                 );
-                // ================= SUBSCRIBE
+                //SUBSCRIBE
                 $mqtt->subscribe(
                 'room/+/status',
                 function (
@@ -46,12 +48,12 @@ class MQTTListen extends Command
                     string $message
                 ) {
 
-                    // ================= START TIMER
+                    //TART TIMER
                     $startProcess = microtime(true);
 
                     try {
 
-                        // ================= JSON
+                        //JSON
                         $data = json_decode(
                             $message,
                             true
@@ -67,7 +69,7 @@ class MQTTListen extends Command
                             return;
                         }
 
-                        // ================= DATA
+                        //DATA
                         $roomId =
                             $data['room_id'];
 
@@ -75,7 +77,7 @@ class MQTTListen extends Command
                             $data['timestamp']
                             ?? 0;
 
-                            // ================= MQTT CALLBACK TIME
+                            //MQTT CALLBACK TIME
                         $callbackMs =
                             abs(
                                 round(
@@ -94,14 +96,14 @@ class MQTTListen extends Command
                             $data['door']
                             ?? 'unknown';
 
-                        // ================= LOG
+                        //LOG
                         echo
                             "ROOM {$roomId}"
                             . " | LOCK: {$lock}"
                             . " | DOOR: {$door}"
                             . PHP_EOL;
 
-                        // ================= SYNC CLOUD
+                        //SYNC CLOUD
                         try {
 
                             $response =
@@ -136,7 +138,7 @@ class MQTTListen extends Command
                                 . PHP_EOL;
                         }
 
-                        // ================= PROCESS TIME
+                        // PROCESS TIME
                         $processMs =
                             round(
                                 (microtime(true) - $startProcess)
@@ -160,7 +162,7 @@ class MQTTListen extends Command
                 },
                 0
             );
-                // ================= MQTT LOOP
+                // MQTT LOOP
                 while (true) {
                     try {
                         $mqtt->loop(
