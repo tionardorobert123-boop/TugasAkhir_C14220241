@@ -64,7 +64,7 @@ class RoomExtendController extends Controller
         $transaction->duration += $minutes; // tambah MENIT
 
         $transaction->total_price =
-            ceil($transaction->duration / 60)
+            ($transaction->duration / 60)
             * $transaction->price_per_hour;
 
         $transaction->save();
