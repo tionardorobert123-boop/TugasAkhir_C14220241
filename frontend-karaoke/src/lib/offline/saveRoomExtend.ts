@@ -166,11 +166,11 @@ export async function saveRoomExtend(
 
     const newDuration =
       (trx.duration || 0) +
-      data.minutes
+      data.minutes;
 
     const totalPrice =
       (newDuration / 60) *
-      (trx.price_per_hour || 0)
+      (trx.price_per_hour || 0);
 
     await db.transactions.update(
 
