@@ -214,15 +214,22 @@ const totalIncome =
     return diff > 0 && diff <= 5 * 60 * 1000;
   };
 
-  const formatDuration = (
-    hours: number
-  ) => {
+  const formatDuration = (minutes: number) => {
+  if (!minutes) return "0 menit";
 
-    if (!hours)
-      return '0 jam';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
 
+  if (hours === 0) {
+    return `${mins} menit`;
+  }
+
+  if (mins === 0) {
     return `${hours} jam`;
-  };
+  }
+
+  return `${hours} jam ${mins} menit`;
+};
 
   return {
     activeRooms,
