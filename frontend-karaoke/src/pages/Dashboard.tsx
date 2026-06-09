@@ -154,7 +154,10 @@ function Dashboard() {
             z-50
           "
         >
-          <SyncStatus />
+          {!isOwner && (
+            <SyncStatus />
+          )}
+
         </div>
         {/* CENTER */}
         <div
@@ -397,6 +400,7 @@ function Dashboard() {
       />
 
     </div>
+  
   );
 }
 

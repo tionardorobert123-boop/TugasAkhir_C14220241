@@ -164,39 +164,29 @@ export async function saveRoomOpen(
   // ================= SAVE LOCAL TRANSACTION
 await db.transactions.add({
 
-  temp_id:
-    payload.temp_id,
+  temp_id: payload.temp_id,
 
-  room_id:
-    data.room_id,
+  room_id: data.room_id,
 
-  customer_name:
-    data.customer_name,
+  customer_name: data.customer_name,
 
-  start_time:
-    startTime,
+  start_time: startTime,
 
-  end_time:
-    endTime,
+  end_time: endTime,
 
-  duration:
-    data.duration / 60,
+  duration: data.duration, // SIMPAN MENIT
 
-  price_per_hour:
-  data.price_per_hour,
+  price_per_hour: data.price_per_hour,
 
   total_price:
     (data.duration / 60) *
     data.price_per_hour,
 
-  status:
-    'active',
+  status: 'active',
 
-  created_at:
-    startTime,
+  created_at: startTime,
 
-  updated_at:
-    startTime
+  updated_at: startTime
 })
 
   // ================= SAVE OFFLINE QUEUE

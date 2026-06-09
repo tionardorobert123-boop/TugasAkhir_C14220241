@@ -7,9 +7,12 @@ import { emergencyOpen, emergencyClose } from "../lib/offline/emergencyService";
 import { db } from "../lib/db";
 import { useLocation } from 'react-router-dom'
 import {useCloud} from '../context/CloudContext'
+import useOffline from "./useOffline";
 
 export function useRoomControl() {
   const [rooms, setRooms] = useState<any[]>([]);
+  const hasInternet = useOffline();
+  
 
   const [showModal, setShowModal] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -947,6 +950,18 @@ const extendRoom = async (
   };
 
   const handleOwnerClick = (room: any) => {
+
+     const role = localStorage.getItem("role");
+
+      if (
+        role === "owner" &&
+        !hasInternet
+      ) {
+        alert(
+          "Owner tidak dapat mengubah setting room saat offline"
+        );
+        return;
+      }
     setSelectedRoom(room.room_id);
     setSelectedRoomData(room);
     setShowSetting(true);
