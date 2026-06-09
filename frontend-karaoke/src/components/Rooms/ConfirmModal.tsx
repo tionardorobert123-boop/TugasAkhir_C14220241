@@ -4,6 +4,7 @@ type Props = {
   customerName: string;
   duration: number;
   total: number;
+  total_minutes: number;
   onClose: () => void;
   onConfirm: () => void;
   isOffline?: boolean;
@@ -15,6 +16,7 @@ export default function ConfirmModal({
   customerName,
   duration,
   total,
+  total_minutes,
   onClose,
   onConfirm,
   isOffline,
@@ -68,7 +70,7 @@ export default function ConfirmModal({
         <div className="bg-black/30 rounded-xl p-3 mb-5 text-center">
           <p className="text-white/60 text-sm">Total Bayar</p>
           <p className="text-2xl font-bold text-green-400">
-            Rp {rupiah(total)}
+            Total: Rp {rupiah(duration === 5 ? total_minutes : total)}
           </p>
         </div>
 

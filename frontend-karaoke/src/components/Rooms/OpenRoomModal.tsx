@@ -7,6 +7,7 @@ type Props = {
   setDuration: (v: number) => void;
   price: number;
   total: number;
+  total_minutes: number;
   onClose: () => void;
   onNext: () => void;
    
@@ -22,6 +23,7 @@ export default function OpenRoomModal({
   setDuration,
   price,
   total,
+  total_minutes,
   onClose,
   onNext,
   onEmergency
@@ -91,7 +93,7 @@ export default function OpenRoomModal({
         <div className="bg-black/30 rounded-xl p-3 mb-4 text-sm">
           <p>Harga / jam: <span className="font-semibold">Rp {rupiah(price)}</span></p>
           <p className="text-lg font-bold text-yellow-400">
-            Total: Rp {rupiah(total)}
+            Total: Rp {rupiah(duration === 5 ? total_minutes : total)}
           </p>
         </div>
 

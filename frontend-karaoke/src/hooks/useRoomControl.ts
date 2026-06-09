@@ -980,6 +980,8 @@ const extendRoom = async (
   const hours = Math.ceil(duration / 60);
   const total = hours * price;
 
+   const total_minutes = (duration / 60) * price;
+
   return {
     rooms,
     setRooms,
@@ -1005,6 +1007,7 @@ const extendRoom = async (
 
     duration,
     setDuration,
+    total_minutes,
 
     price,
     total,

@@ -138,7 +138,7 @@ class RoomController extends Controller
         'price_per_hour' =>
             $room->price_per_hour,
         'total_price' =>
-            $minutes * $room->price_per_hour,
+            ($minutes / 60) * $room->price_per_hour,
         'status' => 'active',
         'created_at' => $start,
         'updated_at' => $start

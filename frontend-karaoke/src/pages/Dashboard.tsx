@@ -39,6 +39,7 @@ function Dashboard() {
 
     price,
     total,
+    total_minutes,
 
     handleClick,
     startRoom,
@@ -342,6 +343,7 @@ function Dashboard() {
         setDuration={setDuration}
         price={price}
         total={total}
+        total_minutes={total_minutes}
         onClose={() => setShowModal(false)}
         onNext={() => setShowConfirm(true)}
         onEmergency={() =>
@@ -369,6 +371,7 @@ function Dashboard() {
         customerName={customerName}
         duration={duration}
         total={total}
+        total_minutes={total_minutes}
         onClose={() => setShowConfirm(false)}
         onConfirm={startRoom}
       />
