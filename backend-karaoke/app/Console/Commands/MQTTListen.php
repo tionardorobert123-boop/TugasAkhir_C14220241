@@ -116,7 +116,7 @@ class MQTTListen extends Command
                                     => 'karaoke-secret'
                                 ])
                                 ->post(
-                                    'https://tugas-akhir-c14220241-robert.up.railway.app//api/iot-sync',
+                                    'https://tugas-akhir-c14220241-robert.up.railway.app/api/iot-sync',
                                     [
                                         'room_id'=> $roomId,
                                         'door_status'=> $door,
