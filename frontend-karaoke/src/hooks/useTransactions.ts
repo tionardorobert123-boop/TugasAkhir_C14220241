@@ -8,7 +8,12 @@ export function useTransactions(selectedDate?: string) {
 
   const token = localStorage.getItem("token");
 
-  const today = new Date().toISOString().split("T")[0];
+  // const today = new Date().toISOString().split("T")[0];
+  const today =
+  new Date()
+    .toLocaleDateString(
+      'sv-SE'
+    )
   const filterDate = selectedDate || today;
   //check internet
   const {cloudOnline} = useCloud()
