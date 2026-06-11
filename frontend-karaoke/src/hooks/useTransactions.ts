@@ -158,24 +158,43 @@ export function useTransactions(selectedDate?: string) {
     trx => trx.status === "finished"
   );
 // ================= SORT DESC
-const sortedFinishedTransactions =
+// const sortedFinishedTransactions =
+
+//   [...finishedTransactions].sort(
+//     (a: any, b: any) => {
+
+//       const dateA =
+//         new Date(
+//           a.created_at ||
+//           a.start_time
+//         ).getTime();
+
+//       const dateB =
+//         new Date(
+//           b.created_at ||
+//           b.start_time
+//         ).getTime();
+
+//       return dateB - dateA;
+//     }
+//   );
+
+  const sortedFinishedTransactions =
 
   [...finishedTransactions].sort(
     (a: any, b: any) => {
 
-      const dateA =
+      const endA =
         new Date(
-          a.created_at ||
-          a.start_time
+          a.updated_at
         ).getTime();
 
-      const dateB =
+      const endB =
         new Date(
-          b.created_at ||
-          b.start_time
+          b.updated_at
         ).getTime();
 
-      return dateB - dateA;
+      return endB - endA;
     }
   );
 

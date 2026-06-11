@@ -22,12 +22,14 @@ export async function saveRoomClose(
   action: 'close' as const,
 
   closed_at:
-    new Date()
-      .toISOString(),
+  new Date()
+    .toLocaleString('sv-SE')
+    .replace(' ', 'T'),
 
   created_at:
     new Date()
-      .toISOString(),
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T'),
 
   sync_status: 0
 }
