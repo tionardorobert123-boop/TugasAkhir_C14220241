@@ -55,7 +55,7 @@ class IotDeviceController extends Controller
 
   public function checkOffline()
 {
-    $devices = IotDevice::all();
+    $devices = IoTDevice::all();
 
     foreach ($devices as $device) {
 
