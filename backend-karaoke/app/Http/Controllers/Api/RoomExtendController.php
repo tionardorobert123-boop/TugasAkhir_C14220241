@@ -89,7 +89,12 @@ class RoomExtendController extends Controller
             'customer_name' => $transaction->customer_name,
             'room_status' => 'extend',
             'duration' => $minutes,
-            'timestamp' => now(),
+            'timestamp' =>
+                $request->action_time
+                    ? Carbon::parse(
+                        $request->action_time
+                    )
+                    : now(),
         ]);
 
         return response()->json([

@@ -332,7 +332,9 @@ public function close(Request $request, $id)
                     'customer_name' => $request->customer_name,
                     'room_status' => $request->room_status,
                     'duration' => $request->duration,
-                    'timestamp' => now(),
+                    'timestamp' => Carbon::parse(
+                        $request->timestamp
+                    ),
                 ]
             );
 

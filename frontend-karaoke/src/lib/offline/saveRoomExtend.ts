@@ -16,18 +16,18 @@ export async function saveRoomExtend(
 
   const payload = {
 
-    temp_id: uuidv4(),
+     temp_id: uuidv4(),
 
-    room_id: data.room_id,
+  room_id: data.room_id,
 
-    action: 'extend' as const,
+  action: 'extend' as const,
 
-    minutes: data.minutes,
+  minutes: data.minutes,
 
-    created_at:
-      new Date().toISOString(),
+  created_at:
+    new Date().toISOString(),
 
-    sync_status: 0
+  sync_status: 0
   }
 
   // ================= ALWAYS LOCAL MQTT
@@ -38,11 +38,12 @@ export async function saveRoomExtend(
       `/local/rooms/${data.room_id}/extend`,
 
       {
-        minutes:
-          data.minutes,
+        minutes: data.minutes,
 
-        temp_id:
-          payload.temp_id
+        temp_id: payload.temp_id,
+
+        created_at:
+          payload.created_at,
       }
     )
 

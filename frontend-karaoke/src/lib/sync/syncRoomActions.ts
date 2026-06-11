@@ -168,11 +168,12 @@ if (!unsynced.length) {
           `/rooms/${item.room_id}/extend`,
 
           {
-            minutes:
-              item.minutes,
+            minutes: item.minutes,
 
-            temp_id:
-              item.temp_id
+            temp_id: item.temp_id,
+
+            created_at:
+              item.created_at
           },
 
         )
