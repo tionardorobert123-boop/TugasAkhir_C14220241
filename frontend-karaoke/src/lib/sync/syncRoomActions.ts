@@ -69,6 +69,30 @@ try {
 
       .toArray()
 
+      const pendingLogs =
+      await db.logs
+        .filter(log => !log.synced)
+        .toArray()
+
+    const totalQueue =
+      unsynced.length +
+      pendingLogs.length
+
+    console.log(
+      'PENDING ROOM ACTION:',
+      unsynced.length
+    )
+
+    console.log(
+      'PENDING LOGS:',
+      pendingLogs.length
+    )
+
+    console.log(
+      'TOTAL PENDING:',
+      totalQueue
+    )
+
       console.log(
       'PENDING QUEUE:',
       unsynced.length
@@ -78,18 +102,11 @@ try {
  // ================= EMPTY
 if (!unsynced.length) {
 
-  console.log(
-    '✅ NO ROOM ACTION PENDING'
-  )
-
-  // tetap sync log
-  await syncLogs()
-
   setSyncInfo?.({
 
-    syncing: false,
+    syncing: true,
 
-    pending: 0,
+    pending: totalQueue,
 
     success: 0,
 
@@ -97,7 +114,33 @@ if (!unsynced.length) {
 
     duration: 0,
 
-    total: 0,
+    total: totalQueue,
+
+    lastSync: null
+  })
+
+  console.log(
+    '✅ NO ROOM ACTION PENDING'
+  )
+
+  const logResult =
+    await syncLogs(setSyncInfo)
+
+  setSyncInfo?.({
+
+    syncing: false,
+
+    pending: 0,
+
+    success: logResult.success,
+
+    failed: logResult.failed,
+
+    duration: 0,
+
+    total:
+      logResult.success +
+      logResult.failed,
 
     lastSync:
       new Date()
@@ -112,7 +155,7 @@ if (!unsynced.length) {
 
     syncing: true,
 
-    pending: unsynced.length,
+    pending: totalQueue,
 
     success: 0,
 
@@ -120,14 +163,14 @@ if (!unsynced.length) {
 
     duration: 0,
 
-    total: unsynced.length,
+    total: totalQueue,
 
     lastSync: null
   })
 
   console.log(
-    `🔄 SYNC ${unsynced.length} ACTION`
-  )
+  `🔄 ROOM ACTIONS: ${unsynced.length} | LOGS: ${pendingLogs.length}`
+)
 
   for (const item of unsynced) {
 
@@ -266,7 +309,14 @@ if (!unsynced.length) {
     }
   }
 
-  await syncLogs()
+  const logResult =
+  await syncLogs(setSyncInfo)
+
+successCount +=
+  logResult.success
+
+failedCount +=
+  logResult.failed
   
   const endSync =
   performance.now()

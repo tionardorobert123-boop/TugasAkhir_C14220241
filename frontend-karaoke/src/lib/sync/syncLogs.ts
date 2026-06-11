@@ -1,9 +1,11 @@
 import API from '../../services/api'
 import { db } from '../db'
 
-export async function syncLogs() {
+export async function syncLogs(
+  setSyncInfo?: any
+) {
 
-   const role =
+  const role =
     localStorage.getItem('role')
 
   if (role !== 'kasir') {
@@ -12,7 +14,10 @@ export async function syncLogs() {
       '🚫 LOG SYNC DISABLED FOR OWNER'
     )
 
-    return
+    return {
+      success: 0,
+      failed: 0
+    }
   }
 
   console.log(
@@ -27,6 +32,9 @@ export async function syncLogs() {
     'LOG PENDING:',
     logs.length
   )
+
+  let successCount = 0
+  let failedCount = 0
 
   for (const log of logs) {
 
@@ -65,16 +73,43 @@ export async function syncLogs() {
         log.log_id!
       )
 
+      successCount++
+
+      setSyncInfo?.((prev: any) => ({
+
+        ...prev,
+
+        success:
+          (prev.success || 0) + 1
+
+      }))
+
       console.log(
         '☁️ LOG SYNCED & REMOVED'
       )
 
     } catch (err) {
 
+      failedCount++
+
+      setSyncInfo?.((prev: any) => ({
+
+        ...prev,
+
+        failed:
+          (prev.failed || 0) + 1
+
+      }))
+
       console.log(
         '❌ LOG SYNC FAILED',
         err
       )
     }
+  }
+
+  return {
+    success: successCount,
+    failed: failedCount
   }
 }
