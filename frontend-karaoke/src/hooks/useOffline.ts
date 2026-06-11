@@ -1,34 +1,48 @@
-import {useEffect} from 'react'
-import {syncRoomActions} from '../lib/sync/syncRoomActions'
-import {useCloud} from '../context/CloudContext'
+import { useEffect } from 'react'
+
+import { syncRoomActions }
+from '../lib/sync/syncRoomActions'
+
+import { syncLogs }
+from '../lib/sync/syncLogs'
+
+import { useCloud }
+from '../context/CloudContext'
 
 export default function useOffline() {
-  const {cloudOnline,
-  setSyncInfo} = useCloud()
+
+  const {
+    cloudOnline,
+    setSyncInfo
+  } = useCloud()
 
   useEffect(() => {
-    // ================= ONLINE
+
     if (cloudOnline) {
 
       console.log(
         '☁️ INTERNET ONLINE'
       )
-      // ================= AUTO SYNC
+
       syncRoomActions(
         cloudOnline,
-         setSyncInfo
+        setSyncInfo
       )
 
-    } else {
+      syncLogs()
+    }
+
+    else {
 
       console.log(
         '📴 OFFLINE MODE'
       )
     }
 
-  }, [cloudOnline,
-
-    setSyncInfo])
+  }, [
+    cloudOnline,
+    setSyncInfo
+  ])
 
   return cloudOnline
 }
