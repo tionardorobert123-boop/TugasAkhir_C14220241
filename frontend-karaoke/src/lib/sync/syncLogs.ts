@@ -6,7 +6,7 @@ export async function syncLogs() {
    const role =
     localStorage.getItem('role')
 
-  if (role !== 'cashier') {
+  if (role !== 'kasir') {
 
     console.log(
       '🚫 LOG SYNC DISABLED FOR OWNER'
@@ -61,15 +61,12 @@ export async function syncLogs() {
         response.data
       )
 
-      await db.logs.update(
-        log.log_id!,
-        {
-          synced: true
-        }
+      await db.logs.delete(
+        log.log_id!
       )
 
       console.log(
-        '☁️ LOG SYNCED'
+        '☁️ LOG SYNCED & REMOVED'
       )
 
     } catch (err) {

@@ -97,6 +97,8 @@ export interface OfflineRoomAction {
   start_time?: string
 
   end_time?: string
+  
+  closed_at?: string
 
   created_at: string
 

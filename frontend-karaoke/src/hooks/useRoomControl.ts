@@ -920,6 +920,42 @@ const extendRoom = async (
       cloudOnline
     );
 
+    // ================= UPDATE UI LANGSUNG
+    setRooms(prev =>
+
+      prev.map(room => {
+
+        if (
+          room.room_id !== roomId
+        ) {
+          return room;
+        }
+
+        const endTime =
+          room.end_time
+            ? new Date(room.end_time)
+            : new Date();
+
+        endTime.setMinutes(
+          endTime.getMinutes() +
+          minutes
+        );
+
+        return {
+
+          ...room,
+
+          end_time:
+
+            endTime
+
+              .toLocaleString('sv-SE')
+
+              .replace(' ', 'T')
+        };
+      })
+    );
+
   } catch (err) {
 
     console.log(

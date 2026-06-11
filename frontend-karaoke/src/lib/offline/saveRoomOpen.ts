@@ -200,8 +200,6 @@ await db.transactions.add({
       '💾 ROOM OPEN SAVED OFFLINE'
     );
   }
-
-  console.log(
-    '💾 ROOM OPEN SAVED OFFLINE'
-  )
+  
 }
+

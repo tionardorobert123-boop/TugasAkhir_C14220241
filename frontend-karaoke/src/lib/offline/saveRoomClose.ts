@@ -15,17 +15,22 @@ export async function saveRoomClose(
 
   const payload = {
 
-    temp_id: uuidv4(),
+  temp_id: uuidv4(),
 
-    room_id: data.room_id,
+  room_id: data.room_id,
 
-    action: 'close' as const,
+  action: 'close' as const,
 
-    created_at:
-      new Date().toISOString(),
+  closed_at:
+    new Date()
+      .toISOString(),
 
-    sync_status: 0
-  }
+  created_at:
+    new Date()
+      .toISOString(),
+
+  sync_status: 0
+}
 
   // ================= ALWAYS LOCAL MQTT
   try {
@@ -137,11 +142,14 @@ export async function saveRoomClose(
   }
 
   // ================= SAVE OFFLINE QUEUE
-  await db.room_actions.add(
-    payload
-  )
 
-  console.log(
+  if (!cloudOnline) {
+   await db.room_actions.add(payload)
+
+   console.log(
     '💾 ROOM CLOSE SAVED OFFLINE'
   )
+}
+
+  
 }

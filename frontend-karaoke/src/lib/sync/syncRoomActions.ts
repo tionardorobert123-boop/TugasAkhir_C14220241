@@ -182,12 +182,14 @@ if (!unsynced.length) {
       if (item.action === 'close') {
 
         await API.post(
-         `/rooms/${item.room_id}/close`,
-
+          `/rooms/${item.room_id}/close`,
           {
             temp_id:
-              item.temp_id
-          },
+              item.temp_id,
+
+            closed_at:
+              item.closed_at
+          }
         )
       }
 

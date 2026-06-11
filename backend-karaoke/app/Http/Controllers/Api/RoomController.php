@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\AccessLog;
-use PhpMqtt\Client\MqttClient;
-use PhpMqtt\Client\ConnectionSettings;
+// use PhpMqtt\Client\MqttClient;
+// use PhpMqtt\Client\ConnectionSettings;
 use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
@@ -181,80 +181,111 @@ class RoomController extends Controller
     }
 
    
-    // CLOSE ROOM
-    public function close(Request $request, $id)
-    {
-        $startApi = microtime(true);
+   // CLOSE ROOM
+public function close(Request $request, $id)
+{
+    $startApi = microtime(true);
 
-        $transaction = DB::table('transactions')
-            ->where('room_id', $id)
-            ->where('status', 'active')
-            ->orderByDesc('transaction_id')
-            ->first();
+    $transaction = DB::table('transactions')
+        ->where('room_id', $id)
+        ->where('status', 'active')
+        ->orderByDesc('transaction_id')
+        ->first();
 
-        if (!$transaction) {
-            return response()->json([
-                "message" => "Room already closed"
-            ]);
-        }
-
-        if ($request->filled('temp_id')) {
-
-            $exists = AccessLog::where(
-                'temp_id',
-                $request->temp_id
-            )->exists();
-
-            if ($exists) {
-
-                return response()->json([
-                    'message' => 'Already synced'
-                ]);
-            }
-        }
-
-        DB::table('transactions')
-            ->where('transaction_id', $transaction->transaction_id)
-            ->update([
-                'status' => 'finished',
-                'updated_at' => now()
-            ]);
-
-        DB::table('rooms')
-            ->where('room_id', $id)
-            ->update(['status' => 'available']);
-
-        // LOG ACCESS
-        $totalDuration = Carbon::parse($transaction->start_time)->diffInMinutes(now());
-        AccessLog::create([
-            'temp_id' => $request->temp_id,
-            'room_id' => $id,
-            'customer_name' =>
-                $transaction->customer_name,
-            'room_status' => 'standby',
-            'duration' => $totalDuration,
-            'timestamp' => now(),
-        ]);
-
-        $apiMs = round(
-            (
-                microtime(true)
-                - $startApi
-            ) * 1000,
-            2
-        );
-
-                Log::info(
-            "API PROCESS: "
-            . $apiMs
-            . " ms"
-        );
+    if (!$transaction) {
 
         return response()->json([
-            "message" => "Room closed",
-            "api_ms" => $apiMs
+            "message" => "Room already closed"
         ]);
     }
+
+    if ($request->filled('temp_id')) {
+
+        $exists = AccessLog::where(
+            'temp_id',
+            $request->temp_id
+        )->exists();
+
+        if ($exists) {
+
+            return response()->json([
+                'message' => 'Already synced'
+            ]);
+        }
+    }
+
+    // ================= REAL CLOSE TIME
+    $closedAt = $request->filled('closed_at')
+        ? Carbon::parse($request->closed_at)
+        : now();
+
+    // ================= UPDATE TRANSACTION
+    DB::table('transactions')
+        ->where(
+            'transaction_id',
+            $transaction->transaction_id
+        )
+        ->update([
+            'status' => 'finished',
+            'updated_at' => $closedAt
+        ]);
+
+    // ================= UPDATE ROOM
+    DB::table('rooms')
+        ->where('room_id', $id)
+        ->update([
+            'status' => 'available'
+        ]);
+
+    // ================= CALCULATE REAL DURATION
+    $totalDuration =
+        Carbon::parse(
+            $transaction->start_time
+        )->diffInMinutes(
+            $closedAt
+        );
+
+    // ================= ACCESS LOG
+    AccessLog::create([
+
+        'temp_id' =>
+            $request->temp_id,
+
+        'room_id' =>
+            $id,
+
+        'customer_name' =>
+            $transaction->customer_name,
+
+        'room_status' =>
+            'standby',
+
+        'duration' =>
+            $totalDuration,
+
+        'timestamp' =>
+            $closedAt,
+    ]);
+
+    $apiMs = round(
+        (
+            microtime(true)
+            - $startApi
+        ) * 1000,
+        2
+    );
+
+    Log::info(
+        "API PROCESS: "
+        . $apiMs
+        . " ms"
+    );
+
+    return response()->json([
+        "message" => "Room closed",
+        "api_ms" => $apiMs
+    ]);
+}
 
     public function updateSetting(Request $request, $id)
     {

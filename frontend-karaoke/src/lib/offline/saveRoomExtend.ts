@@ -204,11 +204,11 @@ export async function saveRoomExtend(
   }
 
   // ================= SAVE OFFLINE QUEUE
-  await db.room_actions.add(
-    payload
-  )
+      if (!cloudOnline) {
+      await db.room_actions.add(payload)
 
-  console.log(
-    '💾 ROOM EXTEND SAVED OFFLINE'
-  )
+      console.log(
+        '💾 ROOM CLOSE SAVED OFFLINE'
+      )
+    }
 }
