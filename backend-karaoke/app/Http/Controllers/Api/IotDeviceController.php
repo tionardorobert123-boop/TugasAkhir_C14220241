@@ -53,6 +53,36 @@ class IotDeviceController extends Controller
         }
     }
 
+  public function checkOffline()
+{
+    $devices = IotDevice::all();
+
+    foreach ($devices as $device) {
+
+        if (!$device->last_seen) {
+            continue;
+        }
+
+        $seconds =
+            \Carbon\Carbon::parse(
+                $device->last_seen
+            )->diffInSeconds(now());
+
+        echo "ROOM {$device->device_id} = {$seconds}\n";
+
+        if ($seconds > 10) {
+
+            $device->update([
+                'status_online' => false
+            ]);
+        }
+    }
+
+    return response()->json([
+        'message' => 'offline check completed'
+    ]);
+}
+
     public function index()
 {
     return DB::table('iot_devices')->get();

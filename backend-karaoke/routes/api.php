@@ -32,6 +32,10 @@ Route::post(
     '/iot-sync',
     [IotDeviceController::class, 'sync']
 );
+Route::post(
+    '/iot/check-offline',
+    [IotDeviceController::class, 'checkOffline']
+);
 
     // LOCAL OFFLINE MQTT ONLY
         Route::prefix('local')
