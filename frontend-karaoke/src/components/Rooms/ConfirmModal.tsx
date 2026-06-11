@@ -8,6 +8,8 @@ type Props = {
   onClose: () => void;
   onConfirm: () => void;
   isOffline?: boolean;
+
+  isLoading?: boolean;
 };
 
 export default function ConfirmModal({
@@ -20,6 +22,8 @@ export default function ConfirmModal({
   onClose,
   onConfirm,
   isOffline,
+
+  isLoading = false 
 }: Props) {
 
 
@@ -78,17 +82,87 @@ export default function ConfirmModal({
 
           <button
             onClick={onClose}
-            className="flex-1 bg-white/10 hover:bg-white/20 py-2 rounded-xl transition"
+            disabled={isLoading}
+            className="
+              flex-1
+              bg-white/10
+              hover:bg-white/20
+              py-2
+              rounded-xl
+              transition
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+            "
           >
             Batal
           </button>
 
           <button
-            onClick={onConfirm}
-            className="flex-1 bg-green-500 hover:bg-green-400 text-black font-semibold py-2 rounded-xl transition"
-          >
-            ✔ Konfirmasi
-          </button>
+
+              onClick={onConfirm}
+
+              disabled={isLoading}
+
+              className="
+                flex-1
+                bg-green-500
+                hover:bg-green-400
+                text-black
+                font-semibold
+                py-2
+                rounded-xl
+                transition
+
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+              "
+            >
+
+              {isLoading ? (
+
+                <div
+                  className="
+                  flex
+                  items-center
+                  justify-center
+                  gap-2"
+                >
+
+                  <svg
+                    className="
+                    w-4 h-4
+                    animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      opacity="0.25"
+                    />
+
+                    <path
+                      fill="currentColor"
+                      opacity="0.75"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    />
+                  </svg>
+
+                  Processing...
+
+                </div>
+
+              ) : (
+
+                '✔ Konfirmasi'
+
+              )}
+
+            </button>
 
         </div>
 

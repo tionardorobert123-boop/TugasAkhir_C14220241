@@ -11,6 +11,7 @@ import RoomSettingModal from "../components/Rooms/RoomSettingModal";
 
 import SyncStatus from "../lib/sync/components/SyncStatus";
 import EmergencyModal from "../components/Rooms/EmergencyModal";
+import { useState } from "react";
 
 function Dashboard() {
   const {
@@ -62,6 +63,28 @@ function Dashboard() {
     setEmergencyRoomId
   } = useRoomControl();
 
+  const [isSubmitting,
+  setIsSubmitting] =
+  useState(false)
+
+  const handleStartRoom =
+  async () => {
+
+    if (isSubmitting)
+      return
+
+    setIsSubmitting(true)
+
+    try {
+
+      await startRoom()
+
+    } finally {
+
+      setIsSubmitting(false)
+    }
+  }
+  
   const hasInternet = useOffline();
 
   const navigate = useNavigate();
@@ -71,6 +94,8 @@ function Dashboard() {
 
   const selectedExtendRoom = rooms.find(r => r.room_id === extendRoomId);
   const extendPrice = selectedExtendRoom?.price_per_hour ?? 0;
+
+  
 const handleEmergencyOpen = async () => {
 
   if (!emergencyRoomId)
@@ -365,16 +390,19 @@ const handleEmergencyClose = async () => {
           }}
         />
 
-      <ConfirmModal
-        show={showConfirm}
-        selectedRoom={selectedRoom}
-        customerName={customerName}
-        duration={duration}
-        total={total}
-        total_minutes={total_minutes}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={startRoom}
-      />
+    <ConfirmModal
+      show={showConfirm}
+      selectedRoom={selectedRoom}
+      customerName={customerName}
+      duration={duration}
+      total={total}
+      total_minutes={total_minutes}
+      onClose={() => setShowConfirm(false)}
+
+      onConfirm={handleStartRoom}
+
+      isLoading={isSubmitting}
+    />
 
       <ExtendRoomModal
         show={showExtendModal}
