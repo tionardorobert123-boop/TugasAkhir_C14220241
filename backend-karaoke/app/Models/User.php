@@ -29,7 +29,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // ⚙️ casting
+    //casting
     protected function casts(): array
     {
         return [
@@ -37,13 +37,13 @@ class User extends Authenticatable
         ];
     }
 
-    // 🔑 override auth password (WAJIB karena pakai custom column)
+    // override auth password (WAJIB karena pakai custom column)
     public function getAuthPassword()
     {
         return $this->user_password;
     }
 
-    // 🔥 override email field (PENTING)
+    // override email field (PENTING)
     public function getAuthIdentifierName()
     {
         return 'user_email';

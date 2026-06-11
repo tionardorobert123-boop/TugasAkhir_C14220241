@@ -17,7 +17,9 @@ export const emergencyOpen = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString()
+    timestamp: new Date()
+      .toLocaleString('sv-SE')
+      .replace(' ', 'T')
   }
 
   // ================= MQTT LOCAL
@@ -89,7 +91,11 @@ export const emergencyClose = async (
 
     duration: 0,
 
-    timestamp: new Date().toISOString()
+    timestamp: new Date()
+
+            .toLocaleString('sv-SE')
+
+            .replace(' ', 'T')
   }
 
   // ================= MQTT LOCAL
