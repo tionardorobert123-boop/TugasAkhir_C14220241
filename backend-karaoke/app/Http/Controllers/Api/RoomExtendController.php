@@ -90,9 +90,9 @@ class RoomExtendController extends Controller
             'room_status' => 'extend',
             'duration' => $minutes,
             'timestamp' =>
-                $request->action_time
+                $request->created_at
                     ? Carbon::parse(
-                        $request->action_time
+                        $request->created_at
                     )
                     : now(),
         ]);

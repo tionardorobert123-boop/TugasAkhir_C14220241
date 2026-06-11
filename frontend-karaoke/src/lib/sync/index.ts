@@ -2,13 +2,22 @@ import {
   syncRoomActions
 } from './syncRoomActions'
 
+import {
+  syncLogs
+} from './syncLogs'
+
 export async function syncAll(
 
   cloudOnline: boolean
 
 ) {
 
-  await syncRoomActions(
-    cloudOnline
-  )
+  await Promise.all([
+
+    syncRoomActions(
+      cloudOnline
+    ),
+
+    syncLogs()
+  ])
 }

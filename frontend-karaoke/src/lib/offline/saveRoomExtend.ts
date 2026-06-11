@@ -42,8 +42,6 @@ export async function saveRoomExtend(
 
         temp_id: payload.temp_id,
 
-        created_at:
-          payload.created_at,
       }
     )
 
@@ -73,7 +71,10 @@ export async function saveRoomExtend(
             data.minutes,
 
           temp_id:
-            payload.temp_id
+            payload.temp_id,
+
+          created_at:
+            payload.created_at,
         }
       )
 
