@@ -24,7 +24,10 @@ export default function useAccessLog(initialDate?: string) {
   const [selectedDate, setSelectedDate] =
   useState(
     initialDate ??
-    new Date().toISOString().split("T")[0]
+    new Date()
+    .toLocaleDateString(
+      'sv-SE'
+    )
   );
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [loading] = useState(false);

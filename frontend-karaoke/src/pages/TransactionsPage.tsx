@@ -17,7 +17,8 @@ export default function TransactionsPage() {
   const [selectedDate, setSelectedDate] =
     useState(
       passedDate ??
-      new Date().toISOString().split("T")[0]
+       new Date().toLocaleDateString(
+      'sv-SE')
     );
 
   const {
@@ -86,7 +87,7 @@ const handleRefresh = async () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                max={new Date().toISOString().split("T")[0]}
+                max={new Date().toLocaleDateString('sv-SE')}
                 className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm"
               />
               <button
