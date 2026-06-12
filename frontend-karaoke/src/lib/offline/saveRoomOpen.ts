@@ -62,7 +62,9 @@ export async function saveRoomOpen(
       endTime,
 
     created_at:
-      new Date().toISOString(),
+  new Date()
+    .toLocaleString('sv-SE')
+    .replace(' ', 'T'),
 
     sync_status: 0
   }
