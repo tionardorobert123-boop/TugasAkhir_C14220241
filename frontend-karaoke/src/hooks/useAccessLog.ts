@@ -93,26 +93,12 @@ const fetchLogs = async () => {
           `/access-logs?date=${selectedDate}`
         );
 
-        const filtered =
+        const filtered = res.data || [];
 
-          (res.data || []).filter(
-            (log: any) => {
-
-              const logDate =
-                log.timestamp?.slice(0, 10);
-
-              return (
-                logDate === selectedDate
-              );
-            }
-          );
-
-        // ================= UPDATE UI
+        // UPDATE UI
         setLogs(filtered);
 
-        await db.logs.bulkPut(
-          filtered
-        );
+        await db.logs.bulkPut(filtered);
 
         console.log(
           '☁️ LOGS FROM CLOUD'

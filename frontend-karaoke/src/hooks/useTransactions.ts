@@ -70,19 +70,9 @@ export function useTransactions(selectedDate?: string) {
               const res = await API.get(
 
                 `/transactions/by-date?date=${filterDate}`
-              );
+              )
 
-              const filtered =
-
-                (res.data || []).filter(
-                  (trx: any) => {
-
-                    const trxDate =
-                      trx.created_at?.slice(0, 10);
-
-                    return trxDate === filterDate;
-                  }
-                );
+            const filtered = res.data || [];
 
               // ================= UPDATE UI
               setTransactions(
