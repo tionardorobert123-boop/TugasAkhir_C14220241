@@ -67,7 +67,8 @@ const fetchLogs = async () => {
         (log: any) => {
 
           const logDate =
-            log.timestamp?.slice(0, 10);
+            new Date(log.timestamp)
+              .toLocaleDateString('sv-SE');
 
           return (
             logDate === selectedDate
@@ -125,7 +126,8 @@ const fetchLogs = async () => {
         (log: any) => {
 
           const logDate =
-            log.timestamp?.slice(0, 10);
+            new Date(log.timestamp)
+              .toLocaleDateString('sv-SE');
 
           return (
             logDate === selectedDate

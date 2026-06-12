@@ -45,7 +45,8 @@ export function useTransactions(selectedDate?: string) {
               (trx: any) => {
 
                 const trxDate =
-                  trx.created_at?.slice(0, 10);
+                  new Date(trx.created_at)
+                    .toLocaleDateString('sv-SE');
 
                 return trxDate === filterDate;
               }
@@ -110,7 +111,8 @@ export function useTransactions(selectedDate?: string) {
               (trx: any) => {
 
                 const trxDate =
-                  trx.created_at?.slice(0, 10);
+                  new Date(trx.created_at)
+                    .toLocaleDateString('sv-SE');
 
                 return trxDate === filterDate;
               }
